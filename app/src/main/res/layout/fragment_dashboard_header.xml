@@ -28,11 +28,18 @@
                 layout="@layout/component_header_item"/>
     </LinearLayout>
 
-    <ImageView
+    <RelativeLayout
         android:layout_marginRight="20dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:src="@drawable/cloud_inuse"/>
+        >
+        <ImageView
+            android:alpha="0.2"
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            android:src="@drawable/cloud_offline"/>
+    </RelativeLayout>
+
 </RelativeLayout>
