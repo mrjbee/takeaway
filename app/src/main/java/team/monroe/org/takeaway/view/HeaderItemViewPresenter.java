@@ -80,7 +80,7 @@ public interface HeaderItemViewPresenter {
             ac_image = combine(
                     animateAppearance(rootView.findViewById(R.id.panel_images),
                             heightSlide(
-                                    (int)DisplayUtils.dpToPx(20, context.getResources()),
+                                    (int)DisplayUtils.dpToPx(23, context.getResources()),
                                     (int)DisplayUtils.dpToPx(35, context.getResources())))
                         .showAnimation(duration_constant(200), interpreter_overshot())
                         .hideAnimation(duration_constant(200), interpreter_accelerate(1f)),

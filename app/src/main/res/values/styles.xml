@@ -20,4 +20,6 @@
     </style>
 
     <color name="text.dark">#555555</color>
+    <color name="highlight">#ee002d</color>
+
 </resources>

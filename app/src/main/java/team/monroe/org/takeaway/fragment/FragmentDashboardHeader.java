@@ -3,18 +3,20 @@ package team.monroe.org.takeaway.fragment;
 import android.os.Bundle;
 import android.view.View;
 
-import org.monroe.team.android.box.app.FragmentSupport;
+import java.util.Arrays;
+import java.util.List;
 
-import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.view.HeaderItemViewPresenter;
 
-public class DashboardHeaderFragment extends FragmentSupport<App> {
+public class FragmentDashboardHeader extends FragmentDashboardScreen {
 
     private HeaderItemViewPresenter.DefaultItemViewPresenter myMusicHeaderItem;
     private HeaderItemViewPresenter.DefaultItemViewPresenter searchHeaderItem;
     private HeaderItemViewPresenter.RootItemViewPresenter homeHeaderItem;
     private HeaderItemViewPresenter mCurrentPresenter;
+    private List<HeaderItemViewPresenter> mHeaderItems;
+    private int mCurrentPosition;
 
     @Override
     protected int getLayoutId() {
@@ -24,6 +26,7 @@ public class DashboardHeaderFragment extends FragmentSupport<App> {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         myMusicHeaderItem = new HeaderItemViewPresenter.DefaultItemViewPresenter(view(R.id.item_music),getActivity());
         searchHeaderItem = new HeaderItemViewPresenter.DefaultItemViewPresenter(view(R.id.item_search),getActivity());
         homeHeaderItem = new HeaderItemViewPresenter.RootItemViewPresenter(view(R.id.item_home));
@@ -31,22 +34,40 @@ public class DashboardHeaderFragment extends FragmentSupport<App> {
         searchHeaderItem.setup("Search", R.drawable.search,R.drawable.search_colored);
         myMusicHeaderItem.deselect(false);
         searchHeaderItem.deselect(false);
-        homeHeaderItem.select(true);
-        mCurrentPresenter = homeHeaderItem;
-        HeaderItemViewPresenter[] presenters = {myMusicHeaderItem,homeHeaderItem,searchHeaderItem};
-        for (final HeaderItemViewPresenter presenter : presenters) {
+        homeHeaderItem.deselect(false);
+
+        mCurrentPosition = getArguments().getInt("curr_position", 1);
+        mHeaderItems = Arrays.asList(myMusicHeaderItem,homeHeaderItem,searchHeaderItem);
+        select(mHeaderItems.get(mCurrentPosition), false);
+
+        for (int i=0;i<mHeaderItems.size();i++) {
+            final HeaderItemViewPresenter presenter = mHeaderItems.get(i);
+            final int finalI = i;
             presenter.onClick(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (presenter == mCurrentPresenter){
-                       return;
-                    }
-                    presenter.select(true);
-                    mCurrentPresenter.deselect(true);
-                    mCurrentPresenter = presenter;
+                    select(presenter, false);
+                    dashboard().changeScreen(finalI);
                 }
             });
         }
 
+    }
+
+    public void select(int position) {
+        select(mHeaderItems.get(position), true);
+    }
+
+    private void select(HeaderItemViewPresenter presenter, boolean animate) {
+        if (presenter == mCurrentPresenter){
+           return;
+        }
+        presenter.select(animate);
+        if (mCurrentPresenter != null) {
+            mCurrentPresenter.deselect(animate);
+        }
+        mCurrentPresenter = presenter;
+        mCurrentPosition = mHeaderItems.indexOf(mCurrentPresenter);
+        getArguments().putInt("curr_position", mCurrentPosition);
     }
 }

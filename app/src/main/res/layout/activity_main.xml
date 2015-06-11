@@ -5,11 +5,17 @@
     style="@style/Panel.Main"
     tools:context=".MainActivity">
 
-    <fragment
+
+    <FrameLayout
+        android:id="@+id/frag_body"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"/>
+
+
+    <FrameLayout
         android:id="@+id/frag_header"
         android:layout_width="fill_parent"
-        android:layout_height="65dp"
-        android:name="team.monroe.org.takeaway.fragment.DashboardHeaderFragment"
-        tools:layout="@layout/fragment_dashboard_header" />
+        android:layout_height="70dp"
+    />
 
 </RelativeLayout>
