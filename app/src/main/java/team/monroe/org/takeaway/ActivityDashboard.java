@@ -1,6 +1,5 @@
 package team.monroe.org.takeaway;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -69,7 +68,7 @@ public class ActivityDashboard extends ActivitySupport<App>{
                     @Override
                     public void onClick(View v) {
                         mNoSourcePopup.dismiss();
-                        startActivity(new Intent(getApplicationContext(), ActivitySetup.class));
+                        startActivity(new Intent(getApplicationContext(), ActivityConfiguration.class));
                     }
                 });
                 mNoSourcePopup = new PopupWindow(view,

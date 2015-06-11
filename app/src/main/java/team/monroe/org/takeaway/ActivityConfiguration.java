@@ -8,7 +8,9 @@ import android.widget.Toast;
 
 import org.monroe.team.android.box.app.ActivitySupport;
 
-public class ActivitySetup extends ActivitySupport<App>{
+import team.monroe.org.takeaway.manage.SourceConfigurationManager;
+
+public class ActivityConfiguration extends ActivitySupport<App>{
     private ProgressDialog mTestConnectionDialog;
 
     @Override
@@ -38,6 +40,14 @@ public class ActivitySetup extends ActivitySupport<App>{
                 cancelConfigurationTest();
             }
         });
+
+        SourceConfigurationManager.Configuration configuration = application().getSourceConfiguration();
+        if (configuration != null){
+            view_text(R.id.text_host).setText(configuration.host);
+            view_text(R.id.text_port).setText(""+configuration.port);
+            view_text(R.id.text_password).setText(configuration.password);
+            view_text(R.id.text_user).setText(configuration.user);
+        }
     }
 
     private void cancelConfigurationTest() {
@@ -45,21 +55,46 @@ public class ActivitySetup extends ActivitySupport<App>{
     }
 
     private void saveConfiguration() {
+        final SourceConfigurationManager.Configuration configuration = new SourceConfigurationManager.Configuration(
+                readText(R.id.text_host),
+                readPortInt(R.id.text_port, 80),
+                readText(R.id.text_user),
+                readText(R.id.text_user)
+        );
+
+        if (configuration.host.isEmpty()){
+            Toast.makeText(getApplicationContext(), "Host should be not empty", Toast.LENGTH_LONG).show();
+            return;
+        }
         mTestConnectionDialog.show();
+
         runLastOnUiThread(new Runnable() {
             @Override
             public void run() {
-                onTestConnectionDone(true);
+                onTestConnectionDone(configuration,true);
             }
         }, 5000);
     }
 
-    private void onTestConnectionDone(boolean result) {
+    private int readPortInt(int text_port, int i) {
+       String portText = view_text(text_port).getText().toString().trim();
+       if (portText.isEmpty()){
+           return i;
+       }
+       return Integer.parseInt(portText);
+    }
+
+    private String readText(int textViewId) {
+        return view_text(textViewId).getText().toString();
+    }
+
+    private void onTestConnectionDone(SourceConfigurationManager.Configuration configuration, boolean result) {
         if (mTestConnectionDialog == null) return;
         mTestConnectionDialog.dismiss();
         if (!result){
             Toast.makeText(getApplicationContext(), "Test failed", Toast.LENGTH_SHORT).show();
         }else{
+            application().updateConfiguration(configuration);
             Toast.makeText(getApplicationContext(), "Configuration saved", Toast.LENGTH_SHORT).show();
             finish();
         }

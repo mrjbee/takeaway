@@ -34,6 +34,7 @@
                     android:src="@drawable/arrow_left_light"
                     style="@style/Button.Round.Action"/>
                 <TextView
+                    android:layout_marginLeft="5dp"
                     android:gravity="center_vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
@@ -58,6 +59,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <EditText
+                    android:id="@+id/text_host"
                     android:layout_weight="1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -66,6 +68,7 @@
                     style="@style/Text.Body.Light"
                     />
                 <EditText
+                    android:id="@+id/text_port"
                     style="@style/Text.Body.Light"
                     android:layout_weight="1"
                     android:layout_width="200dp"
@@ -82,6 +85,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <EditText
+                    android:id="@+id/text_user"
                     style="@style/Text.Body.Light"
                     android:layout_weight="1"
                     android:layout_width="fill_parent"
@@ -98,6 +102,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <EditText
+                    android:id="@+id/text_password"
                     style="@style/Text.Body.Light"
                     android:layout_weight="1"
                     android:layout_width="fill_parent"
