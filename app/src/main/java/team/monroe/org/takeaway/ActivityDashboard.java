@@ -1,5 +1,6 @@
 package team.monroe.org.takeaway;
 
+import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 public class ActivityDashboard extends ActivitySupport<App>{
 
     private PopupWindow mNoSourcePopup;
+    private PopupWindow mSourcePopup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +84,25 @@ public class ActivityDashboard extends ActivitySupport<App>{
             mNoSourcePopup.setBackgroundDrawable(getResources().getDrawable(R.color.transperent));
             mNoSourcePopup.showAsDropDown(anchor);
         }else {
-            throw new IllegalStateException();
+            if (mSourcePopup == null){
+                View view = getLayoutInflater().inflate(R.layout.popup_source, null);
+                view.findViewById(R.id.action_setup).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mSourcePopup.dismiss();
+                        startActivity(new Intent(getApplicationContext(), ActivityConfiguration.class));
+                    }
+                });
+                mSourcePopup = new PopupWindow(view,
+                        (int) DisplayUtils.dpToPx(260, getResources()),
+                        (int) DisplayUtils.dpToPx(120, getResources()),
+                        true);
+
+        }
+        mSourcePopup.setOutsideTouchable(true);
+        mSourcePopup.setFocusable(true);
+        mSourcePopup.setBackgroundDrawable(getResources().getDrawable(R.color.transperent));
+        mSourcePopup.showAsDropDown(anchor);
         }
     }
 
@@ -92,6 +112,11 @@ public class ActivityDashboard extends ActivitySupport<App>{
         if (mNoSourcePopup != null){
             mNoSourcePopup.dismiss();
             mNoSourcePopup = null;
+        }
+
+        if (mSourcePopup != null){
+            mSourcePopup.dismiss();
+            mSourcePopup = null;
         }
     }
 }

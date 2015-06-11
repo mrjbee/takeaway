@@ -59,7 +59,7 @@ public class ActivityConfiguration extends ActivitySupport<App>{
                 readText(R.id.text_host),
                 readPortInt(R.id.text_port, 80),
                 readText(R.id.text_user),
-                readText(R.id.text_user)
+                readText(R.id.text_password)
         );
 
         if (configuration.host.isEmpty()){
