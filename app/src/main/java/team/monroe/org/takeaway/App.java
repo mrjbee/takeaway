@@ -7,4 +7,8 @@ public class App extends ApplicationSupport<AppModel> {
     protected AppModel createModel() {
         return new AppModel("takeaway", getApplicationContext());
     }
+
+    public boolean isSourceConfigured() {
+        return false;
+    }
 }

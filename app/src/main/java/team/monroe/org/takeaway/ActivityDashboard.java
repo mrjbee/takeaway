@@ -1,9 +1,13 @@
 package team.monroe.org.takeaway;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.PopupWindow;
 
 import org.monroe.team.android.box.app.ActivitySupport;
+import org.monroe.team.android.box.utils.DisplayUtils;
 
 import team.monroe.org.takeaway.fragment.FragmentDashboardHeader;
 import team.monroe.org.takeaway.fragment.FragmentDashboardScreensPager;
@@ -11,6 +15,8 @@ import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 
 
 public class ActivityDashboard extends ActivitySupport<App>{
+
+    private PopupWindow mNoSourcePopup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,5 +58,23 @@ public class ActivityDashboard extends ActivitySupport<App>{
     public void changeScreen(int screenPosition) {
         FragmentDashboardScreensPager fragment = (FragmentDashboardScreensPager) getFragmentManager().findFragmentById(R.id.frag_body);
         fragment.updateScreen(screenPosition);
+    }
+
+    public void showSourcePopup(View anchor) {
+        if (!application().isSourceConfigured()){
+            if (mNoSourcePopup == null){
+                View view = getLayoutInflater().inflate(R.layout.popup_source_not_set, null);
+                mNoSourcePopup = new PopupWindow(view,
+                        (int) DisplayUtils.dpToPx(260, getResources()),
+                        (int) DisplayUtils.dpToPx(120, getResources()),
+                        true);
+            }
+            mNoSourcePopup.setOutsideTouchable(true);
+            mNoSourcePopup.setFocusable(true);
+            mNoSourcePopup.setBackgroundDrawable(getResources().getDrawable(R.color.transperent));
+            mNoSourcePopup.showAsDropDown(anchor);
+        }else {
+            throw new IllegalStateException();
+        }
     }
 }

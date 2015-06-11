@@ -29,6 +29,7 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/panel_source"
         android:layout_marginRight="20dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

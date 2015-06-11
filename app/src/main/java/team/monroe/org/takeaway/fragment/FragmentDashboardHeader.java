@@ -52,6 +52,13 @@ public class FragmentDashboardHeader extends FragmentDashboardScreen {
             });
         }
 
+        view(R.id.panel_source).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dashboard().showSourcePopup(v);
+            }
+        });
+
     }
 
     public void select(int position) {
