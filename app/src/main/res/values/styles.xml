@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
+    </style>
+
+    <style name="Panel.Main" parent="AppTheme">
+        <item name="android:background">#e8e8e8</item>
+    </style>
+
+    <style name="Text.Header.Component" parent="AppTheme">
+        <item name="android:textColor">@color/text.dark</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Text.Header.Caption.Component" parent="AppTheme">
+        <item name="android:textColor">@color/text.dark</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif-condensed</item>
+    </style>
+
+    <color name="text.dark">#555555</color>
+</resources>

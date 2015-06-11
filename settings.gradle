@@ -1,0 +1,4 @@
+include ":app"
+include ":beebox"
+include ":beebox:corebox"
+include ":beebox:androidbox"

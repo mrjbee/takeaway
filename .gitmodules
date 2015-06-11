@@ -1,0 +1,3 @@
+[submodule "beebox"]
+	path = beebox
+	url = https://github.com/mrjbee/beebox.git
