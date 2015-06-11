@@ -7,6 +7,12 @@
         <item name="android:background">#e8e8e8</item>
     </style>
 
+    <style name="Text.Caption.Light" parent="AppTheme">
+        <item name="android:textColor">@color/text.light</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif-condensed</item>
+    </style>
+
     <style name="Text.Header.Component" parent="AppTheme">
         <item name="android:textColor">@color/text.dark</item>
         <item name="android:textSize">14sp</item>
@@ -28,12 +34,25 @@
         <item name="android:shadowColor">@color/text.dark.outer.glow</item>
     </style>
 
+    <style name="Text.Body.Light" parent="Text.Body">
+        <item name="android:textColor">@color/text.light</item>
+        <item name="android:textColorHint">@color/text.light.darken</item>
+        <item name="android:shadowRadius">0</item>
+    </style>
+
     <style name="Text.Body.Optional" parent="Text.Body">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/text.dark.lighter</item>
     </style>
 
-
+    <style name="Button.Rect.Action" parent="@android:style/Widget.Button">
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:textColor">@color/highlight</item>
+        <item name="android:textSize">15dip</item>
+        <item name="android:background">@drawable/button_panel</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
 
     <style name="Button.Round.Action" parent="@android:style/Widget.Button">
         <item name="android:background">@drawable/button_round</item>
@@ -43,6 +62,10 @@
         <item name="android:scaleType">fitCenter</item>
     </style>
 
+    <color name="white">#ffffffff</color>
+    <color name="text.light">#fff8f8f8</color>
+    <color name="text.light.shadow">#66000000</color>
+    <color name="text.light.darken">#83F8F8F8</color>
     <color name="text.dark">#555555</color>
     <color name="text.dark.lighter">#ff818181</color>
     <color name="text.dark.outer.glow">#fff</color>

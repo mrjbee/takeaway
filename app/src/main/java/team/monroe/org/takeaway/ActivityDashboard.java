@@ -2,6 +2,7 @@ package team.monroe.org.takeaway;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.PopupWindow;
@@ -64,10 +65,18 @@ public class ActivityDashboard extends ActivitySupport<App>{
         if (!application().isSourceConfigured()){
             if (mNoSourcePopup == null){
                 View view = getLayoutInflater().inflate(R.layout.popup_source_not_set, null);
+                view.findViewById(R.id.action_setup).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mNoSourcePopup.dismiss();
+                        startActivity(new Intent(getApplicationContext(), ActivitySetup.class));
+                    }
+                });
                 mNoSourcePopup = new PopupWindow(view,
                         (int) DisplayUtils.dpToPx(260, getResources()),
                         (int) DisplayUtils.dpToPx(120, getResources()),
                         true);
+
             }
             mNoSourcePopup.setOutsideTouchable(true);
             mNoSourcePopup.setFocusable(true);
@@ -75,6 +84,15 @@ public class ActivityDashboard extends ActivitySupport<App>{
             mNoSourcePopup.showAsDropDown(anchor);
         }else {
             throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mNoSourcePopup != null){
+            mNoSourcePopup.dismiss();
+            mNoSourcePopup = null;
         }
     }
 }
