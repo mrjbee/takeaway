@@ -13,7 +13,7 @@
         >
         <ImageView
             android:id="@+id/image"
-            android:alpha="0.7"
+            android:alpha="0.2"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:src="@drawable/music"/>

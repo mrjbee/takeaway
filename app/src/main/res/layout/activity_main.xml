@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/frag_header"
         android:layout_width="fill_parent"
-        android:layout_height="80dp"
+        android:layout_height="65dp"
         android:name="team.monroe.org.takeaway.fragment.DashboardHeaderFragment"
         tools:layout="@layout/fragment_dashboard_header" />
 
