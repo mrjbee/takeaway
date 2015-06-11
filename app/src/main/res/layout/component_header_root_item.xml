@@ -4,12 +4,13 @@
     android:layout_width="wrap_content"
     android:layout_height="40dp"
     android:layout_gravity="bottom"
+    android:layout_marginBottom="5dp"
     >
 
     <LinearLayout
         android:layout_centerHorizontal="true"
-        android:id="@+id/panel_secondary"
         android:layout_centerVertical="true"
+        android:id="@+id/panel_secondary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -21,6 +22,7 @@
             android:layout_height="40dp"
             android:src="@drawable/takeaway"/>
         <TextView
+            android:textAllCaps="false"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,6 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Takeaway"
+            android:textAllCaps="false"
             style="@style/Text.Header.Caption.Component"/>
     </LinearLayout>
 

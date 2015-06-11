@@ -55,6 +55,10 @@ public class FragmentDashboardHeader extends FragmentDashboardScreen {
     }
 
     public void select(int position) {
+        if (mHeaderItems == null){
+            getArguments().putInt("curr_position", position);
+            return;
+        }
         select(mHeaderItems.get(position), true);
     }
 

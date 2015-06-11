@@ -4,25 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="65dp"
     android:background="@drawable/transperent_header"
-    android:paddingBottom="12dp"
+    android:paddingBottom="8dp"
     >
 
     <LinearLayout
         android:layout_centerHorizontal="true"
+        android:paddingBottom="4dp"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         >
 
-            <include
-                android:id="@+id/item_music"
-                layout="@layout/component_header_item"/>
+        <include
+            android:id="@+id/item_music"
+            layout="@layout/component_header_item"/>
 
-            <include
-                android:id="@+id/item_home"
-                layout="@layout/component_header_root_item"/>
+        <include
+            android:id="@+id/item_home"
+            layout="@layout/component_header_root_item"/>
 
-            <include
+
+        <include
                 android:id="@+id/item_search"
                 layout="@layout/component_header_item"/>
     </LinearLayout>
+
+    <ImageView
+        android:layout_marginRight="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/cloud_inuse"/>
 </RelativeLayout>
