@@ -41,6 +41,9 @@
         <item name="android:singleLine">true</item>
         <item name="android:imeOptions">flagNoExtractUi</item>
     </style>
+    <style name="Text.Body.Light.Smaller" parent="Text.Body.Light">
+        <item name="android:textSize">13sp</item>
+    </style>
 
     <style name="Text.Body.Optional" parent="Text.Body">
         <item name="android:textSize">12sp</item>

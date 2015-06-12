@@ -9,6 +9,7 @@ import android.widget.Toast;
 import org.monroe.team.android.box.app.ActivitySupport;
 
 import team.monroe.org.takeaway.manage.SourceConfigurationManager;
+import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 
 public class ActivityConfiguration extends ActivitySupport<App>{
     private ProgressDialog mTestConnectionDialog;
@@ -57,7 +58,7 @@ public class ActivityConfiguration extends ActivitySupport<App>{
     private void saveConfiguration() {
         final SourceConfigurationManager.Configuration configuration = new SourceConfigurationManager.Configuration(
                 readText(R.id.text_host),
-                readPortInt(R.id.text_port, 80),
+                readPortInt(R.id.text_port, 8080),
                 readText(R.id.text_user),
                 readText(R.id.text_password)
         );
@@ -68,12 +69,20 @@ public class ActivityConfiguration extends ActivitySupport<App>{
         }
         mTestConnectionDialog.show();
 
-        runLastOnUiThread(new Runnable() {
+        application().updateConfiguration(configuration, observe(new OnValue<SourceConnectionStatus>() {
             @Override
-            public void run() {
-                onTestConnectionDone(configuration,true);
+            public void action(SourceConnectionStatus connectionStatus) {
+                if (mTestConnectionDialog == null) return;
+                mTestConnectionDialog.dismiss();
+                if (connectionStatus.isSuccess()){
+                    finish();
+                    Toast.makeText(ActivityConfiguration.this, "Configuration saved", Toast.LENGTH_SHORT).show();
+                }else {
+                    Toast.makeText(ActivityConfiguration.this, "Please check configuration. " + connectionStatus.asString(getResources()), Toast.LENGTH_LONG).show();
+                }
             }
-        }, 5000);
+        }));
+
     }
 
     private int readPortInt(int text_port, int i) {
@@ -88,17 +97,6 @@ public class ActivityConfiguration extends ActivitySupport<App>{
         return view_text(textViewId).getText().toString();
     }
 
-    private void onTestConnectionDone(SourceConfigurationManager.Configuration configuration, boolean result) {
-        if (mTestConnectionDialog == null) return;
-        mTestConnectionDialog.dismiss();
-        if (!result){
-            Toast.makeText(getApplicationContext(), "Test failed", Toast.LENGTH_SHORT).show();
-        }else{
-            application().updateConfiguration(configuration);
-            Toast.makeText(getApplicationContext(), "Configuration saved", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-    }
 
     @Override
     protected void onDestroy() {

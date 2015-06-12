@@ -8,18 +8,26 @@ import java.io.Serializable;
 
 public class SourceConfigurationManager {
 
-    private final SerializationMap<String, Configuration> persist;
+    private final SerializationMap<String, Serializable> persist;
 
     public SourceConfigurationManager(Context context) {
         this.persist = new SerializationMap<>("source_conf", context);
     }
 
     public Configuration get(){
-        return persist.get("conf");
+        return (Configuration) persist.get("configuration");
     }
 
     public void update(Configuration configuration){
-        persist.put("conf", configuration);
+        persist.put("configuration", configuration);
+    }
+
+    public void putProperty(String key, Serializable value){
+        persist.put(key, value);
+    }
+
+    public <Type> Type getProperty(String key){
+        return (Type) persist.get(key);
     }
 
     public static class Configuration implements Serializable{

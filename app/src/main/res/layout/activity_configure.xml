@@ -63,17 +63,17 @@
                     android:layout_weight="1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Server Host"
+                    android:hint="Host, 192.168.0.1"
                     android:singleLine="true"
-                    style="@style/Text.Body.Light"
+                    style="@style/Text.Body.Light.Smaller"
                     />
                 <EditText
                     android:id="@+id/text_port"
-                    style="@style/Text.Body.Light"
+                    style="@style/Text.Body.Light.Smaller"
                     android:layout_weight="1"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
-                    android:hint="Port"
+                    android:hint="Port, 8080"
                     android:inputType="number"
                     />
             </LinearLayout>
@@ -85,8 +85,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <EditText
+                    style="@style/Text.Body.Light.Smaller"
                     android:id="@+id/text_user"
-                    style="@style/Text.Body.Light"
                     android:layout_weight="1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -102,8 +102,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <EditText
+                    style="@style/Text.Body.Light.Smaller"
                     android:id="@+id/text_password"
-                    style="@style/Text.Body.Light"
                     android:layout_weight="1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
