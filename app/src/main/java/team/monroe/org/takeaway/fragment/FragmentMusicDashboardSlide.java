@@ -3,7 +3,7 @@ package team.monroe.org.takeaway.fragment;
 /**
  * Created by mrjbee on 6/11/15.
  */
-public class FragmentDashboardMyMusic extends FragmentBodyDashboard {
+public class FragmentMusicDashboardSlide extends FragmentDashboardSlide {
     @Override
     protected String getHelloString() {
         return "My Music";

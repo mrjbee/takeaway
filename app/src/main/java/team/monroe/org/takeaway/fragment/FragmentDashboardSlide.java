@@ -7,7 +7,7 @@ import org.monroe.team.android.box.app.FragmentSupport;
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
 
-public abstract class FragmentBodyDashboard extends FragmentSupport<App> {
+public abstract class FragmentDashboardSlide extends FragmentSupport<App> {
     @Override
     protected int getLayoutId() {
         return R.layout.fragment_body_dashboard;

@@ -6,7 +6,7 @@ import team.monroe.org.takeaway.ActivityDashboard;
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 
-public abstract class FragmentDashboardScreen extends FragmentSupport<App> {
+public abstract class FragmentDashboardActivity extends FragmentSupport<App> {
 
     public ActivityDashboard dashboard(){
         return (ActivityDashboard) activity();

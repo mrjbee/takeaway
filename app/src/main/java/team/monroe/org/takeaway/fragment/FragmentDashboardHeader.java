@@ -9,7 +9,7 @@ import java.util.List;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.view.HeaderItemViewPresenter;
 
-public class FragmentDashboardHeader extends FragmentDashboardScreen {
+public class FragmentDashboardHeader extends FragmentDashboardActivity {
 
     private HeaderItemViewPresenter.DefaultItemViewPresenter myMusicHeaderItem;
     private HeaderItemViewPresenter.DefaultItemViewPresenter searchHeaderItem;
@@ -32,6 +32,7 @@ public class FragmentDashboardHeader extends FragmentDashboardScreen {
         homeHeaderItem = new HeaderItemViewPresenter.RootItemViewPresenter(view(R.id.item_home));
         myMusicHeaderItem.setup("My Music", R.drawable.music,R.drawable.music_colored);
         searchHeaderItem.setup("Search", R.drawable.search,R.drawable.search_colored);
+
         myMusicHeaderItem.deselect(false);
         searchHeaderItem.deselect(false);
         homeHeaderItem.deselect(false);
