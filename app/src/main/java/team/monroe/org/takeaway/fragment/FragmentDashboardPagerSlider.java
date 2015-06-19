@@ -8,14 +8,14 @@ import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.fragment.common.FragmentPagerAdapter;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 
-public class FragmentDashboardScreensPager extends FragmentDashboardActivity implements ContractBackButton{
+public class FragmentDashboardPagerSlider extends FragmentDashboardActivity implements ContractBackButton{
 
     private ViewPager mViewPager;
     private FragmentPagerAdapter mFragmentPagerAdapter;
 
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_body_main;
+        return R.layout.fragment_dashboard_page_slider;
     }
 
     @Override
@@ -27,9 +27,9 @@ public class FragmentDashboardScreensPager extends FragmentDashboardActivity imp
             @Override
             public Fragment getItem(int position) {
                 switch (position){
-                    case 0: return new FragmentMusicDashboardSlide();
-                    case 1: return new FragmentHomeDashboardSlide();
-                    case 2: return new FragmentSearchDashboardSlide();
+                    case 0: return new FragmentDashboardSlideMusic();
+                    case 1: return new FragmentDashboardSlideHome();
+                    case 2: return new FragmentDashboardSlideSearch();
                     default:
                         throw new IllegalStateException();
                 }

@@ -10,7 +10,7 @@ import team.monroe.org.takeaway.R;
 public abstract class FragmentDashboardSlide extends FragmentSupport<App> {
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_body_dashboard;
+        return R.layout.fragment_dashboard_slide;
     }
 
     @Override

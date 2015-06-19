@@ -3,9 +3,9 @@ package team.monroe.org.takeaway.fragment;
 /**
  * Created by mrjbee on 6/11/15.
  */
-public class FragmentHomeDashboardSlide extends FragmentDashboardSlide {
+public class FragmentDashboardSlideSearch extends FragmentDashboardSlide {
     @Override
     protected String getHelloString() {
-        return "Home";
+        return "Search";
     }
 }

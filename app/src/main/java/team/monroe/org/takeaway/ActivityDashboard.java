@@ -1,6 +1,5 @@
 package team.monroe.org.takeaway;
 
-import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +10,8 @@ import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.utils.DisplayUtils;
 
 import team.monroe.org.takeaway.fragment.FragmentDashboardHeader;
-import team.monroe.org.takeaway.fragment.FragmentDashboardScreensPager;
+import team.monroe.org.takeaway.fragment.FragmentDashboardMediaSourceConfiguration;
+import team.monroe.org.takeaway.fragment.FragmentDashboardPagerSlider;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 
 
@@ -25,19 +25,39 @@ public class ActivityDashboard extends ActivitySupport<App>{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (isFirstRun(savedInstanceState)){
-            FragmentDashboardScreensPager fragmentDashboardScreensPager = new FragmentDashboardScreensPager();
-            Bundle bundle = new Bundle();
-            bundle.putInt("curr_position", 1);
-            bundle.putBoolean("first_run", true);
-            FragmentDashboardHeader dashboardHeader = new FragmentDashboardHeader();
-            dashboardHeader.setArguments(bundle);
-            fragmentDashboardScreensPager.setArguments(bundle);
-            getFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.frag_body, fragmentDashboardScreensPager)
-                    .add(R.id.frag_header, dashboardHeader)
-                    .commit();
+            if (application().isSourceConfigured()){
+                //usual look
+                setup_onCreateSlider();
+            }else{
+               //intro
+                setup_onCreateSourceConfiguration();
+            }
         }
+    }
+
+    private void setup_onCreateSourceConfiguration() {
+        FragmentDashboardMediaSourceConfiguration bodyFragment = new FragmentDashboardMediaSourceConfiguration();
+        Bundle bundle = new Bundle();
+        bodyFragment.setArguments(bundle);
+        getFragmentManager()
+                .beginTransaction()
+                .add(R.id.frag_body, bodyFragment)
+                .commit();
+    }
+
+    private void setup_onCreateSlider() {
+        FragmentDashboardPagerSlider fragmentDashboardPagerSlider = new FragmentDashboardPagerSlider();
+        Bundle bundle = new Bundle();
+        bundle.putInt("curr_position", 1);
+        bundle.putBoolean("first_run", true);
+        FragmentDashboardHeader dashboardHeader = new FragmentDashboardHeader();
+        dashboardHeader.setArguments(bundle);
+        fragmentDashboardPagerSlider.setArguments(bundle);
+        getFragmentManager()
+                .beginTransaction()
+                .add(R.id.frag_body, fragmentDashboardPagerSlider)
+                .add(R.id.frag_header, dashboardHeader)
+                .commit();
     }
 
 
@@ -58,7 +78,7 @@ public class ActivityDashboard extends ActivitySupport<App>{
     }
 
     public void changeScreen(int screenPosition) {
-        FragmentDashboardScreensPager fragment = (FragmentDashboardScreensPager) getFragmentManager().findFragmentById(R.id.frag_body);
+        FragmentDashboardPagerSlider fragment = (FragmentDashboardPagerSlider) getFragmentManager().findFragmentById(R.id.frag_body);
         fragment.updateScreen(screenPosition);
     }
 
