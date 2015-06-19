@@ -1,8 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/text.dark.lighter">
+    >
 
-</LinearLayout>
+    <TextView
+        android:layout_marginTop="60dp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/text_prompt_secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to"
+        style="@style/Text.Prompt.Secondary"
+        />
+
+    <TextView
+        android:layout_below="@+id/text_prompt_secondary"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/text_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Takeaway"
+        style="@style/Text.Prompt"
+        />
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        >
+        <RelativeLayout
+            android:paddingTop="160dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <RelativeLayout
+                android:layout_below="@+id/image_big_icon"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@drawable/background_panel_main"
+                android:layout_marginTop="-100dp"
+                >
+                <RelativeLayout
+                    android:layout_marginTop="40dp"
+                    android:layout_marginBottom="10dp"
+                    android:paddingTop="40dp"
+                    android:paddingBottom="40dp"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#be000000">
+
+                    <TextView
+                        android:layout_marginTop="30dp"
+                        android:id="@+id/text_message_caption"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Music Cloud"
+                        style="@style/Text.Caption.Light"/>
+
+                    <TextView
+                        android:layout_toLeftOf="@+id/panel_config"
+                        android:id="@+id/text_message"
+                        android:layout_marginTop="10dp"
+                        android:layout_below="@+id/text_message_caption"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HI, I`m going to be your easiest way to take your music with you. But first please help me to find your Music Cloud"
+                        style="@style/Text.Body.Light"
+                        android:singleLine="false"/>
+
+                    <RelativeLayout
+                        android:id="@+id/panel_config"
+                        android:layout_alignBottom="@+id/text_message"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="20dp"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@drawable/background_round_panel_light">
+                        <ImageButton
+                            android:layout_centerInParent="true"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:src="@drawable/android_gear"
+                            style="@style/Button.Round.Action"
+                            />
+                    </RelativeLayout>
+
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/image_big_icon"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/big_icon"
+                />
+
+        </RelativeLayout>
+    </ScrollView>
+
+
+</RelativeLayout>

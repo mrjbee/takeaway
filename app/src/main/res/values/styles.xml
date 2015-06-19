@@ -50,6 +50,22 @@
         <item name="android:textColor">@color/text.dark.lighter</item>
     </style>
 
+    <style name="Text.Prompt" parent="AppTheme">
+        <item name="android:textColor">@color/text.dark</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif-condensed</item>
+        <item name="android:shadowDy">-1</item>
+        <item name="android:shadowDx">-1</item>
+        <item name="android:shadowRadius">1</item>
+        <item name="android:shadowColor">@color/text.dark.outer.glow</item>
+    </style>
+
+    <style name="Text.Prompt.Secondary" parent="Text.Prompt">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
     <style name="Button.Rect.Action" parent="@android:style/Widget.Button">
         <item name="android:gravity">center_vertical|center_horizontal</item>
         <item name="android:textColor">@color/highlight</item>
@@ -67,6 +83,7 @@
         <item name="android:scaleType">fitCenter</item>
     </style>
 
+    <color name="background.light">#fffdfdfd</color>
     <color name="white">#ffffffff</color>
     <color name="text.light">#fff8f8f8</color>
     <color name="text.light.shadow">#66000000</color>
@@ -75,6 +92,7 @@
     <color name="text.dark.lighter">#ff818181</color>
     <color name="text.dark.outer.glow">#fff</color>
     <color name="highlight">#ee002d</color>
+    <color name="highlight2">#f01f37</color>
     <color name="transperent">#00FFFFFF</color>
     <color name="button.pressed">#2B000000</color>
 
