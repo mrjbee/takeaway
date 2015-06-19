@@ -1,5 +1,6 @@
 package team.monroe.org.takeaway;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -75,6 +76,7 @@ public class ActivityConfiguration extends ActivitySupport<App>{
                 if (mTestConnectionDialog == null) return;
                 mTestConnectionDialog.dismiss();
                 if (connectionStatus.isSuccess()){
+                    setResult(Activity.RESULT_OK);
                     finish();
                     Toast.makeText(ActivityConfiguration.this, "Configuration saved", Toast.LENGTH_SHORT).show();
                 }else {

@@ -1,9 +1,11 @@
 package team.monroe.org.takeaway;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.PopupWindow;
 
 import org.monroe.team.android.box.app.ActivitySupport;
@@ -17,6 +19,7 @@ import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 
 public class ActivityDashboard extends ActivitySupport<App>{
 
+    private static final int REQUEST_CONFIGURATION = 101;
     private PopupWindow mNoSourcePopup;
     private PopupWindow mSourcePopup;
 
@@ -43,6 +46,32 @@ public class ActivityDashboard extends ActivitySupport<App>{
                 .beginTransaction()
                 .add(R.id.frag_body, bodyFragment)
                 .commit();
+    }
+
+
+    private void setup_Slider() {
+        runLastOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                FragmentDashboardPagerSlider fragmentDashboardPagerSlider = new FragmentDashboardPagerSlider();
+                Bundle bundle = new Bundle();
+                bundle.putInt("curr_position", 1);
+                bundle.putBoolean("first_run", true);
+                FragmentDashboardHeader dashboardHeader = new FragmentDashboardHeader();
+                dashboardHeader.setArguments(bundle);
+                fragmentDashboardPagerSlider.setArguments(bundle);
+                view(R.id.frag_header).setTranslationY(-DisplayUtils.dpToPx(200,getResources()));
+
+                getFragmentManager()
+                        .beginTransaction()
+                        .setCustomAnimations(R.animator.gone_up, R.animator.gone_down)
+                        .replace(R.id.frag_body, fragmentDashboardPagerSlider)
+                        .add(R.id.frag_header, dashboardHeader)
+                        .commit();
+
+                view(R.id.frag_header).animate().setStartDelay(800).setDuration(400).translationY(0).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            }
+        },500);
     }
 
     private void setup_onCreateSlider() {
@@ -139,4 +168,17 @@ public class ActivityDashboard extends ActivitySupport<App>{
             mSourcePopup = null;
         }
     }
+
+    public void requestConfigurationActivity() {
+        startActivityForResult(new Intent(getApplicationContext(), ActivityConfiguration.class), REQUEST_CONFIGURATION);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CONFIGURATION && resultCode == Activity.RESULT_OK){
+            setup_Slider();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 }
