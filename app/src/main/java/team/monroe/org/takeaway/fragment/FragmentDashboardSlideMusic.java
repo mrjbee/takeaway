@@ -16,10 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import team.monroe.org.takeaway.R;
+import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 import team.monroe.org.takeaway.presentations.Folder;
 import team.monroe.org.takeaway.presentations.FolderContent;
 
-public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
+public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  implements ContractBackButton{
 
     private View mLoadingPanel;
     private View mNoItemsPanel;
@@ -156,5 +157,15 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
 
     private Folder getTopFolder() {
         return Lists.getLast(mFolderStack);
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (mFolderStack.size() > 1){
+            mFolderStack.remove(mFolderStack.size() - 1);
+            setup_folder(getTopFolder());
+            return true;
+        }
+        return false;
     }
 }
