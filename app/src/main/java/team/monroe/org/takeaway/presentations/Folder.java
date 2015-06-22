@@ -4,12 +4,13 @@ import java.io.Serializable;
 
 public class Folder implements Serializable{
 
-    public final static Folder FOLDER_ROOT = new Folder("");
+    public final static Folder FOLDER_ROOT = new Folder("root","");
 
-    public final String path;
+    public final String id;
+    public final String title;
 
-    public Folder(String path) {
-        this.path = path;
+    public Folder(String id, String title) {
+        this.id = id;
+        this.title = title;
     }
-
 }

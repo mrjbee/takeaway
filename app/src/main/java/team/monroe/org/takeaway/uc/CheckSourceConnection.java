@@ -21,6 +21,7 @@ public class CheckSourceConnection extends UserCaseSupport<SourceConfigurationMa
             using(SourceConfigurationManager.class).update(request);
             using(SourceConfigurationManager.class).putProperty("version", versionAnswer.body);
         }
+
         return connectionStatus;
     }
 

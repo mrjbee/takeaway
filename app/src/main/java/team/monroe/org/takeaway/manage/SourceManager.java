@@ -5,17 +5,18 @@ import java.util.List;
 public interface SourceManager {
 
     public Answer<String> getSourceVersion(SourceConfigurationManager.Configuration sourceConfiguration);
-    public Answer<List<RemoteFile>> getFolderContent(SourceConfigurationManager.Configuration sourceConfiguration, String folderPath);
+    public Answer<List<RemoteFile>> getTopFolder(SourceConfigurationManager.Configuration sourceConfiguration);
+    public Answer<List<RemoteFile>> getFolderContent(SourceConfigurationManager.Configuration sourceConfiguration, String folderId);
 
     public static class RemoteFile{
 
+        public final String remoteId;
         public final String title;
-        public final String path;
         public final boolean isFolder;
 
-        public RemoteFile(String title, String path, boolean isFolder) {
+        public RemoteFile(String remoteId, String title, boolean isFolder) {
+            this.remoteId = remoteId;
             this.title = title;
-            this.path = path;
             this.isFolder = isFolder;
         }
     }

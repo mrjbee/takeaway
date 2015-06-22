@@ -74,7 +74,7 @@ public class KodiSourceManager implements SourceManager {
     }
 
     @Override
-    public Answer<List<RemoteFile>> getFolderContent(final SourceConfigurationManager.Configuration sourceConfiguration, String folderPath) {
+    public Answer<List<RemoteFile>> getTopFolder(final SourceConfigurationManager.Configuration sourceConfiguration) {
         return sendAndBuild(new Send() {
             @Override
             public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
@@ -82,8 +82,8 @@ public class KodiSourceManager implements SourceManager {
                         prepare_Url(sourceConfiguration),
                         prepare_JsonRequest(
                                 rpc_request("Files.GetSources")
-                                    .field("params",JsonBuilder.object()
-                                                        .field("media","music"))),
+                                    .field("params", JsonBuilder.object()
+                                            .field("media", "music"))),
                         prepare_RequestDetails(),
                         prepare_JsonResponse()
                 );
@@ -99,7 +99,50 @@ public class KodiSourceManager implements SourceManager {
                 List<RemoteFile> answer = new ArrayList<RemoteFile>();
                 for (int i=0;i<sources.size();i++){
                     Json.JsonObject source = sources.asObject(i);
-                    answer.add(new RemoteFile(source.asString("label"), source.asString("file"), true));
+                    answer.add(new RemoteFile(
+                            source.asString("file"),
+                            source.asString("label"),
+                            true));
+                }
+                return answer;
+            }
+        });
+    }
+
+    @Override
+    public Answer<List<RemoteFile>> getFolderContent(final SourceConfigurationManager.Configuration sourceConfiguration, final String folderId) {
+        return sendAndBuild(new Send() {
+            @Override
+            public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
+                return httpManager.post(
+                        prepare_Url(sourceConfiguration),
+                        prepare_JsonRequest(
+                                //"params":{"directory":"/mnt/bigdata/Musik/Mark 2009/", "media":"music"}}'
+                                rpc_request("Files.GetDirectory")
+                                        .field("params", JsonBuilder.object()
+                                                .field("directory", folderId)
+                                                .field("media", "music"))),
+                        prepare_RequestDetails(),
+                        prepare_JsonResponse()
+                );
+            }
+        }, new BuildBody<List<RemoteFile>>() {
+            @Override
+            public List<RemoteFile> doBuild(Json json) {
+
+                if (!json.asObject("result").exists("files")) return Collections.emptyList();
+
+                Json.JsonArray sources = json.asObject("result").asArray("files");
+
+                List<RemoteFile> answer = new ArrayList<RemoteFile>();
+                //"file":"/mnt/bigdata/Musik/Mark 2009/10-so_far_from_the_clyde.mp3","filetype":"file","label":"10-so_far_from_the_clyde.mp3","type":"unknown"
+                for (int i=0;i<sources.size();i++){
+                    Json.JsonObject source = sources.asObject(i);
+                    answer.add(new RemoteFile(
+                            source.asString("file"),
+                            source.asString("label"),
+                            "directory".equals(source.asString("filetype")))
+                    );
                 }
                 return answer;
             }

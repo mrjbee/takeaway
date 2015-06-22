@@ -4,7 +4,6 @@ import org.monroe.team.corebox.services.ServiceRegistry;
 import org.monroe.team.corebox.uc.UserCaseSupport;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import team.monroe.org.takeaway.manage.SourceConfigurationManager;
@@ -23,16 +22,23 @@ public class GetFolderContent extends UserCaseSupport<Folder, FolderContent>{
     protected FolderContent executeImpl(Folder request) {
 
         SourceConfigurationManager.Configuration configuration = using(SourceConfigurationManager.class).get();
-        SourceManager.Answer<List<SourceManager.RemoteFile>> folderAnswer = using(SourceManager.class).getFolderContent(configuration, "");
+
+        SourceManager.Answer<List<SourceManager.RemoteFile>> folderAnswer = null;
+
+        if (request == Folder.FOLDER_ROOT){
+            folderAnswer = using(SourceManager.class).getTopFolder(configuration);
+        } else {
+            folderAnswer = using(SourceManager.class).getFolderContent(configuration, request.id);
+        }
 
         SourceConnectionStatus connectionStatus = SourceConnectionStatus.fromAnswer(folderAnswer);
 
         List<Folder> folders = new ArrayList<>();
         if (folderAnswer.isSuccess()){
             for (SourceManager.RemoteFile remoteFile : folderAnswer.body) {
-                folders.add(new Folder(remoteFile.path));
-            }
+                    folders.add(new Folder(remoteFile.remoteId, remoteFile.title));
 
+            }
         }
         return new FolderContent(request, folders);
     }

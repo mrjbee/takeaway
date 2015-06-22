@@ -2,8 +2,13 @@ package team.monroe.org.takeaway.fragment;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import org.monroe.team.android.box.app.ActivitySupport;
+import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
+import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.corebox.utils.Lists;
 
@@ -22,6 +27,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
     private List<Folder> mFolderStack;
     private Data<FolderContent> mFolderData;
     private Data.DataChangeObserver<FolderContent> mDataObserver;
+    private ListView mFileList;
+    private GenericListViewAdapter<Folder, GetViewImplementation.ViewHolder<Folder>> mFolderAdapter;
 
     @Override
     protected int getLayoutId() {
@@ -48,6 +55,36 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
         mLoadingPanel.setVisibility(View.GONE);
         mNoItemsPanel.setVisibility(View.GONE);
         mItemsPanel.setVisibility(View.GONE);
+
+        mFileList = view_list(R.id.list_items);
+        mFolderAdapter = new GenericListViewAdapter<Folder, GetViewImplementation.ViewHolder<Folder>>(activity(), new GetViewImplementation.ViewHolderFactory<GetViewImplementation.ViewHolder<Folder>>() {
+            @Override
+            public GetViewImplementation.ViewHolder<Folder> create(final View convertView) {
+                return new GetViewImplementation.ViewHolder<Folder>() {
+
+                    TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
+
+                    @Override
+                    public void update(Folder folder, int position) {
+                        caption.setText(folder.title);
+                    }
+
+                    @Override
+                    public void cleanup() {
+
+                    }
+                };
+            }
+        }, R.layout.item_debug);
+        mFileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Folder folder = mFolderAdapter.getItem(position);
+                mFolderStack.add(folder);
+                setup_folder(folder);
+            }
+        });
+        mFileList.setAdapter(mFolderAdapter);
     }
 
     @Override
@@ -75,7 +112,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
         mLoadingPanel.setVisibility(View.VISIBLE);
 
         mNoItemsPanel.setVisibility(View.GONE);
-        mNoItemsPanel.setVisibility(View.GONE);
+        mItemsPanel.setVisibility(View.GONE);
 
         mFolderData = application().data_range_folder.getOrCreate(folder);
         mDataObserver = new Data.DataChangeObserver<FolderContent>() {
@@ -86,7 +123,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
 
             @Override
             public void onData(FolderContent folderContent) {
-                onFolderData(folderContent);
+
             }
         };
         mFolderData.addDataChangeObserver(mDataObserver);
@@ -104,14 +141,16 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
 
     private void onFolderData(FolderContent folderContent) {
 
-       if (folderContent.folder != getTopFolder()) return;
+       if (folderContent.folder != getTopFolder()) throw new IllegalStateException("Something bad");
 
        mLoadingPanel.setVisibility(View.GONE);
        if (folderContent.subFolders.isEmpty()){
            mNoItemsPanel.setVisibility(View.VISIBLE);
        }else {
            mItemsPanel.setVisibility(View.VISIBLE);
-
+           mFolderAdapter.clear();
+           mFolderAdapter.addAll(folderContent.subFolders);
+           mFolderAdapter.notifyDataSetChanged();
        }
     }
 

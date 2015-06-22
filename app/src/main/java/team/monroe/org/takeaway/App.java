@@ -41,7 +41,7 @@ public class App extends ApplicationSupport<AppModel> {
 
             @Override
             protected String convertToStringKey(Folder folder) {
-                return folder.path;
+                return folder.id;
             }
         };
     }
