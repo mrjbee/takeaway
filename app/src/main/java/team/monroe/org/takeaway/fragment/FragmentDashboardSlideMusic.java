@@ -81,7 +81,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
         mDataObserver = new Data.DataChangeObserver<FolderContent>() {
             @Override
             public void onDataInvalid() {
-                fetch_folder(folder);
+                fetch_folder();
             }
 
             @Override
@@ -90,10 +90,10 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide {
             }
         };
         mFolderData.addDataChangeObserver(mDataObserver);
-        fetch_folder(folder);
+        fetch_folder();
     }
 
-    private void fetch_folder(Folder folder) {
+    private void fetch_folder() {
         mFolderData.fetch(true, activity().observe_data(new ActivitySupport.OnValue<FolderContent>() {
             @Override
             public void action(FolderContent folderContent) {

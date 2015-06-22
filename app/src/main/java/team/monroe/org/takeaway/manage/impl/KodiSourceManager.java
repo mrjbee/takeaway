@@ -6,6 +6,9 @@ import org.monroe.team.android.box.services.HttpManager;
 import org.monroe.team.corebox.log.L;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import team.monroe.org.takeaway.manage.SourceConfigurationManager;
 import team.monroe.org.takeaway.manage.SourceManager;
@@ -69,6 +72,40 @@ public class KodiSourceManager implements SourceManager {
             }
         });
     }
+
+    @Override
+    public Answer<List<RemoteFile>> getFolderContent(final SourceConfigurationManager.Configuration sourceConfiguration, String folderPath) {
+        return sendAndBuild(new Send() {
+            @Override
+            public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
+                return httpManager.post(
+                        prepare_Url(sourceConfiguration),
+                        prepare_JsonRequest(
+                                rpc_request("Files.GetSources")
+                                    .field("params",JsonBuilder.object()
+                                                        .field("media","music"))),
+                        prepare_RequestDetails(),
+                        prepare_JsonResponse()
+                );
+            }
+        }, new BuildBody<List<RemoteFile>>() {
+            @Override
+            public List<RemoteFile> doBuild(Json json) {
+
+                if (!json.asObject("result").exists("sources")) return Collections.emptyList();
+
+                Json.JsonArray sources = json.asObject("result").asArray("sources");
+
+                List<RemoteFile> answer = new ArrayList<RemoteFile>();
+                for (int i=0;i<sources.size();i++){
+                    Json.JsonObject source = sources.asObject(i);
+                    answer.add(new RemoteFile(source.asString("label"), source.asString("file"), true));
+                }
+                return answer;
+            }
+        });
+    }
+
 
     private <BodyType> Answer<BodyType> extractErrorIfExists(Json body) {
         if (body.asObject().exists("error")){

@@ -1,8 +1,24 @@
 package team.monroe.org.takeaway.manage;
 
+import java.util.List;
+
 public interface SourceManager {
 
     public Answer<String> getSourceVersion(SourceConfigurationManager.Configuration sourceConfiguration);
+    public Answer<List<RemoteFile>> getFolderContent(SourceConfigurationManager.Configuration sourceConfiguration, String folderPath);
+
+    public static class RemoteFile{
+
+        public final String title;
+        public final String path;
+        public final boolean isFolder;
+
+        public RemoteFile(String title, String path, boolean isFolder) {
+            this.title = title;
+            this.path = path;
+            this.isFolder = isFolder;
+        }
+    }
 
     public static class Answer<ResponseBody>{
 
@@ -17,7 +33,7 @@ public interface SourceManager {
         }
 
         public boolean isSuccess(){
-            return status != Status.SUCCESS;
+            return status == Status.SUCCESS;
         }
 
     }
