@@ -34,6 +34,7 @@
         <item name="android:shadowColor">@color/text.dark.outer.glow</item>
     </style>
 
+
     <style name="Text.Body.Light" parent="Text.Body">
         <item name="android:textColor">@color/text.light</item>
         <item name="android:textColorHint">@color/text.light.darken</item>
@@ -63,6 +64,11 @@
 
     <style name="Text.Prompt.Secondary" parent="Text.Prompt">
         <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="Text.Prompt.No.Item" parent="Text.Prompt">
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">normal</item>
     </style>
 
