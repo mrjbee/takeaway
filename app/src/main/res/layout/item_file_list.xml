@@ -11,16 +11,24 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/panel_left_right_shadow"
+        android:orientation="vertical"
         >
+        <LinearLayout
+            android:id="@+id/separator"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#7BD1D1D1"
+            android:orientation="vertical" />
         <TextView
             android:id="@+id/item_caption"
             android:padding="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Caption"
             style="@style/Text.Body"
             />
-
     </LinearLayout>
 
 </LinearLayout>

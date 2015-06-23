@@ -79,9 +79,11 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 return new GetViewImplementation.ViewHolder<FilePointer>() {
 
                     TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
+                    View separator = convertView.findViewById(R.id.separator);
 
                     @Override
                     public void update(FilePointer filePointer, int position) {
+                        separator.setVisibility(position == 0? View.GONE : View.VISIBLE);
                         caption.setText(filePointer.name);
                     }
 
