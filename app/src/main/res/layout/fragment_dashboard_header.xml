@@ -53,10 +53,11 @@
 
     <LinearLayout
         android:visibility="gone"
-        android:id="@+id/panel_secondary"
-        android:layout_width="50dp"
+        android:id="@+id/panel_secondary_header"
+        android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
     </LinearLayout>
 
 </LinearLayout>

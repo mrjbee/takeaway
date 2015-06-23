@@ -14,6 +14,7 @@ import org.monroe.team.android.box.utils.DisplayUtils;
 import team.monroe.org.takeaway.fragment.FragmentDashboardHeader;
 import team.monroe.org.takeaway.fragment.FragmentDashboardMediaSourceConfiguration;
 import team.monroe.org.takeaway.fragment.FragmentDashboardPagerSlider;
+import team.monroe.org.takeaway.fragment.FragmentDashboardSlide;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 
 
@@ -22,6 +23,8 @@ public class ActivityDashboard extends ActivitySupport<App>{
     private static final int REQUEST_CONFIGURATION = 101;
     private PopupWindow mNoSourcePopup;
     private PopupWindow mSourcePopup;
+    private OnSecondaryHeaderRequestSubscriber mSecondaryHeaderSubscriber;
+    private View mSecondaryHeaderRequestView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,4 +184,31 @@ public class ActivityDashboard extends ActivitySupport<App>{
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    public void requestSecondaryHeader(View view) {
+        mSecondaryHeaderRequestView = view;
+        if (mSecondaryHeaderSubscriber != null){
+            mSecondaryHeaderSubscriber.onRequest(mSecondaryHeaderRequestView);
+        }
+    }
+
+    public void subscribeSecondaryHeaderRequest(OnSecondaryHeaderRequestSubscriber subscriber) {
+        mSecondaryHeaderSubscriber = subscriber;
+        if (mSecondaryHeaderRequestView != null){
+            mSecondaryHeaderSubscriber.onRequest(mSecondaryHeaderRequestView);
+        }
+    }
+
+    public boolean isSlideSelected(FragmentDashboardSlide slide) {
+        Fragment bodyFragment = getFragmentManager().findFragmentById(R.id.frag_body);
+        if (!(bodyFragment instanceof FragmentDashboardPagerSlider)){
+            return false;
+        }
+        FragmentDashboardPagerSlider pagerSlider = (FragmentDashboardPagerSlider) bodyFragment;
+        FragmentDashboardSlide dashboardSlide = pagerSlider.getCurrentSlide();
+        return dashboardSlide == slide;
+    }
+
+    public static interface OnSecondaryHeaderRequestSubscriber {
+        public void onRequest(View secondaryHeaderContent);
+    }
 }

@@ -55,6 +55,7 @@ public class FragmentDashboardPagerSlider extends FragmentDashboardActivity impl
             @Override
             public void onPageSelected(int position) {
                 dashboard().onScreenChanged(position);
+                getPage(position).onSelect();
             }
 
             @Override
@@ -74,15 +75,14 @@ public class FragmentDashboardPagerSlider extends FragmentDashboardActivity impl
 
     @Override
     public boolean onBackPressed() {
-        int curItem = mViewPager.getCurrentItem();
-        Fragment fragment = getPage(curItem);
-        if (fragment instanceof ContractBackButton){
-            if (((ContractBackButton) fragment).onBackPressed()){
+        FragmentDashboardSlide dashboardSlide = getCurrentSlide();
+        if (dashboardSlide instanceof ContractBackButton){
+            if (((ContractBackButton) dashboardSlide).onBackPressed()){
                 return true;
             }
         }
 
-        if (curItem == 1) return false;
+        if (mViewPager.getCurrentItem() == 1) return false;
         mViewPager.setCurrentItem(1, true);
         return true;
     }
@@ -91,8 +91,14 @@ public class FragmentDashboardPagerSlider extends FragmentDashboardActivity impl
         mViewPager.setCurrentItem(screenPosition, true);
     }
 
-    private Fragment getPage(int pageIndex) {
+    private FragmentDashboardSlide getPage(int pageIndex) {
         String pageTag = "android:switcher:" + mViewPager.getId() + ":" + pageIndex;
-        return getFragmentManager().findFragmentByTag(pageTag);
+        return (FragmentDashboardSlide) getFragmentManager().findFragmentByTag(pageTag);
+    }
+
+    public FragmentDashboardSlide getCurrentSlide() {
+        int curItem = mViewPager.getCurrentItem();
+        Fragment fragment = getPage(curItem);
+        return (FragmentDashboardSlide) fragment;
     }
 }

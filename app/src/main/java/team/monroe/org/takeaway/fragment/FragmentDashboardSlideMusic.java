@@ -17,8 +17,6 @@ import java.util.List;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 import team.monroe.org.takeaway.presentations.FilePointer;
-import team.monroe.org.takeaway.presentations.Folder;
-import team.monroe.org.takeaway.presentations.FolderContent;
 import team.monroe.org.takeaway.presentations.Source;
 
 public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  implements ContractBackButton{
@@ -182,6 +180,10 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mFolderData.fetch(true, activity().observe_data(new ActivitySupport.OnValue<List<FilePointer>>() {
             @Override
             public void action(List<FilePointer> filePointers) {
+
+                FilePointer filePointer = mFileStack.get(0);
+                updateHeader(filePointer.name);
+
                 visibility_all(View.GONE);
                 if (filePointers.isEmpty()){
                     mNoItemsPanel.setVisibility(View.VISIBLE);
@@ -194,6 +196,24 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             }
         }) );
     }
+
+    private void updateHeader(String title) {
+        if (title == null){
+            requestSecondaryHeader(null);
+        }else{
+            View view = activity().getLayoutInflater().inflate(R.layout.panel_folder_secondary_header,null);
+            view.findViewById(R.id.action_back).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    activity().onBackPressed();
+                }
+            });
+            ((TextView)view.findViewById(R.id.item_caption)).setText(title);
+            requestSecondaryHeader(view);
+        }
+    }
+
+
 
     private void show_loading() {
         visibility_all(View.GONE);
