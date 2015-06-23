@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import team.monroe.org.takeaway.manage.SourceConfigurationManager;
-import team.monroe.org.takeaway.manage.SourceManager;
+import team.monroe.org.takeaway.manage.CloudConfigurationManager;
+import team.monroe.org.takeaway.manage.CloudManager;
 
-public class KodiSourceManager implements SourceManager {
+public class KodiCloudManager implements CloudManager {
 
     L.Logger log = L.create("KODI.SOURCE.MANAGER");
 
     private final HttpManager httpManager;
 
-    public KodiSourceManager(HttpManager httpManager) {
+    public KodiCloudManager(HttpManager httpManager) {
         this.httpManager = httpManager;
     }
 
@@ -53,7 +53,7 @@ public class KodiSourceManager implements SourceManager {
     }
 
     @Override
-    public Answer<String> getSourceVersion(final SourceConfigurationManager.Configuration sourceConfiguration) {
+    public Answer<String> getSourceVersion(final CloudConfigurationManager.Configuration sourceConfiguration) {
         return sendAndBuild(new Send() {
             @Override
             public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
@@ -74,7 +74,7 @@ public class KodiSourceManager implements SourceManager {
     }
 
     @Override
-    public Answer<List<RemoteFile>> getTopFolder(final SourceConfigurationManager.Configuration sourceConfiguration) {
+    public Answer<List<RemoteFile>> getSources(final CloudConfigurationManager.Configuration sourceConfiguration) {
         return sendAndBuild(new Send() {
             @Override
             public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
@@ -110,7 +110,7 @@ public class KodiSourceManager implements SourceManager {
     }
 
     @Override
-    public Answer<List<RemoteFile>> getFolderContent(final SourceConfigurationManager.Configuration sourceConfiguration, final String folderId) {
+    public Answer<List<RemoteFile>> getFolderContent(final CloudConfigurationManager.Configuration sourceConfiguration, final String folder) {
         return sendAndBuild(new Send() {
             @Override
             public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
@@ -120,7 +120,7 @@ public class KodiSourceManager implements SourceManager {
                                 //"params":{"directory":"/mnt/bigdata/Musik/Mark 2009/", "media":"music"}}'
                                 rpc_request("Files.GetDirectory")
                                         .field("params", JsonBuilder.object()
-                                                .field("directory", folderId)
+                                                .field("directory", folder)
                                                 .field("media", "music"))),
                         prepare_RequestDetails(),
                         prepare_JsonResponse()
@@ -182,7 +182,7 @@ public class KodiSourceManager implements SourceManager {
                         .field("method", method);
     }
 
-    private String prepare_Url(SourceConfigurationManager.Configuration sourceConfiguration) {
+    private String prepare_Url(CloudConfigurationManager.Configuration sourceConfiguration) {
         StringBuilder builder = new StringBuilder();
         if (!sourceConfiguration.host.toLowerCase().startsWith("http://")){
             builder.append("http://");

@@ -2,24 +2,24 @@ package team.monroe.org.takeaway.presentations;
 
 import android.content.res.Resources;
 
-import team.monroe.org.takeaway.manage.SourceManager;
+import team.monroe.org.takeaway.manage.CloudManager;
 
 public class SourceConnectionStatus {
 
-    public final SourceManager.Status status;
+    public final CloudManager.Status status;
     public final String errorDetails;
 
-    public SourceConnectionStatus(SourceManager.Status status, String errorDetails) {
+    public SourceConnectionStatus(CloudManager.Status status, String errorDetails) {
         this.status = status;
         this.errorDetails = errorDetails;
     }
 
-    public static SourceConnectionStatus fromAnswer(SourceManager.Answer<?> sourceAnswer) {
+    public static SourceConnectionStatus fromAnswer(CloudManager.Answer<?> sourceAnswer) {
         return new SourceConnectionStatus(sourceAnswer.status, sourceAnswer.errorDescription);
     }
 
     public boolean isSuccess() {
-        return status == SourceManager.Status.SUCCESS;
+        return status == CloudManager.Status.SUCCESS;
     }
 
     public String asString(Resources resources) {

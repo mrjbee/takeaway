@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import org.monroe.team.android.box.app.ActivitySupport;
 
-import team.monroe.org.takeaway.manage.SourceConfigurationManager;
+import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 
 public class ActivityConfiguration extends ActivitySupport<App>{
@@ -43,7 +43,7 @@ public class ActivityConfiguration extends ActivitySupport<App>{
             }
         });
 
-        SourceConfigurationManager.Configuration configuration = application().getSourceConfiguration();
+        CloudConfigurationManager.Configuration configuration = application().getSourceConfiguration();
         if (configuration != null){
             view_text(R.id.text_host).setText(configuration.host);
             view_text(R.id.text_port).setText(""+configuration.port);
@@ -57,7 +57,7 @@ public class ActivityConfiguration extends ActivitySupport<App>{
     }
 
     private void saveConfiguration() {
-        final SourceConfigurationManager.Configuration configuration = new SourceConfigurationManager.Configuration(
+        final CloudConfigurationManager.Configuration configuration = new CloudConfigurationManager.Configuration(
                 readText(R.id.text_host),
                 readPortInt(R.id.text_port, 8080),
                 readText(R.id.text_user),

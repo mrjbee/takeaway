@@ -6,9 +6,11 @@ import org.monroe.team.android.box.app.AndroidModel;
 import org.monroe.team.android.box.services.HttpManager;
 import org.monroe.team.corebox.services.ServiceRegistry;
 
-import team.monroe.org.takeaway.manage.SourceConfigurationManager;
-import team.monroe.org.takeaway.manage.SourceManager;
-import team.monroe.org.takeaway.manage.impl.KodiSourceManager;
+import team.monroe.org.takeaway.manage.CloudConfigurationManager;
+import team.monroe.org.takeaway.manage.CloudManager;
+import team.monroe.org.takeaway.manage.FileProvider;
+import team.monroe.org.takeaway.manage.KodiFileProvider;
+import team.monroe.org.takeaway.manage.impl.KodiCloudManager;
 
 
 public class AppModel extends AndroidModel {
@@ -20,7 +22,11 @@ public class AppModel extends AndroidModel {
     @Override
     protected void constructor(String appName, Context context, ServiceRegistry serviceRegistry) {
         super.constructor(appName, context, serviceRegistry);
-        serviceRegistry.registrate(SourceConfigurationManager.class, new SourceConfigurationManager(context));
-        serviceRegistry.registrate(SourceManager.class, new KodiSourceManager(new HttpManager()));
+        CloudConfigurationManager configurationManager = new CloudConfigurationManager(context);
+        serviceRegistry.registrate(CloudConfigurationManager.class, configurationManager);
+        CloudManager cloudManager = new KodiCloudManager(new HttpManager());
+        FileProvider fileProvider = new KodiFileProvider(cloudManager, configurationManager);
+        serviceRegistry.registrate(CloudManager.class, cloudManager);
+        serviceRegistry.registrate(FileProvider.class, fileProvider);
     }
 }

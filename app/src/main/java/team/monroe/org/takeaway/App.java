@@ -1,18 +1,23 @@
 package team.monroe.org.takeaway;
 
-import android.app.Activity;
-
 import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.data.PersistRangeDataProvider;
+import org.monroe.team.android.box.data.RefreshableCachedData;
 import org.monroe.team.android.box.utils.AndroidLogImplementation;
 import org.monroe.team.corebox.log.L;
 
-import team.monroe.org.takeaway.manage.SourceConfigurationManager;
+import java.util.List;
+
+import team.monroe.org.takeaway.manage.CloudConfigurationManager;
+import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Folder;
 import team.monroe.org.takeaway.presentations.FolderContent;
+import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 import team.monroe.org.takeaway.uc.CheckSourceConnection;
+import team.monroe.org.takeaway.uc.GetCloudSources;
+import team.monroe.org.takeaway.uc.GetFileContent;
 import team.monroe.org.takeaway.uc.GetFolderContent;
 
 public class App extends ApplicationSupport<AppModel> {
@@ -21,27 +26,36 @@ public class App extends ApplicationSupport<AppModel> {
         L.setup(new AndroidLogImplementation());
     }
 
-    public PersistRangeDataProvider<Folder, FolderContent> data_range_folder;
+    public PersistRangeDataProvider<FilePointer, List<FilePointer>> data_range_folder;
+    public Data<List<Source>> data_sources;
 
     @Override
     protected void onPostCreate() {
+
         super.onPostCreate();
 
-        data_range_folder = new PersistRangeDataProvider<Folder, FolderContent>() {
 
+        data_sources = new Data<List<Source>>(model()) {
             @Override
-            protected Data<FolderContent> buildData(final Folder folder) {
-                return new Data<FolderContent>(model()) {
+            protected List<Source> provideData() {
+                return model().execute(GetCloudSources.class, null);
+            }
+        };
+
+        data_range_folder = new PersistRangeDataProvider<FilePointer, List<FilePointer>>() {
+            @Override
+            protected Data<List<FilePointer>> buildData(final FilePointer filePointer) {
+                return new Data<List<FilePointer>>(model()) {
                     @Override
-                    protected FolderContent provideData() {
-                        return model().execute(GetFolderContent.class, folder);
+                    protected List<FilePointer> provideData() {
+                        return model().execute(GetFileContent.class, filePointer);
                     }
                 };
             }
 
             @Override
-            protected String convertToStringKey(Folder folder) {
-                return folder.id;
+            protected String convertToStringKey(FilePointer filePointer) {
+                return filePointer.source.id+":"+filePointer.relativePath;
             }
         };
     }
@@ -52,14 +66,14 @@ public class App extends ApplicationSupport<AppModel> {
     }
 
     public boolean isSourceConfigured() {
-        return model().usingService(SourceConfigurationManager.class).get() != null;
+        return model().usingService(CloudConfigurationManager.class).get() != null;
     }
 
-    public SourceConfigurationManager.Configuration getSourceConfiguration() {
-        return model().usingService(SourceConfigurationManager.class).get();
+    public CloudConfigurationManager.Configuration getSourceConfiguration() {
+        return model().usingService(CloudConfigurationManager.class).get();
     }
 
-    public void updateConfiguration(SourceConfigurationManager.Configuration configuration, ValueObserver<SourceConnectionStatus> observer) {
+    public void updateConfiguration(CloudConfigurationManager.Configuration configuration, ValueObserver<SourceConnectionStatus> observer) {
         fetchValue(CheckSourceConnection.class, configuration, new NoOpValueAdapter<SourceConnectionStatus>(), observer);
     }
 }

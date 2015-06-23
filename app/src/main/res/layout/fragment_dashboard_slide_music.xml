@@ -43,12 +43,29 @@
     <RelativeLayout
         android:visibility="gone"
         android:id="@+id/panel_items"
-        android:layout_marginTop="60dp"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
         <ListView
             android:id="@+id/list_items"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:dividerHeight="0dp"
+            android:divider="@null"
+            android:listSelector="@color/transperent"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/panel_sources"
+        android:layout_marginTop="60dp"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <ListView
+            android:id="@+id/list_sources"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"/>
 

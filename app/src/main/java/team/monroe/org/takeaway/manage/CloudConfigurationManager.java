@@ -6,11 +6,11 @@ import org.monroe.team.android.box.utils.SerializationMap;
 
 import java.io.Serializable;
 
-public class SourceConfigurationManager {
+public class CloudConfigurationManager {
 
     private final SerializationMap<String, Serializable> persist;
 
-    public SourceConfigurationManager(Context context) {
+    public CloudConfigurationManager(Context context) {
         this.persist = new SerializationMap<>("source_conf", context);
     }
 

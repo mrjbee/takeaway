@@ -2,20 +2,20 @@ package team.monroe.org.takeaway.manage;
 
 import java.util.List;
 
-public interface SourceManager {
+public interface CloudManager {
 
-    public Answer<String> getSourceVersion(SourceConfigurationManager.Configuration sourceConfiguration);
-    public Answer<List<RemoteFile>> getTopFolder(SourceConfigurationManager.Configuration sourceConfiguration);
-    public Answer<List<RemoteFile>> getFolderContent(SourceConfigurationManager.Configuration sourceConfiguration, String folderId);
+    public Answer<String> getSourceVersion(CloudConfigurationManager.Configuration sourceConfiguration);
+    public Answer<List<RemoteFile>> getSources(CloudConfigurationManager.Configuration sourceConfiguration);
+    public Answer<List<RemoteFile>> getFolderContent(CloudConfigurationManager.Configuration sourceConfiguration, String folderId);
 
-    public static class RemoteFile{
+    public static class RemoteFile {
 
-        public final String remoteId;
+        public final String path;
         public final String title;
         public final boolean isFolder;
 
-        public RemoteFile(String remoteId, String title, boolean isFolder) {
-            this.remoteId = remoteId;
+        public RemoteFile(String path, String title, boolean isFolder) {
+            this.path = path;
             this.title = title;
             this.isFolder = isFolder;
         }

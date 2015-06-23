@@ -6,8 +6,8 @@ import org.monroe.team.corebox.uc.UserCaseSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-import team.monroe.org.takeaway.manage.SourceConfigurationManager;
-import team.monroe.org.takeaway.manage.SourceManager;
+import team.monroe.org.takeaway.manage.CloudConfigurationManager;
+import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.presentations.Folder;
 import team.monroe.org.takeaway.presentations.FolderContent;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
@@ -21,22 +21,22 @@ public class GetFolderContent extends UserCaseSupport<Folder, FolderContent>{
     @Override
     protected FolderContent executeImpl(Folder request) {
 
-        SourceConfigurationManager.Configuration configuration = using(SourceConfigurationManager.class).get();
+        CloudConfigurationManager.Configuration configuration = using(CloudConfigurationManager.class).get();
 
-        SourceManager.Answer<List<SourceManager.RemoteFile>> folderAnswer = null;
+        CloudManager.Answer<List<CloudManager.RemoteFile>> folderAnswer = null;
 
         if (request == Folder.FOLDER_ROOT){
-            folderAnswer = using(SourceManager.class).getTopFolder(configuration);
+            folderAnswer = using(CloudManager.class).getSources(configuration);
         } else {
-            folderAnswer = using(SourceManager.class).getFolderContent(configuration, request.id);
+            folderAnswer = using(CloudManager.class).getFolderContent(configuration, request.id);
         }
 
         SourceConnectionStatus connectionStatus = SourceConnectionStatus.fromAnswer(folderAnswer);
 
         List<Folder> folders = new ArrayList<>();
         if (folderAnswer.isSuccess()){
-            for (SourceManager.RemoteFile remoteFile : folderAnswer.body) {
-                    folders.add(new Folder(remoteFile.remoteId, remoteFile.title));
+            for (CloudManager.RemoteFile remoteFile : folderAnswer.body) {
+                    folders.add(new Folder(remoteFile.path, remoteFile.title));
 
             }
         }
