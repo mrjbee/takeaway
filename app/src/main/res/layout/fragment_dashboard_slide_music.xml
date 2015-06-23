@@ -53,6 +53,7 @@
             android:dividerHeight="0dp"
             android:divider="@null"
             android:listSelector="@color/transperent"
+            android:scrollbars="none"
             />
 
     </RelativeLayout>

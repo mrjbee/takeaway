@@ -26,8 +26,9 @@
     </style>
 
     <style name="Text.Body" parent="AppTheme">
+        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif-condensed</item>
         <item name="android:textColor">@color/text.dark</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:shadowDy">-1</item>
         <item name="android:shadowDx">-1</item>
         <item name="android:shadowRadius">1</item>
@@ -47,7 +48,7 @@
     </style>
 
     <style name="Text.Body.Optional" parent="Text.Body">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text.dark.lighter</item>
     </style>
 
@@ -96,7 +97,7 @@
     <color name="text.light.shadow">#66000000</color>
     <color name="text.light.darken">#83F8F8F8</color>
     <color name="text.dark">#555555</color>
-    <color name="text.dark.lighter">#ff818181</color>
+    <color name="text.dark.lighter">#ff9d9d9d</color>
     <color name="text.dark.outer.glow">#fff</color>
     <color name="highlight">#ee002d</color>
     <color name="highlight2">#f01f37</color>

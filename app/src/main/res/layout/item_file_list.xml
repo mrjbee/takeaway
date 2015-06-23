@@ -8,6 +8,7 @@
     >
 
     <LinearLayout
+        android:id="@+id/panel_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/panel_left_right_shadow"
@@ -21,13 +22,24 @@
             android:orientation="vertical" />
         <TextView
             android:id="@+id/item_caption"
-            android:padding="15dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:paddingTop="15dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Caption"
             style="@style/Text.Body"
+            />
+        <TextView
+            android:id="@+id/item_description"
+            android:paddingTop="1dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="File"
+            style="@style/Text.Body.Optional"
             />
     </LinearLayout>
 

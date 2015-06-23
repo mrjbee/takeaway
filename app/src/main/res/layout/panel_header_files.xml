@@ -9,11 +9,5 @@
         android:layout_height="120dp">
 
     </LinearLayout>
-    <LinearLayout
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/panel_round_top"
-        />
+
 </LinearLayout>

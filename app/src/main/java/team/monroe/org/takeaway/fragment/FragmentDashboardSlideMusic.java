@@ -69,7 +69,6 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
         mFileList = view_list(R.id.list_items);
         mFileList.addHeaderView(mHeaderFilesView,null,false);
-        mFileList.addFooterView(activity().getLayoutInflater().inflate(R.layout.panel_bottom_files,null),null,false);
 
         mSourcesList = view_list(R.id.list_sources);
 
@@ -80,9 +79,17 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
                     TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
                     View separator = convertView.findViewById(R.id.separator);
+                    View background = convertView.findViewById(R.id.panel_content);
 
                     @Override
                     public void update(FilePointer filePointer, int position) {
+                        int backgroundResource = R.drawable.panel_left_right_shadow;
+                        if (position == 0){
+                            backgroundResource = R.drawable.panel_round_top;
+                        }else if (position == mFolderAdapter.getCount()-1){
+                            backgroundResource = R.drawable.panel_round_bottom;
+                        }
+                        background.setBackgroundResource(backgroundResource);
                         separator.setVisibility(position == 0? View.GONE : View.VISIBLE);
                         caption.setText(filePointer.name);
                     }
