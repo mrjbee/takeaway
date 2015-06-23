@@ -1,46 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="65dp"
+    android:layout_height="wrap_content"
     android:background="@drawable/transperent_header"
-    android:paddingBottom="8dp"
     >
 
-    <LinearLayout
-        android:layout_centerHorizontal="true"
-        android:paddingBottom="4dp"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        >
-
-        <include
-            android:id="@+id/item_music"
-            layout="@layout/component_header_item"/>
-
-        <include
-            android:id="@+id/item_home"
-            layout="@layout/component_header_root_item"/>
-
-
-        <include
-                android:id="@+id/item_search"
-                layout="@layout/component_header_item"/>
-    </LinearLayout>
-
     <RelativeLayout
-        android:id="@+id/panel_source"
-        android:layout_marginRight="20dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
         >
-        <ImageView
-            android:alpha="0.2"
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            android:src="@drawable/cloud_offline"/>
+
+        <LinearLayout
+            android:layout_centerInParent="true"
+            android:id="@+id/panel_header_items"
+            android:paddingBottom="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+            <include
+                android:id="@+id/item_music"
+                layout="@layout/component_header_item"/>
+
+            <include
+                android:id="@+id/item_home"
+                layout="@layout/component_header_root_item"/>
+
+
+            <include
+                    android:id="@+id/item_search"
+                    layout="@layout/component_header_item"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/panel_source"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentRight="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            >
+            <ImageView
+                android:alpha="0.2"
+                android:layout_height="fill_parent"
+                android:layout_width="fill_parent"
+                android:src="@drawable/cloud_offline"/>
+        </RelativeLayout>
     </RelativeLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/panel_secondary"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:orientation="vertical">
+    </LinearLayout>
+
+</LinearLayout>
