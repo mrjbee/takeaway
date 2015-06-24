@@ -9,10 +9,11 @@ import org.monroe.team.corebox.log.L;
 import java.util.List;
 
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
+import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
-import team.monroe.org.takeaway.uc.CheckSourceConnection;
+import team.monroe.org.takeaway.uc.CheckCloudConnection;
 import team.monroe.org.takeaway.uc.GetCloudSources;
 import team.monroe.org.takeaway.uc.GetFileContent;
 
@@ -27,10 +28,7 @@ public class App extends ApplicationSupport<AppModel> {
 
     @Override
     protected void onPostCreate() {
-
         super.onPostCreate();
-
-
         data_sources = new Data<List<Source>>(model()) {
             @Override
             protected List<Source> provideData() {
@@ -54,6 +52,7 @@ public class App extends ApplicationSupport<AppModel> {
                 return filePointer.source.id+":"+filePointer.relativePath;
             }
         };
+        model().usingService(CloudConnectionManager.class).startWatcher();
     }
 
     @Override
@@ -70,6 +69,10 @@ public class App extends ApplicationSupport<AppModel> {
     }
 
     public void updateConfiguration(CloudConfigurationManager.Configuration configuration, ValueObserver<SourceConnectionStatus> observer) {
-        fetchValue(CheckSourceConnection.class, configuration, new NoOpValueAdapter<SourceConnectionStatus>(), observer);
+        fetchValue(CheckCloudConnection.class, configuration, new NoOpValueAdapter<SourceConnectionStatus>(), observer);
+    }
+
+    public CloudConnectionManager.ConnectionStatus getConnectionStatus() {
+        return model().usingService(CloudConnectionManager.class).getStatus();
     }
 }

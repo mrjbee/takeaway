@@ -2,12 +2,16 @@ package team.monroe.org.takeaway.fragment;
 
 import android.animation.Animator;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
+import org.monroe.team.android.box.event.Event;
 import org.monroe.team.android.box.utils.DisplayUtils;
+import org.monroe.team.corebox.utils.Closure;
 
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
 
@@ -16,6 +20,8 @@ import java.util.List;
 
 import team.monroe.org.takeaway.ActivityDashboard;
 import team.monroe.org.takeaway.R;
+import team.monroe.org.takeaway.manage.CloudConnectionManager;
+import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.view.HeaderItemViewPresenter;
 
 public class FragmentDashboardHeader extends FragmentDashboardActivity {
@@ -29,6 +35,7 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
     private ViewGroup mSecondaryHeader;
     private AppearanceController ac_secondaryPanel;
     private boolean mSecondaryHeaderVisible = false;
+    private ImageButton mCloudAction;
 
     @Override
     protected int getLayoutId() {
@@ -38,7 +45,12 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        getFragmentView().setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
         mSecondaryHeader = view(R.id.panel_secondary_header, ViewGroup.class);
 
         ac_secondaryPanel = animateAppearance(mSecondaryHeader, heightSlide((int) DisplayUtils.dpToPx(50, getResources()),0))
@@ -73,19 +85,57 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
                 }
             });
         }
+        mCloudAction = view(R.id.action_cloud, ImageButton.class);
 
-        view(R.id.panel_source).setOnClickListener(new View.OnClickListener() {
+        mCloudAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dashboard().showSourcePopup(v);
             }
         });
+
         dashboard().subscribeSecondaryHeaderRequest(new ActivityDashboard.OnSecondaryHeaderRequestSubscriber() {
             @Override
             public void onRequest(View secondaryHeaderContent) {
                 updateSecondaryHeader(secondaryHeaderContent);
             }
         });
+
+        updateConnectionStatus(application().getConnectionStatus());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Event.subscribeOnEvent(activity(), this, Events.CLOUD_CONNECTION_STATUS, new Closure<CloudConnectionManager.ConnectionStatus, Void>() {
+            @Override
+            public Void execute(CloudConnectionManager.ConnectionStatus status) {
+                updateConnectionStatus(status);
+                return null;
+            }
+        });
+    }
+
+    private void updateConnectionStatus(CloudConnectionManager.ConnectionStatus status) {
+        int iconResource;
+        switch (status){
+            case ONLINE:
+                iconResource = R.drawable.android_cloud;
+                break;
+            case OFFLINE:
+                iconResource = R.drawable.android_cloud_off;
+                break;
+            default:
+                iconResource = R.drawable.android_cloud_not_defined;
+                break;
+        }
+        mCloudAction.setImageResource(iconResource);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Event.unSubscribeFromEvents(activity(), this);
     }
 
     public void select(int position) {
