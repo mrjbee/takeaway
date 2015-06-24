@@ -24,6 +24,8 @@ public class FileOperationException extends Exception{
 
         public static ErrorCode from(CloudManager.Status status) {
             switch (status){
+                case BAD_CONNECTION:
+                    return BAD_CONNECTION;
                 case NO_ROUTE_TO_HOST:
                     return NO_ROUTE_TO_HOST;
                 case BAD_URL:

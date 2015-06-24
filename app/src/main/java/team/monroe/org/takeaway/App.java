@@ -3,7 +3,6 @@ package team.monroe.org.takeaway;
 import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.data.PersistRangeDataProvider;
-import org.monroe.team.android.box.data.RefreshableCachedData;
 import org.monroe.team.android.box.utils.AndroidLogImplementation;
 import org.monroe.team.corebox.log.L;
 
@@ -11,14 +10,11 @@ import java.util.List;
 
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.presentations.FilePointer;
-import team.monroe.org.takeaway.presentations.Folder;
-import team.monroe.org.takeaway.presentations.FolderContent;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 import team.monroe.org.takeaway.uc.CheckSourceConnection;
 import team.monroe.org.takeaway.uc.GetCloudSources;
 import team.monroe.org.takeaway.uc.GetFileContent;
-import team.monroe.org.takeaway.uc.GetFolderContent;
 
 public class App extends ApplicationSupport<AppModel> {
 
