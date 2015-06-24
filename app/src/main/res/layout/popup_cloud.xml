@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="300dp"
+    android:layout_height="150dp"
+    android:background="@drawable/popup_white">
+
+    <LinearLayout
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:layout_width="fill_parent"
+        android:paddingTop="20dp"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/action_setup"
+            android:layout_gravity="center_vertical"
+            style="@style/Button.Round.Action"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:padding="5dp"
+            android:src="@drawable/android_edit"/>
+        <TextView
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            style="@style/Text.Body"
+            android:text="Kodi 1.0.1"/>
+        <TextView
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="Offline"
+            style="@style/Text.Body.Optional"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        style="@style/Panel.Separator"
+        android:layout_marginBottom="15dp"
+        />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="5dp"
+        >
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            style="@style/Button.Rect.Action"
+            android:text=""
+            />
+        <ImageView
+            android:layout_marginLeft="20dp"
+            android:id="@+id/image_download_manager"
+            android:layout_centerVertical="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/android_cloud_download"
+            />
+        <TextView
+            android:id="@+id/text_caption_download_manager"
+            android:layout_toRightOf="@+id/image_download_manager"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            style="@style/Text.Body"
+            android:text="Download Manager"
+            />
+    </RelativeLayout>
+</LinearLayout>

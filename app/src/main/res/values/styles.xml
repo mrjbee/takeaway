@@ -1,6 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
+    <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar"/>
+
+    <style name="Panel.Separator" parent="AppTheme">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">#7BD1D1D1</item>
+        <item name="android:orientation">vertical</item>
     </style>
 
     <style name="Panel.Main" parent="AppTheme">
@@ -26,7 +32,7 @@
     </style>
 
     <style name="Text.Body" parent="AppTheme">
-        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif-condensed</item>
+        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif</item>
         <item name="android:textColor">@color/text.dark</item>
         <item name="android:textSize">16sp</item>
         <item name="android:shadowDy">-1</item>
@@ -34,7 +40,6 @@
         <item name="android:shadowRadius">1</item>
         <item name="android:shadowColor">@color/text.dark.outer.glow</item>
     </style>
-
 
     <style name="Text.Body.Light" parent="Text.Body">
         <item name="android:textColor">@color/text.light</item>
@@ -50,6 +55,10 @@
     <style name="Text.Body.Optional" parent="Text.Body">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text.dark.lighter</item>
+    </style>
+
+    <style name="Text.Body.Caption" parent="Text.Body">
+        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="Text.Prompt" parent="AppTheme">
@@ -96,7 +105,7 @@
     <color name="text.light">#fff8f8f8</color>
     <color name="text.light.shadow">#66000000</color>
     <color name="text.light.darken">#83F8F8F8</color>
-    <color name="text.dark">#555555</color>
+    <color name="text.dark">#ff5d5d5d</color>
     <color name="text.dark.lighter">#ff9d9d9d</color>
     <color name="text.dark.outer.glow">#fff</color>
     <color name="highlight">#ee002d</color>

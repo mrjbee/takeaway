@@ -6,10 +6,8 @@
 
     <LinearLayout
         android:id="@+id/separator"
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="#7BD1D1D1"
-        android:orientation="vertical" />
+        style="@style/Panel.Separator"
+        />
 
     <LinearLayout
         android:layout_marginTop="5dp"

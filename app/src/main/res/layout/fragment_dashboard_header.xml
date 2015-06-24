@@ -15,7 +15,7 @@
 
         <LinearLayout
             android:layout_marginLeft="20dp"
-            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
             android:id="@+id/panel_header_items"
             android:paddingBottom="4dp"
             android:layout_width="wrap_content"
@@ -38,19 +38,31 @@
 
         <RelativeLayout
             android:id="@+id/panel_source"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="10dp"
-            android:layout_alignParentRight="true"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/action_more"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             >
             <ImageButton
                 android:id="@+id/action_cloud"
-                android:layout_height="fill_parent"
-                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_width="40dp"
                 style="@style/Button.Round.Action"
+                android:padding="5dp"
                 android:src="@drawable/android_cloud_off"/>
         </RelativeLayout>
+
+        <ImageButton
+            android:layout_marginRight="10dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:id="@+id/action_more"
+            android:layout_height="40dp"
+            android:layout_width="40dp"
+            style="@style/Button.Round.Action"
+            android:padding="5dp"
+            android:src="@drawable/android_more"/>
+
     </RelativeLayout>
 
     <LinearLayout
