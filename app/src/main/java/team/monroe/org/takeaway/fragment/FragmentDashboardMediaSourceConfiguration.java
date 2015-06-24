@@ -18,7 +18,7 @@ public class FragmentDashboardMediaSourceConfiguration extends FragmentDashboard
         view(R.id.action_configure).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dashboard().requestConfigurationActivity();
+                dashboard().requestConfigurationActivity(true);
             }
         });
     }

@@ -44,12 +44,13 @@
             android:layout_height="40dp"
             >
             <ImageButton
+                android:layout_centerVertical="true"
                 android:id="@+id/action_cloud"
                 android:layout_height="40dp"
                 android:layout_width="40dp"
+                android:padding="7dp"
                 style="@style/Button.Round.Action"
-                android:padding="5dp"
-                android:src="@drawable/android_cloud_off"/>
+                android:src="@drawable/android_cloud"/>
         </RelativeLayout>
 
         <ImageButton

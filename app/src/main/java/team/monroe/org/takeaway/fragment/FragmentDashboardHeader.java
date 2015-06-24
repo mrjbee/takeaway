@@ -90,7 +90,7 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
         mCloudAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dashboard().showSourcePopup(v);
+                dashboard().showDownloads();
             }
         });
 
@@ -120,13 +120,13 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
         int iconResource;
         switch (status){
             case ONLINE:
-                iconResource = R.drawable.android_cloud_not_defined;
+                iconResource = R.drawable.android_cloud;
                 break;
             case OFFLINE:
                 iconResource = R.drawable.android_cloud_off;
                 break;
             default:
-                iconResource = R.drawable.android_cloud;
+                iconResource = R.drawable.android_cloud_not_defined;
                 break;
         }
         mCloudAction.setImageResource(iconResource);

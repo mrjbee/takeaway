@@ -75,4 +75,10 @@ public class App extends ApplicationSupport<AppModel> {
     public CloudConnectionManager.ConnectionStatus getConnectionStatus() {
         return model().usingService(CloudConnectionManager.class).getStatus();
     }
+
+
+    public String getCloudName() {
+        String version = model().usingService(CloudConfigurationManager.class).getProperty("version");
+        return "Kodi "+ (version == null?"":version);
+    }
 }
