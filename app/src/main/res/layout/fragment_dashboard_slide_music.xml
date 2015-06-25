@@ -4,6 +4,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <RelativeLayout
+        android:visibility="visible"
+        android:id="@+id/panel_error"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="60dp"
+        android:padding="20dp">
+
+        <ImageView
+            android:layout_marginBottom="10dp"
+            android:layout_above="@+id/text_error_caption"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/android_error"/>
+
+        <TextView
+            android:id="@+id/text_error_caption"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Upps, something goes wrong"
+            style="@style/Text.Secondary"/>
+
+        <TextView
+            android:id="@+id/text_error_description"
+            android:layout_below="@+id/text_error_caption"
+            android:layout_alignLeft="@+id/text_error_caption"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="No Connection To Host"
+            android:singleLine="false"
+            style="@style/Text.Secondary.Description"/>
+        <Button
+            android:id="@+id/action_refresh"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/text_error_description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Try Again"
+            style="@style/Button.Rect.Action"/>
+    </RelativeLayout>
+
     <RelativeLayout
         android:visibility="gone"
         android:id="@+id/panel_no_items"
@@ -17,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="Upps, seems nothing here"
-            style="@style/Text.Prompt.No.Item"/>
+            style="@style/Text.Prompt.Secondary"/>
 
     </RelativeLayout>
 

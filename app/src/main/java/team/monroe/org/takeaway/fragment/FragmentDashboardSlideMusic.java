@@ -16,6 +16,8 @@ import java.util.List;
 
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
+import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
+import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Source;
 
@@ -37,6 +39,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     private ListView mSourcesList;
     private GenericListViewAdapter<Source, GetViewImplementation.ViewHolder<Source>> mSourceListAdapter;
     private View mHeaderFilesView;
+    private View mErrorPanel;
 
     @Override
     protected int getLayoutId() {
@@ -62,7 +65,18 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mNoItemsPanel = view(R.id.panel_no_items);
         mItemsPanel = view(R.id.panel_items);
         mSourcePanel = view(R.id.panel_sources);
+        mErrorPanel = view(R.id.panel_error);
 
+        view(R.id.action_refresh).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mFileStack.isEmpty()){
+                    fetch_sources(true);
+                }else {
+                    fetch_folder();
+                }
+            }
+        });
         visibility_all(View.GONE);
 
         mFileList = view_list(R.id.list_items);
@@ -137,6 +151,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mNoItemsPanel.setVisibility(visibility);
         mItemsPanel.setVisibility(visibility);
         mSourcePanel.setVisibility(visibility);
+        mErrorPanel.setVisibility(visibility);
     }
 
     @Override
@@ -177,10 +192,9 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
     private void fetch_folder() {
         show_loading();
-        mFolderData.fetch(true, activity().observe_data(new ActivitySupport.OnValue<List<FilePointer>>() {
+        mFolderData.fetch(true, new Data.FetchObserver<List<FilePointer>>() {
             @Override
-            public void action(List<FilePointer> filePointers) {
-
+            public void onFetch(List<FilePointer> filePointers) {
                 FilePointer filePointer = mFileStack.get(0);
                 updateHeader(filePointer.name);
 
@@ -194,7 +208,30 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                     mItemsPanel.setVisibility(View.VISIBLE);
                 }
             }
-        }) );
+
+            @Override
+            public void onError(Data.FetchError fetchError) {
+                handle_fetchError(fetchError);
+            }
+        });
+    }
+
+    private void handle_fetchError(Data.FetchError fetchError) {
+        if (fetchError instanceof Data.ExceptionFetchError){
+            Throwable exception = ((Data.ExceptionFetchError) fetchError).cause;
+            FileOperationException foe = ApplicationException.get(exception, FileOperationException.class);
+            if (foe != null){
+                showErrorMessage(foe.errorCode.toHumanString(getResources()), foe.extraDescription );
+                return;
+            }
+        }
+        showErrorMessage("Completely unexpected error", fetchError.message());
+    }
+
+    private void showErrorMessage(String description, String extraDescription) {
+        visibility_all(View.GONE);
+        view_text(R.id.text_error_description).setText(extraDescription == null ? description: description+" ["+extraDescription+"] ");
+        mErrorPanel.setVisibility(View.VISIBLE);
     }
 
     private void updateHeader(String title) {
@@ -224,9 +261,10 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         if (andShow) {
             show_loading();
         }
-        application().data_sources.fetch(true, activity().observe_data(new ActivitySupport.OnValue<List<Source>>() {
+
+        application().data_sources.fetch(true, new Data.FetchObserver<List<Source>>() {
             @Override
-            public void action(List<Source> sources) {
+            public void onFetch(List<Source> sources) {
                 mSources = sources;
                 if (andShow) {
                     visibility_all(View.GONE);
@@ -246,7 +284,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                     }
                 }
             }
-        }));
+
+            @Override
+            public void onError(Data.FetchError fetchError) {
+                if (andShow){
+                    handle_fetchError(fetchError);
+                }
+            }
+        });
     }
 
     @Override
