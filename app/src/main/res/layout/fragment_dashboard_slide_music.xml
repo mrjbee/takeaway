@@ -14,12 +14,13 @@
         android:padding="20dp">
 
         <ImageView
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:layout_above="@+id/text_error_caption"
             android:layout_centerHorizontal="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/android_error"/>
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/android_error_big"/>
 
         <TextView
             android:id="@+id/text_error_caption"
@@ -40,7 +41,7 @@
             style="@style/Text.Secondary.Description"/>
         <Button
             android:id="@+id/action_refresh"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:layout_below="@+id/text_error_description"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

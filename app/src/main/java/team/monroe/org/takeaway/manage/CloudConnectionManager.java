@@ -43,7 +43,7 @@ public class CloudConnectionManager {
         }
     }
 
-    private void checkAndSchedule() {
+    private synchronized void checkAndSchedule() {
         CloudConfigurationManager.Configuration configuration = model.usingService(CloudConfigurationManager.class).get();
         if (configuration == null){
             updateStatus(ConnectionStatus.NOT_CONFIGURED);
@@ -51,6 +51,7 @@ public class CloudConnectionManager {
             SourceConnectionStatus mAnswer = model.execute(CheckCloudConnection.class, configuration);
             updateStatusBySourceConnection(mAnswer, true);
         }
+        if (mTimer == null) return;
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
