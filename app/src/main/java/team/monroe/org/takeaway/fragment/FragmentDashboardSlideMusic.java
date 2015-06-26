@@ -3,6 +3,7 @@ package team.monroe.org.takeaway.fragment;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Source;
+import team.monroe.org.takeaway.view.WarningViewPresenter;
 
 public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  implements ContractBackButton{
 
@@ -41,7 +43,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     private ListView mSourcesList;
     private GenericListViewAdapter<Source, GetViewImplementation.ViewHolder<Source>> mSourceListAdapter;
     private View mHeaderFilesView;
-    private View mErrorPanel;
+    private CheckBox mHeaderFilesOfflineModeCheck;
+    private WarningViewPresenter mWarningPresenter;
 
     @Override
     protected int getLayoutId() {
@@ -62,21 +65,19 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         }
 
         mHeaderFilesView = activity().getLayoutInflater().inflate(R.layout.panel_header_files, null);
-
-        mLoadingPanel = view(R.id.panel_loading);
-        mItemsPanel = view(R.id.panel_items);
-        mSourcePanel = view(R.id.panel_sources);
-        mErrorPanel = view(R.id.panel_error);
-
-        view_check(R.id.check_offline_only_error).setChecked(application().isOfflineModeEnabled());
-        view_check(R.id.check_offline_only_error).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mHeaderFilesOfflineModeCheck = (CheckBox) mHeaderFilesView.findViewById(R.id.check_offline);
+        mHeaderFilesOfflineModeCheck.setChecked(application().isOfflineModeEnabled());
+        mHeaderFilesOfflineModeCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 application().offlineMode(isChecked);
             }
         });
 
-        view(R.id.action_refresh).setOnClickListener(new View.OnClickListener() {
+        mLoadingPanel = view(R.id.panel_loading);
+        mItemsPanel = view(R.id.panel_items);
+        mSourcePanel = view(R.id.panel_sources);
+        mWarningPresenter = new WarningViewPresenter(view(R.id.panel_error), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mFileStack.isEmpty()){
@@ -84,6 +85,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 }else {
                     fetch_folder();
                 }
+            }
+        });
+
+        view_check(R.id.check_offline_only_error).setChecked(application().isOfflineModeEnabled());
+        view_check(R.id.check_offline_only_error).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                application().offlineMode(isChecked);
             }
         });
         visibility_all(View.GONE);
@@ -159,7 +168,10 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mLoadingPanel.setVisibility(visibility);
         mItemsPanel.setVisibility(visibility);
         mSourcePanel.setVisibility(visibility);
-        mErrorPanel.setVisibility(visibility);
+        if (visibility != View.GONE){
+            throw new IllegalStateException();
+        }
+        mWarningPresenter.hide();
     }
 
     @Override
@@ -185,6 +197,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             @Override
             public Void execute(Boolean arg) {
                 view_check(R.id.check_offline_only_error).setChecked(arg);
+                mHeaderFilesOfflineModeCheck.setChecked(arg);
                 return null;
             }
         });
@@ -209,6 +222,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     private void fetch_folder() {
         show_loading();
         final  Data<List<FilePointer>> data = mFolderData;
+        if (mFolderData == null) return;
         mFolderData.fetch(true, new Data.FetchObserver<List<FilePointer>>() {
             @Override
             public void onFetch(List<FilePointer> filePointers) {
@@ -217,7 +231,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
                 visibility_all(View.GONE);
                 if (filePointers.isEmpty()){
-                    showWarningPanel("Try to switch offline mode", null, "Sorry, but nothing here");
+                    warning_asNoItems("Try to switch offline mode");
                 }else {
                     mFolderAdapter.clear();
                     mFolderAdapter.addAll(filePointers);
@@ -239,18 +253,23 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             Throwable exception = ((Data.ExceptionFetchError) fetchError).cause;
             FileOperationException foe = ApplicationException.get(exception, FileOperationException.class);
             if (foe != null){
-                showWarningPanel(foe.errorCode.toHumanString(getResources()), foe.extraDescription, "Uppps, something goes wrong !");
+                warning_asError(foe.errorCode.toHumanString(getResources()), foe.extraDescription);
                 return;
             }
         }
-        showWarningPanel("Completely unexpected error", fetchError.message(), "Uppps, something goes wrong !");
+        warning_asError("Completely unexpected error", fetchError.message());
     }
 
-    private void showWarningPanel(String description, String extraDescription, String caption) {
+    private void warning_asError(String description, String extraDescription) {
         visibility_all(View.GONE);
-        view_text(R.id.text_error_description).setText(extraDescription == null ? description: description+" ["+extraDescription+"] ");
-        mErrorPanel.setVisibility(View.VISIBLE);
-        view_text(R.id.text_error_caption).setText(caption);
+        mWarningPresenter.updateDetails(WarningViewPresenter.WarningType.ERROR, description, extraDescription);
+        mWarningPresenter.show();
+    }
+
+    private void warning_asNoItems(String description) {
+        visibility_all(View.GONE);
+        mWarningPresenter.updateDetails(WarningViewPresenter.WarningType.NO_ITEMS, description, null);
+        mWarningPresenter.show();
     }
 
     private void updateHeader(String title) {
@@ -288,7 +307,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 if (andShow) {
                     visibility_all(View.GONE);
                     if (sources.isEmpty()){
-                        showWarningPanel("Try to switch offline mode", null, "Sorry, but nothing here");
+                        warning_asNoItems("Try to switch offline mode");
                     }else {
                         if (sources.size()==1){
                             FilePointer filePointer = sources.get(0).asFilePointer();
