@@ -7,40 +7,54 @@
     android:paddingRight="10dp"
     >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/panel_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/panel_left_right_shadow"
         android:orientation="vertical"
         >
+
+        <ImageView
+            android:layout_marginLeft="10dp"
+            android:id="@+id/item_image"
+            android:layout_centerVertical="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:alpha="0.9"
+            android:src="@drawable/android_music_lib_lightgray"
+            />
+
         <LinearLayout
             android:id="@+id/separator"
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:background="#7BD1D1D1"
             android:orientation="vertical" />
+
         <TextView
             android:id="@+id/item_caption"
-            android:paddingTop="15dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:layout_toRightOf="@+id/item_image"
+            android:layout_below="@+id/separator"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Caption"
             style="@style/Text.Body"
             />
+
         <TextView
             android:id="@+id/item_description"
-            android:paddingTop="1dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="15dp"
+            android:layout_below="@+id/item_caption"
+            android:layout_alignLeft="@+id/item_caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="File"
+            android:paddingBottom="15dp"
             style="@style/Text.Body.Optional"
             />
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

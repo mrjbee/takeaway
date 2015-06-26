@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -108,8 +109,10 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 return new GetViewImplementation.ViewHolder<FilePointer>() {
 
                     TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
+                    TextView description = (TextView) convertView.findViewById(R.id.item_description);
                     View separator = convertView.findViewById(R.id.separator);
                     View background = convertView.findViewById(R.id.panel_content);
+                    ImageView image = (ImageView) convertView.findViewById(R.id.item_image);
 
                     @Override
                     public void update(FilePointer filePointer, int position) {
@@ -119,6 +122,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                         }else if (position == mFolderAdapter.getCount()-1){
                             backgroundResource = R.drawable.panel_round_bottom;
                         }
+                        if (filePointer.type == FilePointer.Type.FILE){
+                            description.setText("Song");
+                            image.setImageResource(R.drawable.android_note_lightgray);
+                        }else {
+                            description.setText("Music Collection");
+                            image.setImageResource(R.drawable.android_music_lib_lightgray);
+                        }
+
                         background.setBackgroundResource(backgroundResource);
                         separator.setVisibility(position == 0? View.GONE : View.VISIBLE);
                         caption.setText(filePointer.name);
