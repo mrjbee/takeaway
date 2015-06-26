@@ -1,5 +1,6 @@
 package team.monroe.org.takeaway.uc;
 
+import org.monroe.team.android.box.services.SettingManager;
 import org.monroe.team.corebox.services.ServiceRegistry;
 import org.monroe.team.corebox.uc.UserCaseSupport;
 
@@ -8,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import team.monroe.org.takeaway.manage.FileProvider;
+import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
@@ -20,6 +22,13 @@ public class GetFileContent extends UserCaseSupport<FilePointer, List<FilePointe
 
     @Override
     protected List<FilePointer> executeImpl(FilePointer request) {
+
+        Boolean offlineMode = using(SettingManager.class).get(Settings.MODE_OFFLINE);
+        if (Boolean.TRUE.equals(offlineMode)){
+            //TODO: Implement offline fetching
+            return Collections.emptyList();
+        }
+
         FileProvider fileProvider = using(FileProvider.class);
         try {
             List<FilePointer> answer = fileProvider.getNestedFiles(request);

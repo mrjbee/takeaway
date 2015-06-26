@@ -3,19 +3,22 @@ package team.monroe.org.takeaway.fragment;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.android.box.data.Data;
+import org.monroe.team.android.box.event.Event;
+import org.monroe.team.corebox.utils.Closure;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
+import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
@@ -24,7 +27,6 @@ import team.monroe.org.takeaway.presentations.Source;
 public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  implements ContractBackButton{
 
     private View mLoadingPanel;
-    private View mNoItemsPanel;
     private View mItemsPanel;
     private View mSourcePanel;
 
@@ -62,10 +64,17 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mHeaderFilesView = activity().getLayoutInflater().inflate(R.layout.panel_header_files, null);
 
         mLoadingPanel = view(R.id.panel_loading);
-        mNoItemsPanel = view(R.id.panel_no_items);
         mItemsPanel = view(R.id.panel_items);
         mSourcePanel = view(R.id.panel_sources);
         mErrorPanel = view(R.id.panel_error);
+
+        view_check(R.id.check_offline_only_error).setChecked(application().isOfflineModeEnabled());
+        view_check(R.id.check_offline_only_error).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                application().offlineMode(isChecked);
+            }
+        });
 
         view(R.id.action_refresh).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +157,6 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
     private void visibility_all(int visibility) {
         mLoadingPanel.setVisibility(visibility);
-        mNoItemsPanel.setVisibility(visibility);
         mItemsPanel.setVisibility(visibility);
         mSourcePanel.setVisibility(visibility);
         mErrorPanel.setVisibility(visibility);
@@ -172,6 +180,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         }else{
             update_folder();
         }
+
+        Event.subscribeOnEvent(activity(), this, Events.OFFLINE_MODE_CHANGED, new Closure<Boolean, Void>() {
+            @Override
+            public Void execute(Boolean arg) {
+                view_check(R.id.check_offline_only_error).setChecked(arg);
+                return null;
+            }
+        });
     }
 
     private void update_folder() {
@@ -192,6 +208,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
     private void fetch_folder() {
         show_loading();
+        final  Data<List<FilePointer>> data = mFolderData;
         mFolderData.fetch(true, new Data.FetchObserver<List<FilePointer>>() {
             @Override
             public void onFetch(List<FilePointer> filePointers) {
@@ -200,7 +217,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
                 visibility_all(View.GONE);
                 if (filePointers.isEmpty()){
-                    mNoItemsPanel.setVisibility(View.VISIBLE);
+                    showWarningPanel("Try to switch offline mode", null, "Sorry, but nothing here");
                 }else {
                     mFolderAdapter.clear();
                     mFolderAdapter.addAll(filePointers);
@@ -211,27 +228,29 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
             @Override
             public void onError(Data.FetchError fetchError) {
-                handle_fetchError(fetchError);
+                handle_fetchError(fetchError, data);
             }
         });
     }
 
-    private void handle_fetchError(Data.FetchError fetchError) {
+    private void handle_fetchError(Data.FetchError fetchError, Data<List<FilePointer>> data) {
+        if (data != null && mFolderData != data) return;
         if (fetchError instanceof Data.ExceptionFetchError){
             Throwable exception = ((Data.ExceptionFetchError) fetchError).cause;
             FileOperationException foe = ApplicationException.get(exception, FileOperationException.class);
             if (foe != null){
-                showErrorMessage(foe.errorCode.toHumanString(getResources()), foe.extraDescription );
+                showWarningPanel(foe.errorCode.toHumanString(getResources()), foe.extraDescription, "Uppps, something goes wrong !");
                 return;
             }
         }
-        showErrorMessage("Completely unexpected error", fetchError.message());
+        showWarningPanel("Completely unexpected error", fetchError.message(), "Uppps, something goes wrong !");
     }
 
-    private void showErrorMessage(String description, String extraDescription) {
+    private void showWarningPanel(String description, String extraDescription, String caption) {
         visibility_all(View.GONE);
         view_text(R.id.text_error_description).setText(extraDescription == null ? description: description+" ["+extraDescription+"] ");
         mErrorPanel.setVisibility(View.VISIBLE);
+        view_text(R.id.text_error_caption).setText(caption);
     }
 
     private void updateHeader(String title) {
@@ -269,7 +288,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 if (andShow) {
                     visibility_all(View.GONE);
                     if (sources.isEmpty()){
-                        mNoItemsPanel.setVisibility(View.VISIBLE);
+                        showWarningPanel("Try to switch offline mode", null, "Sorry, but nothing here");
                     }else {
                         if (sources.size()==1){
                             FilePointer filePointer = sources.get(0).asFilePointer();
@@ -288,7 +307,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             @Override
             public void onError(Data.FetchError fetchError) {
                 if (andShow){
-                    handle_fetchError(fetchError);
+                    handle_fetchError(fetchError , null);
                 }
             }
         });
@@ -299,6 +318,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         super.onStop();
         deinit_folder_data();
         application().data_sources.removeDataChangeObserver(mSourcesDataListener);
+        Event.unSubscribeFromEvents(activity(), this);
     }
 
     private void deinit_folder_data() {
@@ -307,9 +327,6 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             mFolderData = null;
         }
     }
-
-
-
 
 
     @Override

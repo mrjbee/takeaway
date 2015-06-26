@@ -73,7 +73,7 @@
     </style>
 
     <style name="Text.Prompt.Secondary" parent="Text.Prompt">
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">25sp</item>
         <item name="android:textStyle">normal</item>
     </style>
 
@@ -112,7 +112,7 @@
     <color name="text.light.darken">#83F8F8F8</color>
     <color name="text.dark">#ff5d5d5d</color>
     <color name="text.dark.lighter">#ff9d9d9d</color>
-    <color name="text.dark.outer.glow">#fff</color>
+    <color name="text.dark.outer.glow">#b9ffffff</color>
     <color name="highlight">#ee002d</color>
     <color name="highlight2">#f01f37</color>
     <color name="transperent">#00FFFFFF</color>

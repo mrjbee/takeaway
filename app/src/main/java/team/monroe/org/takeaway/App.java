@@ -3,6 +3,8 @@ package team.monroe.org.takeaway;
 import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.data.PersistRangeDataProvider;
+import org.monroe.team.android.box.event.Event;
+import org.monroe.team.android.box.services.SettingManager;
 import org.monroe.team.android.box.utils.AndroidLogImplementation;
 import org.monroe.team.corebox.log.L;
 
@@ -10,6 +12,8 @@ import java.util.List;
 
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudConnectionManager;
+import team.monroe.org.takeaway.manage.Events;
+import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
@@ -80,5 +84,23 @@ public class App extends ApplicationSupport<AppModel> {
     public String getCloudName() {
         String version = model().usingService(CloudConfigurationManager.class).getProperty("version");
         return "Kodi "+ (version == null?"":version);
+    }
+
+    public void offlineMode(boolean enabled) {
+
+        boolean wasValue = isOfflineModeEnabled();
+
+        if (wasValue == enabled){
+            return;
+        }
+
+        model().usingService(SettingManager.class).set(Settings.MODE_OFFLINE, enabled);
+        Event.send(this, Events.OFFLINE_MODE_CHANGED, enabled);
+        data_sources.invalidate();
+        data_range_folder.invalidateAll();
+    }
+
+    public boolean isOfflineModeEnabled() {
+        return model().usingService(SettingManager.class).get(Settings.MODE_OFFLINE);
     }
 }

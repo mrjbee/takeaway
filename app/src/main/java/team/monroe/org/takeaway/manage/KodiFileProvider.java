@@ -58,7 +58,7 @@ public class KodiFileProvider implements FileProvider {
 
         CloudManager.Answer<List<CloudManager.RemoteFile>> remoteSubFiles = cloudManager.getFolderContent(configuration, sourceRemoteFile.path + filePointer.relativePath);
         if (!remoteSubFiles.isSuccess()){
-            throw new FileOperationException(null, FileOperationException.ErrorCode.from(files.status), files.errorDescription);
+            throw new FileOperationException(null, FileOperationException.ErrorCode.from(remoteSubFiles.status), remoteSubFiles.errorDescription);
         }
         List<FilePointer> answer = new ArrayList<>();
         for (CloudManager.RemoteFile file : remoteSubFiles.body) {
