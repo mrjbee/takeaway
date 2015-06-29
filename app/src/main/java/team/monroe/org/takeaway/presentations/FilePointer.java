@@ -16,6 +16,10 @@ public class FilePointer implements Serializable {
         this.type = type;
     }
 
+    public String getNormalizedTitle(){
+       return name.replace(".mp3","").replace("_", " ").replace("-", " ").replaceAll(" +"," ");
+    }
+
     public static enum Type {
         FOLDER, FILE
     }

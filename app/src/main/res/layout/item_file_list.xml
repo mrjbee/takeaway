@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -15,13 +15,15 @@
         android:orientation="vertical"
         >
 
-        <ImageView
+        <ImageButton
             android:layout_marginLeft="10dp"
             android:id="@+id/item_image"
             android:layout_centerVertical="true"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:alpha="0.9"
+            android:padding="3dp"
+            android:focusable="false"
+            style="@style/Button.Round.Action"
             android:src="@drawable/android_music_lib_lightgray"
             />
 
@@ -42,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Caption"
-            style="@style/Text.Body"
+            style="@style/Text.Body.Smaller"
             />
 
         <TextView
@@ -57,4 +59,4 @@
             />
     </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>

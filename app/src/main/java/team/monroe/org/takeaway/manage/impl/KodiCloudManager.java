@@ -99,10 +99,13 @@ public class KodiCloudManager implements CloudManager {
                 List<RemoteFile> answer = new ArrayList<RemoteFile>();
                 for (int i=0;i<sources.size();i++){
                     Json.JsonObject source = sources.asObject(i);
-                    answer.add(new RemoteFile(
-                            source.asString("file"),
-                            source.asString("label"),
-                            true));
+                    String path = source.asString("file");
+                    if (!path.toLowerCase().startsWith("addons:")){
+                        answer.add(new RemoteFile(
+                                source.asString("file"),
+                                source.asString("label"),
+                                true));
+                    }
                 }
                 return answer;
             }

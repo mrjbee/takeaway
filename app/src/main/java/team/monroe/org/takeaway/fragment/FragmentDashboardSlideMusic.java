@@ -1,16 +1,22 @@
 package team.monroe.org.takeaway.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
+import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
+
+import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
+import org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.event.Event;
 import org.monroe.team.corebox.utils.Closure;
@@ -112,32 +118,148 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                     TextView description = (TextView) convertView.findViewById(R.id.item_description);
                     View separator = convertView.findViewById(R.id.separator);
                     View background = convertView.findViewById(R.id.panel_content);
-                    ImageView image = (ImageView) convertView.findViewById(R.id.item_image);
+                    ImageButton image = (ImageButton) convertView.findViewById(R.id.item_image);
+                    AppearanceController mPlayAnimator = animateAppearance(image, scale(1f,0f))
+                            .showAnimation(duration_constant(200), interpreter_overshot())
+                            .hideAnimation(duration_constant(200), interpreter_accelerate(0.5f))
+                            .build();
+
+                    FilePointer mFilePointer;
+
+                    public boolean mMainActionActive;
+                    public boolean mMainLongActionActive;
 
                     @Override
-                    public void update(FilePointer filePointer, int position) {
+                    public void update(final FilePointer filePointer, int position) {
+                        mMainActionActive = true;
+                        mMainLongActionActive = true;
+
+                        mPlayAnimator.showWithoutAnimation();
+                        mFilePointer = filePointer;
                         int backgroundResource = R.drawable.panel_left_right_shadow;
                         if (position == 0){
                             backgroundResource = R.drawable.panel_round_top;
                         }else if (position == mFolderAdapter.getCount()-1){
                             backgroundResource = R.drawable.panel_round_bottom;
                         }
+
+                        updateIcon(filePointer);
+
                         if (filePointer.type == FilePointer.Type.FILE){
                             description.setText("Song");
-                            image.setImageResource(R.drawable.android_note_lightgray);
                         }else {
                             description.setText("Music Collection");
-                            image.setImageResource(R.drawable.android_music_lib_lightgray);
                         }
-
+                        image.setFocusable(false);
                         background.setBackgroundResource(backgroundResource);
                         separator.setVisibility(position == 0? View.GONE : View.VISIBLE);
-                        caption.setText(filePointer.name);
+                        caption.setText(filePointer.getNormalizedTitle());
+                        image.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (!mMainActionActive) return;
+                                mMainActionActive = false;
+                                SceneDirector
+                                        .scenario()
+                                            .hide(mPlayAnimator)
+                                            .then()
+                                                .action(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        image.setImageResource(R.drawable.android_play_lightgray);
+                                                    }
+                                                })
+                                                    .then()
+                                                        .show(mPlayAnimator)
+                                        .play();
+                                final FilePointer usedFilePointer = filePointer;
+                                runLastOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (usedFilePointer != mFilePointer){
+                                            return;
+                                        }
+                                        SceneDirector
+                                                .scenario()
+                                                .hide(mPlayAnimator)
+                                                .then()
+                                                .action(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        updateIcon(mFilePointer);
+                                                        mMainActionActive = true;
+                                                    }
+                                                })
+                                                .then()
+                                                .show(mPlayAnimator)
+                                                .play();
+
+                                    }
+                                },1000);
+                            }
+                        });
+
+                        image.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                if (!mMainLongActionActive) return true;
+                                mMainLongActionActive = false;
+                                Vibrator vb = (Vibrator) activity().getSystemService(Context.VIBRATOR_SERVICE);
+                                vb.vibrate(100);
+                                SceneDirector
+                                        .scenario()
+                                        .hide(mPlayAnimator)
+                                        .then()
+                                        .action(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                image.setImageResource(R.drawable.android_playlist_add);
+                                            }
+                                        })
+                                        .then()
+                                        .show(mPlayAnimator)
+                                        .play();
+                                final FilePointer usedFilePointer = filePointer;
+                                runLastOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (usedFilePointer != mFilePointer){
+                                            return;
+                                        }
+                                        SceneDirector
+                                                .scenario()
+                                                .hide(mPlayAnimator)
+                                                .then()
+                                                .action(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        updateIcon(mFilePointer);
+                                                        mMainLongActionActive = true;
+                                                    }
+                                                })
+                                                .then()
+                                                .show(mPlayAnimator)
+                                                .play();
+
+                                    }
+                                },1000);
+                            return true;
+                            }
+
+                        });
+                    }
+
+                    private void updateIcon(FilePointer filePointer) {
+                        if (filePointer.type == FilePointer.Type.FILE){
+                            image.setImageResource(R.drawable.android_note_lightgray);
+                        }else {
+                            image.setImageResource(R.drawable.android_music_lib_lightgray);
+                        }
                     }
 
                     @Override
                     public void cleanup() {
-
+                        image.setOnClickListener(null);
                     }
                 };
             }
@@ -166,6 +288,15 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             }
         }, R.layout.item_debug);
         mSourcesList.setAdapter(mSourceListAdapter);
+        mSourcesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Source source = mSourceListAdapter.getItem(position);
+                FilePointer filePointer = source.asFilePointer();
+                mFileStack.add(0,filePointer);
+                update_folder();
+            }
+        });
 
     }
 
@@ -191,7 +322,11 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mSourcesDataListener = new Data.DataChangeObserver<List<Source>>() {
             @Override
             public void onDataInvalid() {
-                fetch_sources(false);
+                if(mFileStack.isEmpty()){
+                    fetch_sources(true);
+                }else {
+                    fetch_sources(false);
+                }
             }
             @Override
             public void onData(List<Source> sources) {}
@@ -328,7 +463,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                             mSourceListAdapter.clear();
                             mSourceListAdapter.addAll(sources);
                             mSourceListAdapter.notifyDataSetChanged();
-                            mItemsPanel.setVisibility(View.VISIBLE);
+                            mSourcePanel.setVisibility(View.VISIBLE);
                         }
                     }
                 }
