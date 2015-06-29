@@ -13,8 +13,10 @@ import java.util.List;
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.Events;
+import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.presentations.FilePointer;
+import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 import team.monroe.org.takeaway.uc.CheckCloudConnection;
@@ -56,6 +58,7 @@ public class App extends ApplicationSupport<AppModel> {
                 return filePointer.source.id+":"+filePointer.relativePath;
             }
         };
+
         model().usingService(CloudConnectionManager.class).startWatcher();
     }
 
@@ -102,5 +105,17 @@ public class App extends ApplicationSupport<AppModel> {
 
     public boolean isOfflineModeEnabled() {
         return model().usingService(SettingManager.class).get(Settings.MODE_OFFLINE);
+    }
+
+    public void function_updateActivePlaylist(FilePointer filePointer, boolean append) {
+       if (!append) {
+           model().usingService(Player.class).clearAndAddToPlayList(filePointer);
+       }else {
+           model().usingService(Player.class).addToPlayList(filePointer);
+       }
+    }
+
+    public Player player(){
+        return model().usingService(Player.class);
     }
 }

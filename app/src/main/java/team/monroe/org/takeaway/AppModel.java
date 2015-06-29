@@ -12,6 +12,7 @@ import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.manage.FileProvider;
 import team.monroe.org.takeaway.manage.KodiFileProvider;
+import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.impl.KodiCloudManager;
 
 
@@ -25,6 +26,7 @@ public class AppModel extends AndroidModel {
     protected void constructor(String appName, Context context, ServiceRegistry serviceRegistry) {
         super.constructor(appName, context, serviceRegistry);
 
+        serviceRegistry.registrate(Player.class, new Player(this));
         serviceRegistry.registrate(NetworkManager.class, new NetworkManager(context));
         CloudConnectionManager cloudConnectionManager = new CloudConnectionManager(this);
         serviceRegistry.registrate(CloudConnectionManager.class, cloudConnectionManager);

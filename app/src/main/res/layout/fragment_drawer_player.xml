@@ -46,8 +46,8 @@
 
             <ImageButton
                 android:id="@+id/action_play"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:padding="3dp"
                 android:src="@drawable/android_play_round_light"
                 style="@style/Button.Round.Action"/>
@@ -100,5 +100,22 @@
                 style="@style/Text.Secondary.Description"/>
 
         </RelativeLayout>
+        <RelativeLayout
+            android:visibility="visible"
+            android:id="@+id/panel_loading"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:padding="20dp">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar"
+                android:indeterminate="true"
+                android:layout_centerInParent="true"
+                />
+
+        </RelativeLayout>
+
     </RelativeLayout>
 </RelativeLayout>

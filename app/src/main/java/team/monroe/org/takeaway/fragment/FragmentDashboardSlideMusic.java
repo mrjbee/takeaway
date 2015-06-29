@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
@@ -30,6 +31,7 @@ import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
+import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.view.WarningViewPresenter;
 
@@ -159,6 +161,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                             public void onClick(View v) {
                                 if (!mMainActionActive) return;
                                 mMainActionActive = false;
+                                final FilePointer usedFilePointer = filePointer;
+                                playList_replace(usedFilePointer);
                                 SceneDirector
                                         .scenario()
                                             .hide(mPlayAnimator)
@@ -172,7 +176,6 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                                                     .then()
                                                         .show(mPlayAnimator)
                                         .play();
-                                final FilePointer usedFilePointer = filePointer;
                                 runLastOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -206,6 +209,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                                 mMainLongActionActive = false;
                                 Vibrator vb = (Vibrator) activity().getSystemService(Context.VIBRATOR_SERVICE);
                                 vb.vibrate(100);
+                                final FilePointer usedFilePointer = filePointer;
+                                playList_add(usedFilePointer);
                                 SceneDirector
                                         .scenario()
                                         .hide(mPlayAnimator)
@@ -219,7 +224,6 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                                         .then()
                                         .show(mPlayAnimator)
                                         .play();
-                                final FilePointer usedFilePointer = filePointer;
                                 runLastOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -299,6 +303,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             }
         });
 
+    }
+
+    private void playList_add(FilePointer filePointer) {
+        application().function_updateActivePlaylist(filePointer, true);
+    }
+
+    private void playList_replace(FilePointer filePointer) {
+        application().function_updateActivePlaylist(filePointer, false);
     }
 
     @Override
