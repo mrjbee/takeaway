@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- The main content view -->
+    <RelativeLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/Panel.Main">
+
+
+        <FrameLayout
+            android:id="@+id/frag_body"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+
+
+        <FrameLayout
+            android:id="@+id/frag_header"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            />
+
+        <LinearLayout
+            android:id="@+id/layer_shadow"
+            android:background="#000000"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" />
+
+
+        <FrameLayout
+            android:id="@+id/frag_downloads"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            />
+
+    </RelativeLayout>
+
+    <!-- The navigation drawer -->
+    <fragment
+        android:id="@+id/left_drawer"
+        android:name="team.monroe.org.takeaway.fragment.FragmentDashboardPlayer"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111"
+        tools:layout="@layout/fragment_drawer_player" />
+
+
+</android.support.v4.widget.DrawerLayout>

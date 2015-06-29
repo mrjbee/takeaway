@@ -373,6 +373,9 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mFolderData.fetch(true, new Data.FetchObserver<List<FilePointer>>() {
             @Override
             public void onFetch(List<FilePointer> filePointers) {
+
+                if (!state_before(State.STOP))return;
+
                 FilePointer filePointer = mFileStack.get(0);
                 updateHeader(filePointer.name);
 
@@ -389,6 +392,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
             @Override
             public void onError(Data.FetchError fetchError) {
+                if (!state_before(State.STOP))return;
                 handle_fetchError(fetchError, data);
             }
         });
@@ -450,6 +454,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         application().data_sources.fetch(true, new Data.FetchObserver<List<Source>>() {
             @Override
             public void onFetch(List<Source> sources) {
+                if (!state_before(State.STOP))return;
                 mSources = sources;
                 if (andShow) {
                     visibility_all(View.GONE);
@@ -472,6 +477,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
             @Override
             public void onError(Data.FetchError fetchError) {
+                if (!state_before(State.STOP))return;
+
                 if (andShow){
                     handle_fetchError(fetchError , null);
                 }

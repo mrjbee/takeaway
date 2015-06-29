@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -30,11 +31,14 @@ public class ActivityDashboard extends ActivitySupport<App>{
     private View mSecondaryHeaderRequestView;
     private AppearanceController ac_downloadFragment;
     private boolean mDownloadsShown =false;
+    private DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_dasboard);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (isFirstRun(savedInstanceState)){
             if (application().isSourceConfigured()){
                 //usual look

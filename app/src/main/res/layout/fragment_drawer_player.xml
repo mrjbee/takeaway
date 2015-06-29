@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/Panel.Main">
+    <RelativeLayout
+        android:id="@+id/panel_header"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/drawer_player_header"
+        android:background="@color/highlight"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout
+            android:layout_alignParentBottom="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="5dp"
+            android:background="#ae000000"
+            >
+            <ImageButton
+                android:id="@+id/action_mode_shuffle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:src="@drawable/android_shuffle_light"
+                style="@style/Button.Round.Action"/>
+
+
+            <ImageButton
+                android:id="@+id/action_mode_repeat"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:src="@drawable/android_repeat_light"
+                style="@style/Button.Round.Action"/>
+
+            <Space
+                android:layout_weight="1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <ImageButton
+                android:id="@+id/action_play"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:padding="3dp"
+                android:src="@drawable/android_play_round_light"
+                style="@style/Button.Round.Action"/>
+        </LinearLayout>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_below="@+id/panel_header"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <ListView
+            android:id="@+id/list_items"
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:dividerHeight="0dp"
+            android:divider="@null"
+            android:listSelector="@color/transperent"
+            android:scrollbars="none"
+            />
+        <RelativeLayout
+            android:id="@+id/panel_no_items"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <ImageView
+                android:id="@+id/image_error"
+                android:layout_above="@+id/text_error_caption"
+                android:layout_centerHorizontal="true"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/android_music_queue_big"/>
+
+            <TextView
+                android:id="@+id/text_error_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Empty playlist"
+                style="@style/Text.Secondary"/>
+
+            <TextView
+                android:id="@+id/text_error_description"
+                android:layout_below="@+id/text_error_caption"
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add some songs to play"
+                android:singleLine="false"
+                style="@style/Text.Secondary.Description"/>
+
+        </RelativeLayout>
+    </RelativeLayout>
+</RelativeLayout>
