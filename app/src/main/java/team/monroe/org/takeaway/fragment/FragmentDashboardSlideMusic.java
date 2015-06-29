@@ -268,6 +268,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 FilePointer filePointer = mFolderAdapter.getItem(position - 1);
+                if (filePointer.type != FilePointer.Type.FOLDER) return;
                 mFileStack.add(0, filePointer);
                 update_folder();
             }
