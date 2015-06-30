@@ -12,16 +12,21 @@
         android:orientation="vertical"
         >
 
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/big_icon"/>
         <LinearLayout
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_alignParentBottom="true"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingBottom="5dp"
-            android:background="#ae000000"
+            android:background="#2d000000"
             >
             <ImageButton
                 android:id="@+id/action_mode_shuffle"
@@ -31,6 +36,10 @@
                 android:src="@drawable/android_shuffle_light"
                 style="@style/Button.Round.Action"/>
 
+            <Space
+                android:layout_weight="1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
             <ImageButton
                 android:id="@+id/action_mode_repeat"
@@ -38,19 +47,6 @@
                 android:layout_height="40dp"
                 android:padding="5dp"
                 android:src="@drawable/android_repeat_light"
-                style="@style/Button.Round.Action"/>
-
-            <Space
-                android:layout_weight="1"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-            <ImageButton
-                android:id="@+id/action_play"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:padding="3dp"
-                android:src="@drawable/android_play_round_light"
                 style="@style/Button.Round.Action"/>
         </LinearLayout>
     </RelativeLayout>
