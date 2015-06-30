@@ -39,7 +39,7 @@ public class Player {
     }
 
     private Playlist createEmptyPlayList() {
-        return new Playlist("No Name","no_name", new ArrayList<FilePointer>());
+        return new Playlist("Playlist","no_name", new ArrayList<FilePointer>());
     }
 
     public Playlist getPlaylist(){

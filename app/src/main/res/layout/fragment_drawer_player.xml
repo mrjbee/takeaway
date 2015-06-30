@@ -13,6 +13,7 @@
         >
 
         <LinearLayout
+            android:visibility="gone"
             android:layout_alignParentBottom="true"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -59,15 +60,17 @@
         android:layout_height="fill_parent">
         <ListView
             android:id="@+id/list_items"
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:dividerHeight="0dp"
             android:divider="@null"
             android:listSelector="@color/transperent"
-            android:scrollbars="none"
+            android:background="@color/transperent"
+            android:scrollbars="vertical"
             />
         <RelativeLayout
+            android:visibility="gone"
             android:id="@+id/panel_no_items"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
@@ -101,7 +104,7 @@
 
         </RelativeLayout>
         <RelativeLayout
-            android:visibility="visible"
+            android:visibility="gone"
             android:id="@+id/panel_loading"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

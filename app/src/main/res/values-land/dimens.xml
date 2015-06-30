@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="drawer_player_header">80dp</dimen>
+    <dimen name="drawer_player_header">50dp</dimen>
 </resources>

@@ -26,6 +26,8 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
     private View mNoItemsPanel;
     private Data.DataChangeObserver<Playlist> playlistDataChangeObserver;
     private GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> mPlaylistAdapter;
+    private TextView mPlaylistText;
+    private TextView mSongsText;
 
     @Override
     protected int getLayoutId() {
@@ -42,8 +44,13 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
             }
         });
 
+        View mSongsListHeaderView = getActivity().getLayoutInflater().inflate(R.layout.panel_player_top, null);
+        mPlaylistText = (TextView) mSongsListHeaderView.findViewById(R.id.text_playlist_title);
+        mSongsText = (TextView) mSongsListHeaderView.findViewById(R.id.text_song_count);
+
         mLoadingPanel = view(R.id.panel_loading);
         mItemList = view_list(R.id.list_items);
+        mItemList.addHeaderView(mSongsListHeaderView);
         mNoItemsPanel = view(R.id.panel_no_items);
         hide_all();
 
@@ -53,15 +60,24 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
                 return new GetViewImplementation.GenericViewHolder<FilePointer>() {
 
                     TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
+                    TextView description = (TextView) convertView.findViewById(R.id.item_description);
+                    View separator = convertView.findViewById(R.id.separator);
 
                     @Override
                     public void update(FilePointer filePointer, int position) {
+                        if (position == 0) separator.setVisibility(View.GONE);
+
                         caption.setText(filePointer.getNormalizedTitle());
+                        description.setText(filePointer.relativePath);
                     }
 
+                    @Override
+                    public void cleanup() {
+                        separator.setVisibility(View.VISIBLE);
+                    }
                 };
             }
-        }, R.layout.item_debug);
+        }, R.layout.item_playlist);
         mItemList.setAdapter(mPlaylistAdapter);
     }
 
@@ -78,7 +94,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
         playlistDataChangeObserver = new Data.DataChangeObserver<Playlist>() {
             @Override
             public void onDataInvalid() {
-                fetchPlaylist();
+                fetch_Playlist();
             }
 
             @Override
@@ -87,7 +103,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
             }
         };
         application().player().data_active_playlist.addDataChangeObserver(playlistDataChangeObserver);
-        fetchPlaylist();
+        fetch_Playlist();
     }
 
     @Override
@@ -96,7 +112,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
         application().player().data_active_playlist.removeDataChangeObserver(playlistDataChangeObserver);
     }
 
-    private void fetchPlaylist() {
+    private void fetch_Playlist() {
         hide_all();
         mLoadingPanel.setVisibility(View.VISIBLE);
         application().player().data_active_playlist.fetch(true, activity().observe_data(new ActivitySupport.OnValue<Playlist>() {
@@ -106,7 +122,10 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
                 if (playlist == null || playlist.songList.isEmpty()) {
                     mNoItemsPanel.setVisibility(View.VISIBLE);
                 } else {
-                    //TODO: add more
+
+                    mSongsText.setText(playlist.songList.size()+" songs");
+                    mPlaylistText.setText(playlist.title);
+
                     mPlaylistAdapter.clear();
                     mPlaylistAdapter.addAll(playlist.songList);
                     mPlaylistAdapter.notifyDataSetChanged();
