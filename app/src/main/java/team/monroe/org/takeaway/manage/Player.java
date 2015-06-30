@@ -15,21 +15,12 @@ import team.monroe.org.takeaway.uc.GetFileContent;
 
 public class Player {
 
-    private static final  L.Logger LOG = L.create("PLAYER.PLAYLIST");
-
     private final Model mModel;
-    private final Object mPlaylistResourceMonitor = new Object();
-
     public Data<Playlist> data_active_playlist;
-    private Playlist mCurrentPlaylist = null;
-    private Playlist mPlaylistUnderBuild = null;
-    private List<PlaylistUpdateJob> mPlaylistBuildJobList = new ArrayList<>();
-    private BackgroundTaskManager.BackgroundTask<Void> mBackgroundUpdateTask;
-
+    private final PlaylistController mPlaylistController = new PlaylistController();
 
     public Player(Model model) {
         this.mModel = model;
-        mCurrentPlaylist = createEmptyPlayList();
         data_active_playlist = new Data<Playlist>(model) {
             @Override
             protected Playlist provideData() {
@@ -38,114 +29,143 @@ public class Player {
         };
     }
 
-    private Playlist createEmptyPlayList() {
-        return new Playlist("Playlist","no_name", new ArrayList<FilePointer>());
-    }
-
     public Playlist getPlaylist(){
-        LOG.d("Playlist requested");
-        synchronized (mPlaylistResourceMonitor) {
-            if (mCurrentPlaylist != null) {
-                LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
-                return mCurrentPlaylist;
-            }
-            try {
-                LOG.d("Play list awaiting...");
-                mPlaylistResourceMonitor.wait();
-            } catch (InterruptedException e) {
-            }
-            LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
-            return mCurrentPlaylist;
-        }
+       return mPlaylistController.getPlaylist();
     }
 
-    public synchronized void clearAndAddToPlayList(FilePointer filePointer) {
-        LOG.d("New playlist requested...");
-        if (mBackgroundUpdateTask != null){
-            mBackgroundUpdateTask.cancel();
-            mBackgroundUpdateTask = null;
-        }
-        synchronized (mPlaylistResourceMonitor) {
-            mPlaylistUnderBuild = createEmptyPlayList();
-            mPlaylistBuildJobList.clear();
-            mCurrentPlaylist = null;
-            data_active_playlist.invalidate();
-        }
-        addUpdateJob(filePointer);
+    public void clearAndAddToPlayList(FilePointer filePointer) {
+        mPlaylistController.clearAndAddToPlayList(filePointer);
     }
 
 
-    public synchronized void addToPlayList(FilePointer filePointer) {
-        synchronized (mPlaylistResourceMonitor) {
-            LOG.d("Add to existing playlist requested...");
-            if (mPlaylistUnderBuild == null && mCurrentPlaylist == null) {
-                mPlaylistUnderBuild = createEmptyPlayList();
-            } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
-                mPlaylistUnderBuild = mCurrentPlaylist.duplicate();
-            }
-
-            mCurrentPlaylist = null;
-            data_active_playlist.invalidate();
-        }
-        addUpdateJob(filePointer);
+    public void addToPlayList(FilePointer filePointer) {
+        mPlaylistController.addToPlayList(filePointer);
     }
 
-    private void addUpdateJob(FilePointer filePointer) {
-        LOG.d("Start playlist creation.");
-        mPlaylistBuildJobList.add(new PlaylistUpdateJob(filePointer));
-        startNextJob();
-    }
+   private class PlaylistController{
 
-    private void startNextJob() {
-        if (mBackgroundUpdateTask == null) {
-            mBackgroundUpdateTask = mModel.usingService(BackgroundTaskManager.class).execute(mPlaylistBuildJobList.remove(0), new BackgroundTaskManager.TaskCompletionNotificationObserver<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Player.this.onUpdateTaskSuccess();
-                }
-                @Override
-                public void onFails(Exception e) {
-                    Player.this.onUpdateTaskFailed(e);
-                }
-            });
-        }
-    }
+       private final  L.Logger LOG = L.create("PLAYER.PLAYLIST");
 
-    private synchronized void onUpdateTaskFailed(Exception e) {
-        LOG.d("Playlist creation failed: %s", e.getClass().getName());
+       private final Object mPlaylistResourceMonitor = new Object();
 
-        if (e instanceof UpdateCancelException) return;
+       private Playlist mCurrentPlaylist = null;
+       private Playlist mPlaylistUnderBuild = null;
+       private List<PlaylistUpdateJob> mPlaylistBuildJobList = new ArrayList<>();
+       private BackgroundTaskManager.BackgroundTask<Void> mBackgroundUpdateTask;
 
-        mBackgroundUpdateTask = null;
-        if (mPlaylistBuildJobList.isEmpty()){
-            synchronized (mPlaylistResourceMonitor) {
-                LOG.d("Playlist [empty] created notification");
-                mCurrentPlaylist = createEmptyPlayList();
-                mBackgroundUpdateTask = null;
-                mPlaylistResourceMonitor.notifyAll();
-            }
-        }else {
-            LOG.d("Playlist creation next task ...");
-            startNextJob();
-        }
-    }
 
-    private synchronized void onUpdateTaskSuccess() {
-        LOG.d("Playlist creation finished");
-        mBackgroundUpdateTask = null;
-        if (mPlaylistBuildJobList.isEmpty()){
-            synchronized (mPlaylistResourceMonitor) {
-                LOG.d("Playlist created notification");
-                mCurrentPlaylist = mPlaylistUnderBuild;
-                mBackgroundUpdateTask = null;
-                mPlaylistResourceMonitor.notifyAll();
-            }
-        }else {
-            LOG.d("Playlist creation next task ...");
-            startNextJob();
-        }
-    }
+       public PlaylistController() {
+           mCurrentPlaylist = createEmptyPlayList();
+       }
 
+       private Playlist createEmptyPlayList() {
+           return new Playlist("Playlist","no_name", new ArrayList<FilePointer>());
+       }
+
+       public Playlist getPlaylist(){
+           LOG.d("Playlist requested");
+           synchronized (mPlaylistResourceMonitor) {
+               if (mCurrentPlaylist != null) {
+                   LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
+                   return mCurrentPlaylist;
+               }
+               try {
+                   LOG.d("Play list awaiting...");
+                   mPlaylistResourceMonitor.wait();
+               } catch (InterruptedException e) {
+               }
+               LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
+               return mCurrentPlaylist;
+           }
+       }
+
+       public synchronized void clearAndAddToPlayList(FilePointer filePointer) {
+           LOG.d("New playlist requested...");
+           if (mBackgroundUpdateTask != null){
+               mBackgroundUpdateTask.cancel();
+               mBackgroundUpdateTask = null;
+           }
+           synchronized (mPlaylistResourceMonitor) {
+               mPlaylistUnderBuild = createEmptyPlayList();
+               mPlaylistBuildJobList.clear();
+               mCurrentPlaylist = null;
+               data_active_playlist.invalidate();
+           }
+           addUpdateJob(filePointer);
+       }
+
+
+       public synchronized void addToPlayList(FilePointer filePointer) {
+           synchronized (mPlaylistResourceMonitor) {
+               LOG.d("Add to existing playlist requested...");
+               if (mPlaylistUnderBuild == null && mCurrentPlaylist == null) {
+                   mPlaylistUnderBuild = createEmptyPlayList();
+               } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
+                   mPlaylistUnderBuild = mCurrentPlaylist.duplicate();
+               }
+
+               mCurrentPlaylist = null;
+               data_active_playlist.invalidate();
+           }
+           addUpdateJob(filePointer);
+       }
+
+       private void addUpdateJob(FilePointer filePointer) {
+           LOG.d("Start playlist creation.");
+           mPlaylistBuildJobList.add(new PlaylistUpdateJob(filePointer));
+           startNextJob();
+       }
+
+       private void startNextJob() {
+           if (mBackgroundUpdateTask == null) {
+               mBackgroundUpdateTask = mModel.usingService(BackgroundTaskManager.class).execute(mPlaylistBuildJobList.remove(0), new BackgroundTaskManager.TaskCompletionNotificationObserver<Void>() {
+                   @Override
+                   public void onSuccess(Void aVoid) {
+                       Player.this.mPlaylistController.onUpdateTaskSuccess();
+                   }
+                   @Override
+                   public void onFails(Exception e) {
+                       Player.this.mPlaylistController.onUpdateTaskFailed(e);
+                   }
+               });
+           }
+       }
+
+       private synchronized void onUpdateTaskFailed(Exception e) {
+           LOG.d("Playlist creation failed: %s", e.getClass().getName());
+
+           if (e instanceof UpdateCancelException) return;
+
+           mBackgroundUpdateTask = null;
+           if (mPlaylistBuildJobList.isEmpty()){
+               synchronized (mPlaylistResourceMonitor) {
+                   LOG.d("Playlist [empty] created notification");
+                   mCurrentPlaylist = createEmptyPlayList();
+                   mBackgroundUpdateTask = null;
+                   mPlaylistResourceMonitor.notifyAll();
+               }
+           }else {
+               LOG.d("Playlist creation next task ...");
+               startNextJob();
+           }
+       }
+
+       private synchronized void onUpdateTaskSuccess() {
+           LOG.d("Playlist creation finished");
+           mBackgroundUpdateTask = null;
+           if (mPlaylistBuildJobList.isEmpty()){
+               synchronized (mPlaylistResourceMonitor) {
+                   LOG.d("Playlist created notification");
+                   mCurrentPlaylist = mPlaylistUnderBuild;
+                   mBackgroundUpdateTask = null;
+                   mPlaylistResourceMonitor.notifyAll();
+               }
+           }else {
+               LOG.d("Playlist creation next task ...");
+               startNextJob();
+           }
+       }
+   }
 
     class PlaylistUpdateJob implements Callable<Void> {
 
@@ -160,7 +180,7 @@ public class Player {
             List<FilePointer> songList = new ArrayList<>();
             explore(filePointer, songList);
             checkAndStop();
-            Player.this.mPlaylistUnderBuild.songList.addAll(songList);
+            Player.this.mPlaylistController.mPlaylistUnderBuild.songList.addAll(songList);
             return null;
         }
         private void explore(FilePointer filePointer, List<FilePointer> songList) {
@@ -183,7 +203,5 @@ public class Player {
     }
 
    class UpdateCancelException extends RuntimeException{}
-
-
 
 }
