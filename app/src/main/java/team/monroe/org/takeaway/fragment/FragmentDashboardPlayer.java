@@ -47,7 +47,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
 
         mLoadingPanel = view(R.id.panel_loading);
         mItemList = view_list(R.id.list_items);
-        mItemList.addHeaderView(mSongsListHeaderView);
+        mItemList.addHeaderView(mSongsListHeaderView, null, false);
         mNoItemsPanel = view(R.id.panel_no_items);
         hide_all();
 

@@ -20,7 +20,9 @@ import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControl
 import org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.event.Event;
+import org.monroe.team.android.box.utils.DisplayUtils;
 import org.monroe.team.corebox.utils.Closure;
+import org.monroe.team.corebox.utils.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +56,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     private View mHeaderFilesView;
     private CheckBox mHeaderFilesOfflineModeCheck;
     private WarningViewPresenter mWarningPresenter;
+    private AppearanceController mMediaHeaderContentAC;
+    private TextView mSongsView;
 
     @Override
     protected int getLayoutId() {
@@ -74,6 +78,44 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         }
 
         mHeaderFilesView = activity().getLayoutInflater().inflate(R.layout.panel_header_files, null);
+        mSongsView = (TextView) mHeaderFilesView.findViewById(R.id.text_song_count);
+
+        mMediaHeaderContentAC = combine(
+                animateAppearance(mHeaderFilesView.findViewById(R.id.panel_media_folder_content), heightSlide((int) DisplayUtils.dpToPx(100, getResources()),0))
+                .showAnimation(duration_constant(500),interpreter_overshot())
+                .hideAnimation(duration_constant(500), interpreter_accelerate(0.5f))
+                .hideAndGone(),
+
+                animateAppearance(mHeaderFilesView.findViewById(R.id.panel_media_folder_content), alpha(1f, 0f))
+                .showAnimation(duration_constant(300), interpreter_decelerate(0.8f))
+                .hideAnimation(duration_constant(200), interpreter_accelerate(0.5f))
+        );
+        mMediaHeaderContentAC.hideWithoutAnimation();
+        mHeaderFilesView.findViewById(R.id.action_folder_playlist).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<FilePointer> songFileList = getCurrentSongFiles();
+                for (int i=0; i< songFileList.size(); i++){
+                    if (i == 0){
+                        application().player().clearAndAddToPlayList(songFileList.get(i));
+                    }else {
+                        application().player().addToPlayList(songFileList.get(i));
+                    }
+                }
+
+            }
+        });
+
+        mHeaderFilesView.findViewById(R.id.action_folder_playlist_append).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<FilePointer> songFileList = getCurrentSongFiles();
+                for (int i=0; i< songFileList.size(); i++){
+                    application().player().addToPlayList(songFileList.get(i));
+                }
+            }
+        });
+
         mHeaderFilesOfflineModeCheck = (CheckBox) mHeaderFilesView.findViewById(R.id.check_offline);
         mHeaderFilesOfflineModeCheck.setChecked(application().isOfflineModeEnabled());
         mHeaderFilesOfflineModeCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -305,6 +347,17 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
     }
 
+    private List<FilePointer> getCurrentSongFiles() {
+        List<FilePointer> songFileList = new ArrayList<FilePointer>();
+        for(int i=0;i<mFolderAdapter.getCount();i++){
+            FilePointer filePointer = mFolderAdapter.getItem(i);
+            if (filePointer.type == FilePointer.Type.FILE){
+                songFileList.add(filePointer);
+            }
+        }
+        return songFileList;
+    }
+
     private void playList_add(FilePointer filePointer) {
         application().function_updateActivePlaylist(filePointer, true);
     }
@@ -395,6 +448,18 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 if (filePointers.isEmpty()){
                     warning_asNoItems("Try to switch offline mode");
                 }else {
+                    int filesCount = 0;
+                    for (FilePointer pointer : filePointers) {
+                        if (pointer.type == FilePointer.Type.FILE){
+                            filesCount ++;
+                        }
+                    }
+                    mSongsView.setText(filesCount+" songs in collection");
+                    if (filesCount != 0){
+                        mMediaHeaderContentAC.show();
+                    }else {
+                        mMediaHeaderContentAC.hide();
+                    }
                     mFolderAdapter.clear();
                     mFolderAdapter.addAll(filePointers);
                     mFolderAdapter.notifyDataSetChanged();

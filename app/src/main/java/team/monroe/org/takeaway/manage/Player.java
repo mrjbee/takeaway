@@ -58,7 +58,7 @@ public class Player {
     }
 
     public void play(FilePointer filePointer) {
-
+        
     }
 
     public static interface PlayerListener {

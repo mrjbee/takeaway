@@ -1,38 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
-    <LinearLayout
-        android:layout_marginTop="150dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="150dp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/panel_media_folder_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/image_album_cover"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/android_album_lightgray_big"
+            />
+
         <LinearLayout
+            android:id="@+id/panel_description"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_toRightOf="@+id/image_album_cover"
+            android:layout_toLeftOf="@+id/panel_quick_action"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Media Collection"
+                android:singleLine="true"
+                style="@style/Text.Body.Smaller"
+                />
 
             <TextView
-                android:gravity="right|center_vertical"
-                android:layout_weight="1"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="Offline Browsing"
-                style="@style/Text.Secondary.Description"/>
-
-            <CheckBox
-                android:layout_marginLeft="10dp"
-                android:id="@+id/check_offline"
-                android:layout_width="50dp"
-                android:layout_height="25dp"
-                android:button="@android:color/transparent"
-                android:background="@drawable/activation_check"
+                android:id="@+id/text_song_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22 Songs"
+                android:singleLine="true"
+                style="@style/Text.Body.Optional"
                 />
         </LinearLayout>
-    </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/panel_quick_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true">
+            <ImageButton
+                android:id="@+id/action_folder_playlist"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="3dp"
+                android:src="@drawable/android_play_lightgray"
+                style="@style/Button.Round.Action"/>
+            <ImageButton
+                android:id="@+id/action_folder_playlist_append"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="3dp"
+                android:src="@drawable/android_playlist_add"
+                style="@style/Button.Round.Action"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/Text.Secondary.Description"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="right|center_vertical"
+            android:text="Offline Browsing" />
+
+        <CheckBox
+            android:id="@+id/check_offline"
+            android:layout_width="50dp"
+            android:layout_height="25dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/activation_check"
+            android:button="@android:color/transparent" />
+    </LinearLayout>
 </LinearLayout>
