@@ -11,16 +11,13 @@ import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.android.box.data.Data;
 
-import java.util.List;
-
 import team.monroe.org.takeaway.R;
+import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
-import team.monroe.org.takeaway.presentations.Source;
 
-public class FragmentDashboardPlayer extends FragmentDashboardActivity {
+public class FragmentDashboardPlayer extends FragmentDashboardActivity implements Player.PlayerListener{
 
-    private Data.DataChangeObserver<List<Source>> mPlaylistDataObserver;
     private View mLoadingPanel;
     private ListView mItemList;
     private View mNoItemsPanel;
@@ -91,47 +88,39 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity {
     @Override
     public void onStart() {
         super.onStart();
-        playlistDataChangeObserver = new Data.DataChangeObserver<Playlist>() {
-            @Override
-            public void onDataInvalid() {
-                fetch_Playlist();
-            }
-
-            @Override
-            public void onData(Playlist playlist) {
-
-            }
-        };
-        application().player().data_active_playlist.addDataChangeObserver(playlistDataChangeObserver);
-        fetch_Playlist();
+        application().player().addPlayerListener(this);
+        onPlaylistChanged(application().player().getPlaylist());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        application().player().data_active_playlist.removeDataChangeObserver(playlistDataChangeObserver);
+        application().player().removePlayerListener(this);
     }
 
-    private void fetch_Playlist() {
+    @Override
+    public void onPlaylistCalculation() {
         hide_all();
         mLoadingPanel.setVisibility(View.VISIBLE);
-        application().player().data_active_playlist.fetch(true, activity().observe_data(new ActivitySupport.OnValue<Playlist>() {
-            @Override
-            public void action(Playlist playlist) {
-                hide_all();
-                if (playlist == null || playlist.songList.isEmpty()) {
-                    mNoItemsPanel.setVisibility(View.VISIBLE);
-                } else {
+    }
 
-                    mSongsText.setText(playlist.songList.size()+" songs");
-                    mPlaylistText.setText(playlist.title);
+    @Override
+    public void onPlaylistChanged(Playlist playlist) {
+        hide_all();
+        if (playlist == null || playlist.songList.isEmpty()) {
+            mNoItemsPanel.setVisibility(View.VISIBLE);
+        } else {
 
-                    mPlaylistAdapter.clear();
-                    mPlaylistAdapter.addAll(playlist.songList);
-                    mPlaylistAdapter.notifyDataSetChanged();
-                    mItemList.setVisibility(View.VISIBLE);
-                }
-            }
-        }));
+            mSongsText.setText(playlist.songList.size()+" songs");
+            mPlaylistText.setText(playlist.title);
+
+            mPlaylistAdapter.clear();
+            mPlaylistAdapter.addAll(playlist.songList);
+            mPlaylistAdapter.notifyDataSetChanged();
+
+            mItemList.setVisibility(View.VISIBLE);
+
+            application().player().play(playlist.songList.get(0));
+        }
     }
 }

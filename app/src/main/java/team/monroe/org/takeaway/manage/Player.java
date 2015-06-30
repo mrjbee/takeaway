@@ -4,6 +4,7 @@ import org.monroe.team.android.box.data.Data;
 import org.monroe.team.corebox.app.Model;
 import org.monroe.team.corebox.log.L;
 import org.monroe.team.corebox.services.BackgroundTaskManager;
+import org.monroe.team.corebox.utils.Closure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +17,31 @@ import team.monroe.org.takeaway.uc.GetFileContent;
 public class Player {
 
     private final Model mModel;
-    public Data<Playlist> data_active_playlist;
     private final PlaylistController mPlaylistController = new PlaylistController();
+    private final List<PlayerListener> mListenerList = new ArrayList<>();
+
 
     public Player(Model model) {
         this.mModel = model;
-        data_active_playlist = new Data<Playlist>(model) {
+    }
+
+    public synchronized void addPlayerListener(PlayerListener listener){
+        mListenerList.add(listener);
+    }
+
+    public synchronized void removePlayerListener(PlayerListener listener) {
+        mListenerList.remove(listener);
+    }
+
+    private synchronized void notifyListeners(final Closure <PlayerListener, Void> notificationAction){
+        mModel.getResponseHandler().post(new Runnable() {
             @Override
-            protected Playlist provideData() {
-                return getPlaylist();
+            public void run() {
+                for (PlayerListener playerListener : mListenerList) {
+                    notificationAction.execute(playerListener);
+                }
             }
-        };
+        });
     }
 
     public Playlist getPlaylist(){
@@ -42,11 +57,19 @@ public class Player {
         mPlaylistController.addToPlayList(filePointer);
     }
 
-   private class PlaylistController{
+    public void play(FilePointer filePointer) {
+
+    }
+
+    public static interface PlayerListener {
+        void onPlaylistCalculation();
+        void onPlaylistChanged(Playlist playlist);
+    }
+
+
+    private class PlaylistController{
 
        private final  L.Logger LOG = L.create("PLAYER.PLAYLIST");
-
-       private final Object mPlaylistResourceMonitor = new Object();
 
        private Playlist mCurrentPlaylist = null;
        private Playlist mPlaylistUnderBuild = null;
@@ -63,20 +86,8 @@ public class Player {
        }
 
        public Playlist getPlaylist(){
-           LOG.d("Playlist requested");
-           synchronized (mPlaylistResourceMonitor) {
-               if (mCurrentPlaylist != null) {
-                   LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
-                   return mCurrentPlaylist;
-               }
-               try {
-                   LOG.d("Play list awaiting...");
-                   mPlaylistResourceMonitor.wait();
-               } catch (InterruptedException e) {
-               }
-               LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
-               return mCurrentPlaylist;
-           }
+           LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
+           return mCurrentPlaylist;
        }
 
        public synchronized void clearAndAddToPlayList(FilePointer filePointer) {
@@ -85,28 +96,35 @@ public class Player {
                mBackgroundUpdateTask.cancel();
                mBackgroundUpdateTask = null;
            }
-           synchronized (mPlaylistResourceMonitor) {
-               mPlaylistUnderBuild = createEmptyPlayList();
-               mPlaylistBuildJobList.clear();
-               mCurrentPlaylist = null;
-               data_active_playlist.invalidate();
-           }
+           mPlaylistUnderBuild = createEmptyPlayList();
+           mPlaylistBuildJobList.clear();
+           mCurrentPlaylist = null;
+           notifyListeners(new Closure<PlayerListener, Void>() {
+               @Override
+               public Void execute(PlayerListener arg) {
+                   arg.onPlaylistCalculation();
+                   return null;
+               }
+           });
            addUpdateJob(filePointer);
        }
 
 
        public synchronized void addToPlayList(FilePointer filePointer) {
-           synchronized (mPlaylistResourceMonitor) {
-               LOG.d("Add to existing playlist requested...");
-               if (mPlaylistUnderBuild == null && mCurrentPlaylist == null) {
-                   mPlaylistUnderBuild = createEmptyPlayList();
-               } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
-                   mPlaylistUnderBuild = mCurrentPlaylist.duplicate();
-               }
-
-               mCurrentPlaylist = null;
-               data_active_playlist.invalidate();
+           LOG.d("Add to existing playlist requested...");
+           if (mPlaylistUnderBuild == null && mCurrentPlaylist == null) {
+               mPlaylistUnderBuild = createEmptyPlayList();
+           } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
+               mPlaylistUnderBuild = mCurrentPlaylist.duplicate();
            }
+           mCurrentPlaylist = null;
+           notifyListeners(new Closure<PlayerListener, Void>() {
+               @Override
+               public Void execute(PlayerListener arg) {
+                   arg.onPlaylistCalculation();
+                   return null;
+               }
+           });
            addUpdateJob(filePointer);
        }
 
@@ -138,12 +156,16 @@ public class Player {
 
            mBackgroundUpdateTask = null;
            if (mPlaylistBuildJobList.isEmpty()){
-               synchronized (mPlaylistResourceMonitor) {
-                   LOG.d("Playlist [empty] created notification");
-                   mCurrentPlaylist = createEmptyPlayList();
-                   mBackgroundUpdateTask = null;
-                   mPlaylistResourceMonitor.notifyAll();
-               }
+               LOG.d("Playlist [empty] created notification");
+               mCurrentPlaylist = createEmptyPlayList();
+               mBackgroundUpdateTask = null;
+               notifyListeners(new Closure<PlayerListener, Void>() {
+                   @Override
+                   public Void execute(PlayerListener arg) {
+                       arg.onPlaylistChanged(mCurrentPlaylist);
+                       return null;
+                   }
+               });
            }else {
                LOG.d("Playlist creation next task ...");
                startNextJob();
@@ -154,12 +176,16 @@ public class Player {
            LOG.d("Playlist creation finished");
            mBackgroundUpdateTask = null;
            if (mPlaylistBuildJobList.isEmpty()){
-               synchronized (mPlaylistResourceMonitor) {
-                   LOG.d("Playlist created notification");
-                   mCurrentPlaylist = mPlaylistUnderBuild;
-                   mBackgroundUpdateTask = null;
-                   mPlaylistResourceMonitor.notifyAll();
-               }
+               LOG.d("Playlist created notification");
+               mCurrentPlaylist = mPlaylistUnderBuild;
+               mBackgroundUpdateTask = null;
+               notifyListeners(new Closure<PlayerListener, Void>() {
+                   @Override
+                   public Void execute(PlayerListener arg) {
+                       arg.onPlaylistChanged(mCurrentPlaylist);
+                       return null;
+                   }
+               });
            }else {
                LOG.d("Playlist creation next task ...");
                startNextJob();
