@@ -123,4 +123,14 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
             application().player().play(playlist.songList.get(0));
         }
     }
+
+    @Override
+    public void onError(Throwable e) {
+        activity().handle_Error(e);
+    }
+
+    @Override
+    public void onUnavailableFile(FilePointer filePointer) {
+
+    }
 }

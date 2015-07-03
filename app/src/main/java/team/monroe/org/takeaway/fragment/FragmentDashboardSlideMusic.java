@@ -133,7 +133,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             public void onClick(View v) {
                 if (mFileStack.isEmpty()){
                     fetch_sources(true);
-                }else {
+                } else {
                     fetch_folder();
                 }
             }

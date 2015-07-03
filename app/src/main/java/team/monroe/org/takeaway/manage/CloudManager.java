@@ -7,6 +7,7 @@ public interface CloudManager {
     public Answer<String> getSourceVersion(CloudConfigurationManager.Configuration sourceConfiguration);
     public Answer<List<RemoteFile>> getSources(CloudConfigurationManager.Configuration sourceConfiguration);
     public Answer<List<RemoteFile>> getFolderContent(CloudConfigurationManager.Configuration sourceConfiguration, String folderId);
+    public Answer<DownloadManager.Transfer> createTransfer(CloudConfigurationManager.Configuration sourceConfiguration, String fileId);
 
     public static class RemoteFile {
 

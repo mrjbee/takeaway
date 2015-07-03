@@ -12,6 +12,7 @@ import java.util.List;
 
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudManager;
+import team.monroe.org.takeaway.manage.DownloadManager;
 
 public class KodiCloudManager implements CloudManager {
 
@@ -152,6 +153,33 @@ public class KodiCloudManager implements CloudManager {
         });
     }
 
+    @Override
+    public Answer<DownloadManager.Transfer> createTransfer(final CloudConfigurationManager.Configuration sourceConfiguration, final String fileId) {
+        return sendAndBuild(new Send() {
+            @Override
+            public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
+                return httpManager.post(
+                        prepare_Url(sourceConfiguration),
+                        prepare_JsonRequest(
+                                rpc_request("Files.PrepareDownload")
+                                        .field("params", JsonBuilder.object()
+                                                .field("path", fileId))),
+                        prepare_RequestDetails(),
+                        prepare_JsonResponse()
+                );
+            }
+        }, new BuildBody<DownloadManager.Transfer>() {
+            @Override
+            public DownloadManager.Transfer doBuild(Json json) {
+                if (!json.asObject("result").exists("details")) return null;
+                if (!json.asObject("result").asObject("details").exists("path")) return null;
+                //TODO: check protocol and vfs type
+                String vfsPath = json.asObject("result").asObject("details").asString("path");
+                return new KodiFileTransfer(vfsPath);
+            }
+        });
+    }
+
 
     private <BodyType> Answer<BodyType> extractErrorIfExists(Json body) {
         if (body.asObject().exists("error")){
@@ -203,4 +231,14 @@ public class KodiCloudManager implements CloudManager {
     private static  interface BuildBody<BodyType> {
         public BodyType doBuild(Json json);
     }
+
+    private final class KodiFileTransfer implements DownloadManager.Transfer{
+
+        private final String vfsPath;
+
+        private KodiFileTransfer(String vfsPath) {
+            this.vfsPath = vfsPath;
+        }
+    }
+
 }

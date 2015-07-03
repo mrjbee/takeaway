@@ -10,8 +10,10 @@ import org.monroe.team.corebox.services.ServiceRegistry;
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.CloudManager;
+import team.monroe.org.takeaway.manage.DownloadManager;
 import team.monroe.org.takeaway.manage.FileProvider;
-import team.monroe.org.takeaway.manage.KodiFileProvider;
+import team.monroe.org.takeaway.manage.impl.KodiFileProvider;
+import team.monroe.org.takeaway.manage.impl.LocalFileProvider;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.impl.KodiCloudManager;
 
@@ -25,7 +27,8 @@ public class AppModel extends AndroidModel {
     @Override
     protected void constructor(String appName, Context context, ServiceRegistry serviceRegistry) {
         super.constructor(appName, context, serviceRegistry);
-
+        serviceRegistry.registrate(DownloadManager.class, new DownloadManager());
+        serviceRegistry.registrate(LocalFileProvider.class, new LocalFileProvider());
         serviceRegistry.registrate(Player.class, new Player(this));
         serviceRegistry.registrate(NetworkManager.class, new NetworkManager(context));
         CloudConnectionManager cloudConnectionManager = new CloudConnectionManager(this);
