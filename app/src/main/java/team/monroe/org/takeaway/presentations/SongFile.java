@@ -79,9 +79,11 @@ public interface SongFile {
             return !cacheFile.exists() || cacheFile.delete();
         }
 
+
         public enum State{
             NOT_STARTED,
             STARTED,
+            @Deprecated
             RELEASED,
             FINISHED,
             ERROR

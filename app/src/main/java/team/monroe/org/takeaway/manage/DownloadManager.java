@@ -9,6 +9,10 @@ import org.monroe.team.corebox.utils.Lists;
 import org.monroe.team.corebox.utils.P;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,8 +28,8 @@ public class DownloadManager {
 
     private L.Logger log = L.create("DOWNLOAD_MANAGER");
 
-    private final File mCacheFolder;
     private final Context context;
+    private final File mCacheFolder;
 
     private final List<SongFile.StreamFile> mStreamFilesRequestList = new ArrayList<>();
 
@@ -112,51 +116,75 @@ public class DownloadManager {
     }
 
     public synchronized void releaseStreamFile(SongFile.StreamFile streamFile) {
-        streamFile.state = SongFile.StreamFile.State.RELEASED;
+        log.d("Release stream file "+streamFile.getFilePointer().relativePath);
         int index = mStreamFilesRequestList.indexOf(streamFile);
         if (index == -1){
+            log.e("Releasing ERROR "+streamFile.getFilePointer().relativePath);
             throw new IllegalStateException("Unknown stream file");
         }
+
         mStreamFilesRequestList.remove(index);
         if (streamFile.state == SongFile.StreamFile.State.FINISHED){
+            log.d("Removing cached files "+streamFile.getFilePointer().relativePath);
             File cacheFile = toCacheFile(streamFile);
             cacheFile.delete();
         }
+        streamFile.state = SongFile.StreamFile.State.RELEASED;
     }
 
     public void downloadInCache(SongFile.StreamFile streamFile) {
+        log.d("Start actual downloading "+streamFile.getFilePointer().relativePath);
         if (streamFile.state == SongFile.StreamFile.State.FINISHED){
+            log.d("File already downloaded "+streamFile.getFilePointer().relativePath);
             reorderStreamFileQueue();
             return;
         }
         streamFile.state = SongFile.StreamFile.State.STARTED;
-        //TODO: create dirs
         File cacheFile = toCacheFile(streamFile);
         File cacheFileFolder = cacheFile.getParentFile();
         if (!cacheFileFolder.exists() && !cacheFileFolder.mkdirs()){
             log.w("Coulnot create folder", cacheFileFolder.getAbsolutePath());
             streamFile.state = SongFile.StreamFile.State.ERROR;
+            reorderStreamFileQueue();
+            return;
         }
 
         streamFile.cacheFile = cacheFile;
         streamFile.releaseSpace();
 
+        FileOutputStream output = null;
+        try {
+            log.d("Open stream "+streamFile.getFilePointer().relativePath);
+            InputStream inputStream = streamFile.transfer.getInputStream();
+            output = new FileOutputStream(streamFile.cacheFile);
+            byte data[] = new byte[4096];
+            int count;
+            while ((count = inputStream.read(data)) != -1) {
+                if (Thread.currentThread().isInterrupted()) {
+                    log.d("Downloading interrupted "+streamFile.getFilePointer().relativePath);
+                    streamFile.state = SongFile.StreamFile.State.NOT_STARTED;
+                    streamFile.transfer.releaseInput();
+                    output.close();
+                    streamFile.releaseSpace();
+                    return;
+                }
+                output.write(data, 0, count);
+            }
 
-        if (Thread.currentThread().isInterrupted()){
-            streamFile.state = SongFile.StreamFile.State.NOT_STARTED;
+        } catch (Exception e) {
+            log.e("Error during downloading "+streamFile.getFilePointer().relativePath, e);
+            streamFile.state = SongFile.StreamFile.State.ERROR;
             streamFile.releaseSpace();
+            streamFile.transfer.releaseInput();
             reorderStreamFileQueue();
         }
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            streamFile.state = SongFile.StreamFile.State.NOT_STARTED;
-            streamFile.releaseSpace();
-        }
+        if (output != null) try {
+            output.close();
+        } catch (IOException whocare) {}
 
-        //TODO: actual downloading here
-
+        log.d("Downloading finished "+streamFile.getFilePointer().relativePath);
+        streamFile.transfer.releaseInput();
         streamFile.state = SongFile.StreamFile.State.FINISHED;
         reorderStreamFileQueue();
     }
@@ -168,7 +196,27 @@ public class DownloadManager {
     }
 
 
-    public interface Transfer {}
+    public interface Transfer {
+        InputStream getInputStream() throws TransferFailException;
+        void releaseInput();
+    }
+
+    public static class TransferFailException extends Exception{
+        public TransferFailException() {
+        }
+
+        public TransferFailException(String detailMessage) {
+            super(detailMessage);
+        }
+
+        public TransferFailException(String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
+        }
+
+        public TransferFailException(Throwable throwable) {
+            super(throwable);
+        }
+    }
 
     public static enum Priority{
         HIGHEST, HIGH, MEDIUM, LOW

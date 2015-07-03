@@ -6,6 +6,7 @@ import org.monroe.team.android.box.services.HttpManager;
 import org.monroe.team.corebox.log.L;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -175,7 +176,8 @@ public class KodiCloudManager implements CloudManager {
                 if (!json.asObject("result").asObject("details").exists("path")) return null;
                 //TODO: check protocol and vfs type
                 String vfsPath = json.asObject("result").asObject("details").asString("path");
-                return new KodiFileTransfer(vfsPath);
+
+                return new KodiFileTransfer(prepare_VfsUrl(sourceConfiguration, vfsPath));
             }
         });
     }
@@ -224,6 +226,18 @@ public class KodiCloudManager implements CloudManager {
         return builder.toString();
     }
 
+
+    private String prepare_VfsUrl(CloudConfigurationManager.Configuration sourceConfiguration, String vfsPath) {
+        StringBuilder builder = new StringBuilder();
+        if (!sourceConfiguration.host.toLowerCase().startsWith("http://")){
+            builder.append("http://");
+        }
+        builder.append(sourceConfiguration.host);
+        builder.append(":"+sourceConfiguration.port);
+        builder.append("/"+vfsPath);
+        return builder.toString();
+    }
+
     private static interface Send {
         public HttpManager.Response<Json> doSend()  throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException;
     }
@@ -235,10 +249,32 @@ public class KodiCloudManager implements CloudManager {
     private final class KodiFileTransfer implements DownloadManager.Transfer{
 
         private final String vfsPath;
+        private HttpManager.Response<InputStream> mInputStreamResponse;
 
         private KodiFileTransfer(String vfsPath) {
             this.vfsPath = vfsPath;
         }
+
+        @Override
+        public InputStream getInputStream() throws DownloadManager.TransferFailException {
+            HttpManager httpManager = new HttpManager();
+            try {
+                mInputStreamResponse = httpManager.get(vfsPath, HttpManager.details(), HttpManager.response_input());
+                return mInputStreamResponse.body;
+            } catch (HttpManager.InvalidBodyFormatException e) {
+                throw new DownloadManager.TransferFailException(e);
+            } catch (IOException e) {
+                throw new DownloadManager.TransferFailException(e);
+            }
+        }
+
+        @Override
+        public void releaseInput() {
+            if (mInputStreamResponse != null){
+                mInputStreamResponse.release();
+            }
+        }
+
     }
 
 }
