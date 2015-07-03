@@ -1,5 +1,7 @@
 package team.monroe.org.takeaway.presentations;
 
+import java.io.File;
+
 import team.monroe.org.takeaway.manage.DownloadManager;
 
 public interface SongFile {
@@ -48,18 +50,41 @@ public interface SongFile {
         public void release() {}
     }
 
-    public static class StreamFile extends AbstractSongFile{
+    public static class StreamFile extends AbstractSongFile implements Runnable{
 
-        private final DownloadManager.Transfer transfer;
+        public DownloadManager.Priority priority;
+        public final DownloadManager.Transfer transfer;
+        public State state = State.NOT_STARTED;
+        public final DownloadManager downloadManager;
+        public File cacheFile;
 
-        public StreamFile(FilePointer filePointer, DownloadManager.Transfer transfer) {
+        public StreamFile(FilePointer filePointer, DownloadManager.Priority priority, DownloadManager.Transfer transfer, DownloadManager downloadManager) {
             super(filePointer);
+            this.priority = priority;
             this.transfer = transfer;
+            this.downloadManager = downloadManager;
         }
 
         @Override
-        public void release() {
+        public synchronized void release() {
+            downloadManager.releaseStreamFile(this);
+        }
 
+        @Override
+        public synchronized void run() {
+            downloadManager.downloadInCache(this);
+        }
+
+        public boolean releaseSpace() {
+            return !cacheFile.exists() || cacheFile.delete();
+        }
+
+        public enum State{
+            NOT_STARTED,
+            STARTED,
+            RELEASED,
+            FINISHED,
+            ERROR
         }
     }
 }

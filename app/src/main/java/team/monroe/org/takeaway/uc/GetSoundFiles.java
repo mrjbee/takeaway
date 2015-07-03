@@ -25,16 +25,18 @@ public class GetSoundFiles extends UserCaseSupport<List<FilePointer>, List<SongF
         List<SongFile> answer = new ArrayList<>();
         SongFile itSongFile = null;
         DownloadManager downloadManager = using(DownloadManager.class);
-        for (FilePointer filePointer : request) {
+        downloadManager.updateStreamFilePriority(DownloadManager.Priority.LOW);
+        for (int i=0;i<request.size();i++) {
+            FilePointer filePointer =  request.get(i);
             itSongFile = localFileProvider.getSongFile(filePointer);
             if (itSongFile == null){
                 //no local copy
-                itSongFile = downloadManager.getExistsStreamFile(filePointer);
+                itSongFile = downloadManager.renewExistingStreamFile(filePointer, getPriorityByIndex(i));
                 if (itSongFile == null){
                     //no streaming file already
                     try {
                         DownloadManager.Transfer transfer = using(Model.class).execute(GetTransferForFile.class, filePointer);
-                        itSongFile = downloadManager.createStreamFile(filePointer, transfer);
+                        itSongFile = downloadManager.createStreamFile(filePointer, transfer, getPriorityByIndex(i));
                     }catch (ApplicationException e){
                         itSongFile = new SongFile.NotAvailableSongFile(filePointer);
                     }
@@ -42,6 +44,16 @@ public class GetSoundFiles extends UserCaseSupport<List<FilePointer>, List<SongF
             }
             answer.add(itSongFile);
         }
+        downloadManager.reorderStreamFileQueue();
         return answer;
+    }
+
+    private DownloadManager.Priority getPriorityByIndex(int i) {
+        switch (i){
+            case 0: return DownloadManager.Priority.HIGHEST;
+            case 1:
+            case 2: return DownloadManager.Priority.HIGH;
+            default: return DownloadManager.Priority.MEDIUM;
+        }
     }
 }

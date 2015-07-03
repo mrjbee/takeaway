@@ -27,7 +27,7 @@ public class AppModel extends AndroidModel {
     @Override
     protected void constructor(String appName, Context context, ServiceRegistry serviceRegistry) {
         super.constructor(appName, context, serviceRegistry);
-        serviceRegistry.registrate(DownloadManager.class, new DownloadManager());
+        serviceRegistry.registrate(DownloadManager.class, new DownloadManager(context));
         serviceRegistry.registrate(LocalFileProvider.class, new LocalFileProvider());
         serviceRegistry.registrate(Player.class, new Player(this));
         serviceRegistry.registrate(NetworkManager.class, new NetworkManager(context));
