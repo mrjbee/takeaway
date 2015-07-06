@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.android.box.data.Data;
@@ -89,7 +88,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     public void onStart() {
         super.onStart();
         application().player().addPlayerListener(this);
-        onPlaylistChanged(application().player().getPlaylist());
+        update_playlist(application().player().getPlaylist(), false);
     }
 
     @Override
@@ -106,6 +105,10 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
 
     @Override
     public void onPlaylistChanged(Playlist playlist) {
+        update_playlist(playlist, true);
+    }
+
+    private void update_playlist(Playlist playlist, boolean autoplay) {
         hide_all();
         if (playlist == null || playlist.songList.isEmpty()) {
             mNoItemsPanel.setVisibility(View.VISIBLE);
@@ -119,8 +122,9 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
             mPlaylistAdapter.notifyDataSetChanged();
 
             mItemList.setVisibility(View.VISIBLE);
-
-            application().player().play(playlist.songList.get(0));
+            if (autoplay) {
+                application().player().play(playlist.songList.get(0));
+            }
         }
     }
 

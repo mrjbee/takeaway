@@ -11,7 +11,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
@@ -22,7 +21,6 @@ import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.event.Event;
 import org.monroe.team.android.box.utils.DisplayUtils;
 import org.monroe.team.corebox.utils.Closure;
-import org.monroe.team.corebox.utils.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,6 @@ import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
-import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.view.WarningViewPresenter;
 
@@ -150,7 +147,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
         mFileList = view_list(R.id.list_items);
         mFileList.addHeaderView(mHeaderFilesView,null,false);
-
+        mFileList.addFooterView(activity().getLayoutInflater().inflate(R.layout.panel_footer_files,null));
         mSourcesList = view_list(R.id.list_sources);
 
         mFolderAdapter = new GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>>(activity(), new GetViewImplementation.ViewHolderFactory<GetViewImplementation.ViewHolder<FilePointer>>() {
@@ -183,10 +180,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                         int backgroundResource = R.drawable.panel_left_right_shadow;
                         if (position == 0){
                             backgroundResource = R.drawable.panel_round_top;
-                        }else if (position == mFolderAdapter.getCount()-1){
-                            backgroundResource = R.drawable.panel_round_bottom;
                         }
-
                         updateIcon(filePointer);
 
                         if (filePointer.type == FilePointer.Type.FILE){

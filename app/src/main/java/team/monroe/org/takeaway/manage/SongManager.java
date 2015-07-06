@@ -152,11 +152,6 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             public void onAnimationEnd(Animator animation) {
                 stopAndReset();
             }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                stopAndReset();
-            }
         });
         setVolumeFraction(mVolumeFraction);
         mMediaPlayer.start();

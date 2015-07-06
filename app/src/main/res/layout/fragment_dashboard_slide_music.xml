@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     style="@style/Panel.Main"
+    android:paddingLeft="@dimen/margin_side_body"
+    android:paddingRight="@dimen/margin_side_body"
     >
 
 
