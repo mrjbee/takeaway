@@ -29,7 +29,7 @@ public class AppModel extends AndroidModel {
         super.constructor(appName, context, serviceRegistry);
         serviceRegistry.registrate(DownloadManager.class, new DownloadManager(context));
         serviceRegistry.registrate(LocalFileProvider.class, new LocalFileProvider());
-        serviceRegistry.registrate(Player.class, new Player(this));
+        serviceRegistry.registrate(Player.class, new Player(context, this));
         serviceRegistry.registrate(NetworkManager.class, new NetworkManager(context));
         CloudConnectionManager cloudConnectionManager = new CloudConnectionManager(this);
         serviceRegistry.registrate(CloudConnectionManager.class, cloudConnectionManager);

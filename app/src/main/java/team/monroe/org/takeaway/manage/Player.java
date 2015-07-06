@@ -1,11 +1,16 @@
 package team.monroe.org.takeaway.manage;
 
+import android.content.Context;
+
+import org.monroe.team.android.box.event.Event;
 import org.monroe.team.corebox.app.Model;
 import org.monroe.team.corebox.log.L;
 import org.monroe.team.corebox.services.BackgroundTaskManager;
 import org.monroe.team.corebox.utils.Closure;
 import org.monroe.team.corebox.utils.Lists;
+import org.monroe.team.corebox.utils.P;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -16,20 +21,37 @@ import team.monroe.org.takeaway.presentations.SongFile;
 import team.monroe.org.takeaway.uc.GetFileContent;
 import team.monroe.org.takeaway.uc.GetSoundFiles;
 
-public class Player {
+public class Player implements SongManager.Observer {
 
-    private int MAX_PLAY_PREPARE_QUEUE = 3;
-
+    private final static L.Logger log = L.create("PLAYER.PLAY");
     private final Model mModel;
     private final PlaylistController mPlaylistController = new PlaylistController();
     private final List<PlayerListener> mListenerList = new ArrayList<>();
 
     private FilePointer mCurrentSongFilePointer;
-    private SongFile mCurrentPlayingSound;
+    private SongFile mCurrentPlayingSong;
+    private SongFile mSongAwaitingToRelease;
     private List<SongFile> mSongPlayQueue;
+    private ArrayList<SongManager> mSongManagerPool = new ArrayList<>();
 
-    public Player(Model model) {
+    public Player(Context context, Model model) {
         this.mModel = model;
+        Event.subscribeOnEvent(context, this, Events.FILE_PREPARED, new Closure<P<FilePointer, Boolean>, Void>() {
+            @Override
+            public Void execute(P<FilePointer, Boolean> filePrepared) {
+                onFileReady(filePrepared.first, filePrepared.second);
+                return null;
+            }
+        });
+        mSongManagerPool.add(new SongManager("PRIMARY", this));
+        mSongManagerPool.add(new SongManager("SECONDARY", this));
+    }
+
+    private synchronized void onFileReady(FilePointer filePointer, boolean readyStatus) {
+        for (SongManager songManager : mSongManagerPool) {
+            songManager.onSongReady(filePointer);
+        }
+
     }
 
     public synchronized void addPlayerListener(PlayerListener listener){
@@ -86,9 +108,6 @@ public class Player {
         });
     }
 
-    public synchronized void playNext() {
-
-    }
 
     private synchronized void process_playQueue(List<SongFile> response) {
         if (!response.get(0).getFilePointer().equals(mCurrentSongFilePointer)) {
@@ -96,34 +115,44 @@ public class Player {
             return;
         }
 
+        boolean currentPlayingSongReleaseRequired = true;
         if (mSongPlayQueue != null) {
             for (SongFile songFile : mSongPlayQueue) {
-                if (mCurrentPlayingSound != songFile && response.indexOf(songFile) == -1) {
+                if (mCurrentPlayingSong != songFile && response.indexOf(songFile) == -1) {
                     songFile.release();
+                }else if (mCurrentPlayingSong == songFile){
+                    currentPlayingSongReleaseRequired = false;
                 }
             }
         }
 
         mSongPlayQueue = response;
-
-        if (mCurrentPlayingSound != null) {
-            //may require to do something with it
+        if (currentPlayingSongReleaseRequired){
+            if (mSongAwaitingToRelease != null && mSongAwaitingToRelease != mCurrentPlayingSong){
+                mSongAwaitingToRelease.release();
+            }
+            mSongAwaitingToRelease = mCurrentPlayingSong;
         }
 
-        mCurrentPlayingSound = response.get(0);
-        if (mCurrentPlayingSound instanceof SongFile.NotAvailableSongFile) {
+        mCurrentPlayingSong = response.get(0);
+        if (mCurrentPlayingSong instanceof SongFile.NotAvailableSongFile) {
             notifyListeners(new Closure<PlayerListener, Void>() {
                 @Override
                 public Void execute(PlayerListener arg) {
-                    arg.onUnavailableFile(mCurrentPlayingSound.getFilePointer());
+                    arg.onUnavailableFile(mCurrentPlayingSong.getFilePointer());
                     return null;
                 }
             });
+            return;
         }
+
+        SongManager topSongManger = mSongManagerPool.get(0);
+        topSongManger.setup(mCurrentPlayingSong);
     }
 
+
     private synchronized List<FilePointer> generateNextPlayQueue(FilePointer filePointer) {
-        List<FilePointer> answer = new ArrayList<>(MAX_PLAY_PREPARE_QUEUE+2);
+        List<FilePointer> answer = new ArrayList<>(4);
         answer.add(filePointer);
         Playlist playlist = getPlaylist();
         if (playlist == null){
@@ -168,6 +197,36 @@ public class Player {
     private FilePointer getPrevSong(int songIndex, List<FilePointer> songsInPlaylist) {
         if (songIndex == 0)return null;
         return songsInPlaylist.get(songIndex-1);
+    }
+
+    @Override
+    public synchronized void onCriticalError(SongManager songManager, Exception e) {
+        log.e("Song manager raise critical error", e);
+    }
+
+    @Override
+    public synchronized void onSongBroken(SongManager songManager, SongFile mSongFile) {
+
+    }
+
+    @Override
+    public synchronized void onSongPreparedToPlay(SongManager songManager, SongFile mSongFile) {
+        log.d("Song ready to play");
+        if (songManager == mSongManagerPool.get(0)){
+            log.d("Start playing song");
+            //top player ready start to play
+            songManager.play();
+            mSongManagerPool.add(mSongManagerPool.remove(0));
+        }
+    }
+
+    @Override
+    public synchronized void onSongPlayComplete(SongManager songManager, SongFile mSongFile) {
+        if (mSongFile == mSongAwaitingToRelease){
+            mSongAwaitingToRelease.release();
+        }
+        //Switch this to top
+        mSongManagerPool.add(0, mSongManagerPool.remove(mSongManagerPool.indexOf(songManager)));
     }
 
     public static interface PlayerListener {

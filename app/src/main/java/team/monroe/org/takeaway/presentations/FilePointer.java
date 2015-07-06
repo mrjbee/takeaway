@@ -20,7 +20,6 @@ public class FilePointer implements Serializable {
        return name.replace(".mp3","").replace("_", " ").replace("-", " ").replaceAll(" +"," ");
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

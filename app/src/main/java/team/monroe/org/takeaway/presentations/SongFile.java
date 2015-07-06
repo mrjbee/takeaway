@@ -8,6 +8,9 @@ public interface SongFile {
 
     FilePointer getFilePointer();
     void release();
+    String getDataSourcePath();
+    boolean isReady();
+    boolean isBroken();
 
     public static abstract class AbstractSongFile implements SongFile {
 
@@ -48,6 +51,21 @@ public interface SongFile {
 
         @Override
         public void release() {}
+
+        @Override
+        public String getDataSourcePath() {
+            throw new IllegalStateException("Not Available");
+        }
+
+        @Override
+        public boolean isReady() {
+            throw new IllegalStateException("Not Available");
+        }
+
+        @Override
+        public boolean isBroken() {
+            return true;
+        }
     }
 
     public static class StreamFile extends AbstractSongFile implements Runnable{
@@ -71,6 +89,22 @@ public interface SongFile {
         }
 
         @Override
+        public String getDataSourcePath() {
+            if (cacheFile != null) return cacheFile.getAbsolutePath();
+            return null;
+        }
+
+        @Override
+        public boolean isReady() {
+            return state == State.FINISHED || state == State.ERROR;
+        }
+
+        @Override
+        public boolean isBroken() {
+            return state == State.ERROR;
+        }
+
+        @Override
         public synchronized void run() {
             downloadManager.downloadInCache(this);
         }
@@ -83,8 +117,6 @@ public interface SongFile {
         public enum State{
             NOT_STARTED,
             STARTED,
-            @Deprecated
-            RELEASED,
             FINISHED,
             ERROR
         }
