@@ -1,6 +1,12 @@
 package team.monroe.org.takeaway.manage;
 
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
 import android.media.MediaPlayer;
+import android.util.Property;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.AccelerateInterpolator;
+
 import org.monroe.team.corebox.log.L;
 
 import java.io.IOException;
@@ -14,6 +20,9 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     private final MediaPlayer mMediaPlayer;
     private SongFile mSongFile;
     private final Observer mObserver;
+    private float mVolumeFraction = 0;
+    private ObjectAnimator mFadeAnimator;
+    private float mVolume;
 
     public SongManager(String driverName, Observer mObserver) {
         this.mObserver = mObserver;
@@ -94,8 +103,25 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     public void onSeekComplete(MediaPlayer mp) {
     }
 
-    public void play() {
+    public float getVolumeFraction() {
+        return mVolumeFraction;
+    }
+
+    public void setVolumeFraction(float volumeFraction) {
+        this.mVolumeFraction = volumeFraction;
+        float volume = mVolume * mVolumeFraction;
+        mL.d("Volume: "+volume);
+        mMediaPlayer.setVolume(volume, volume);
+    }
+
+    public void play(float volume) {
+        mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",0.2f, 1f);
+        mFadeAnimator.setDuration(1000 * 10);
+        mFadeAnimator.setInterpolator(new AccelerateInterpolator(0.9f));
+        mVolume = volume;
+        setVolumeFraction(0.2f);
         mMediaPlayer.start();
+        mFadeAnimator.start();
     }
 
     public static interface Observer {
