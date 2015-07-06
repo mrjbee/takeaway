@@ -218,6 +218,9 @@ public class Player implements SongManager.Observer {
             //top player ready start to play
             songManager.play(mVolume);
             mSongManagerPool.add(mSongManagerPool.remove(0));
+            if (mSongManagerPool.get(0).isPlaying()){
+                mSongManagerPool.get(0).stop();
+            }
         }
     }
 
