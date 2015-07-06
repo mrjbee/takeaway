@@ -22,7 +22,6 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     private final Observer mObserver;
     private float mVolumeFraction = 0.2f;
     private ObjectAnimator mFadeAnimator;
-    private float mVolume;
 
     public SongManager(String driverName, Observer mObserver) {
         this.mObserver = mObserver;
@@ -82,8 +81,13 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        mMediaPlayer.reset();
-        mObserver.onSongPlayComplete(this, mSongFile);
+        //TODO: might be more tricky if song less then 5 seconds ;) as then fade animator going to be fadeout and no completion
+        if (mFadeAnimator.isRunning()){
+            mFadeAnimator.cancel();
+        }else {
+            mMediaPlayer.reset();
+            mObserver.onSongPlayComplete(this, mSongFile);
+        }
     }
 
     @Override
@@ -110,22 +114,25 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
 
     public void setVolumeFraction(float volumeFraction) {
         this.mVolumeFraction = volumeFraction;
-        float volume = mVolume * mVolumeFraction;
-        mMediaPlayer.setVolume(volume, volume);
+        mMediaPlayer.setVolume(volumeFraction, volumeFraction);
     }
 
-    public void play(float volume) {
+    public void play(boolean fadeIn) {
         log.i("Request to play");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }
-        mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",mVolumeFraction, 1f);
-        mFadeAnimator.setDuration(1000 * 10);
-        mFadeAnimator.setInterpolator(new AccelerateInterpolator(0.9f));
-        mVolume = volume;
-        setVolumeFraction(mVolumeFraction);
+        if (fadeIn) {
+            mFadeAnimator = ObjectAnimator.ofFloat(this, "volumeFraction", mVolumeFraction, 1f);
+            mFadeAnimator.setStartDelay(1000 * 3);
+            mFadeAnimator.setDuration(1000 * 5);
+            mFadeAnimator.setInterpolator(new AccelerateInterpolator(0.9f));
+            setVolumeFraction(mVolumeFraction);
+            mFadeAnimator.start();
+        }else {
+            setVolumeFraction(1f);
+        }
         mMediaPlayer.start();
-        mFadeAnimator.start();
     }
 
     public boolean isPlaying() {

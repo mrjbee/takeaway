@@ -33,7 +33,6 @@ public class Player implements SongManager.Observer {
     private SongFile mSongAwaitingToRelease;
     private List<SongFile> mSongPlayQueue;
     private ArrayList<SongManager> mSongManagerPool = new ArrayList<>();
-    private float mVolume = 0.8f;
 
     public Player(Context context, Model model) {
         this.mModel = model;
@@ -216,7 +215,7 @@ public class Player implements SongManager.Observer {
         if (songManager == mSongManagerPool.get(0)){
             log.d("Start playing song");
             //top player ready start to play
-            songManager.play(mVolume);
+            songManager.play(mSongManagerPool.get(1).isPlaying());
             mSongManagerPool.add(mSongManagerPool.remove(0));
             if (mSongManagerPool.get(0).isPlaying()){
                 mSongManagerPool.get(0).stop();

@@ -3,6 +3,7 @@ package team.monroe.org.takeaway;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MotionEvent;
@@ -36,6 +37,8 @@ public class ActivityDashboard extends ActivitySupport<App>{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         setContentView(R.layout.activity_dasboard);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
