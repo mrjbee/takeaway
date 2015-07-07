@@ -32,7 +32,7 @@
             android:layout_alignParentBottom="true"
             android:name="team.monroe.org.takeaway.fragment.FragmentDashboardMiniPlayer"
             android:layout_width="fill_parent"
-            android:layout_height="80dp"
+            android:layout_height="60dp"
             tools:layout="@layout/fragment_mini_player" />
 
         <LinearLayout

@@ -82,7 +82,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     @Override
     public void onCompletion(MediaPlayer mp) {
         //TODO: might be more tricky if song less then 5 seconds ;) as then fade animator going to be fadeout and no completion
-        if (mFadeAnimator.isRunning()){
+        if (mFadeAnimator!= null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }else {
             mMediaPlayer.reset();

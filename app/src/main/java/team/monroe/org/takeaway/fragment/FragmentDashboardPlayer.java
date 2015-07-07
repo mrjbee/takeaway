@@ -137,4 +137,14 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     public void onUnavailableFile(FilePointer filePointer) {
 
     }
+
+    @Override
+    public void onCurrentSongChanged(FilePointer filePointer) {
+
+    }
+
+    @Override
+    public void onCurrentSongReady(FilePointer filePointer) {
+
+    }
 }

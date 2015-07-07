@@ -33,6 +33,7 @@ public class ActivityDashboard extends ActivitySupport<App>{
     private AppearanceController ac_downloadFragment;
     private boolean mDownloadsShown =false;
     private DrawerLayout mDrawerLayout;
+    private AppearanceController ac_miniPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,11 @@ public class ActivityDashboard extends ActivitySupport<App>{
                         .hideAnimation(duration_constant(200), interpreter_decelerate(0.5f))
                         .hideAndGone()
         );
+
+        ac_miniPlayer = animateAppearance(view(R.id.frag_mini_player), ySlide(0, DisplayUtils.dpToPx(100, getResources())))
+                        .showAnimation(duration_constant(400),interpreter_accelerate(0.8f))
+                        .hideAnimation(duration_constant(300), interpreter_decelerate(0.5f))
+                        .build();
 
         if (savedInstanceState != null){
             mDownloadsShown = savedInstanceState.getBoolean("downloads_shown",false);
@@ -219,6 +225,22 @@ public class ActivityDashboard extends ActivitySupport<App>{
         FragmentDashboardPagerSlider pagerSlider = (FragmentDashboardPagerSlider) bodyFragment;
         FragmentDashboardSlide dashboardSlide = pagerSlider.getCurrentSlide();
         return dashboardSlide == slide;
+    }
+
+    public void visibility_MiniPlayer(boolean visible, boolean animate) {
+        if (visible){
+            if (animate){
+                ac_miniPlayer.show();
+            }else {
+                ac_miniPlayer.showWithoutAnimation();
+            }
+        }else {
+            if (animate){
+                ac_miniPlayer.hide();
+            }else {
+                ac_miniPlayer.hideWithoutAnimation();
+            }
+        }
     }
 
     public static interface OnSecondaryHeaderRequestSubscriber {

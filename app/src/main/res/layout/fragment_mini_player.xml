@@ -1,69 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
-    android:paddingRight="20dp"
-    android:paddingLeft="20dp"
+    android:layout_height="60dp"
     android:background="@drawable/transperent_bottom"
-    >
+    android:orientation="vertical"
+    android:paddingTop="10dp">
 
     <RelativeLayout
-        android:id="@+id/panel_song_image"
-        android:layout_centerVertical="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:id="@+id/panel_song_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-        <ProgressBar
-            android:visibility="gone"
-            android:layout_centerInParent="true"
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/panel_song_image"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true">
+
+            <ProgressBar
+                android:id="@+id/progress_song_buffering"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/image_song_cover"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/android_note_lightgray" />
+
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/progress_song_buffering" />
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/panel_song_image"
+            android:layout_toLeftOf="@+id/action_song_play"
+            android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/image_song_cover"
+            <TextView
+                android:id="@+id/text_song_caption"
+                style="@style/Text.Body.Smaller"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="Song Caption" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/action_song_play"
+            style="@style/Button.Round.Action"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/android_note_lightgray"/>
-
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="3dp"
+            android:src="@drawable/android_play_round" />
     </RelativeLayout>
-
-
-    <LinearLayout
-        android:layout_toRightOf="@+id/panel_song_image"
-        android:layout_centerVertical="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/text_song_caption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Song Caption"
-            style="@style/Text.Body.Smaller"
-            />
-
-        <TextView
-            android:id="@+id/text_song_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Song About"
-            style="@style/Text.Body.Optional"
-            />
-    </LinearLayout>
-
-    <ImageButton
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        style="@style/Button.Round.Action"
-        android:padding="3dp"
-        android:src="@drawable/android_play_round"/>
-
-
-
-</RelativeLayout>
+</LinearLayout>
