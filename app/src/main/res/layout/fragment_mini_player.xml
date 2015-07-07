@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:paddingRight="20dp"
+    android:paddingLeft="20dp"
+    android:background="@drawable/transperent_bottom"
+    >
+
+    <RelativeLayout
+        android:id="@+id/panel_song_image"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progress_song_buffering" />
+
+        <ImageView
+            android:id="@+id/image_song_cover"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/android_note_lightgray"/>
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_toRightOf="@+id/panel_song_image"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/text_song_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Song Caption"
+            style="@style/Text.Body.Smaller"
+            />
+
+        <TextView
+            android:id="@+id/text_song_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Song About"
+            style="@style/Text.Body.Optional"
+            />
+    </LinearLayout>
+
+    <ImageButton
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        style="@style/Button.Round.Action"
+        android:padding="3dp"
+        android:src="@drawable/android_play_round"/>
+
+
+
+</RelativeLayout>
