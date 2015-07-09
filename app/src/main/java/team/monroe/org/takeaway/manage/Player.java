@@ -264,10 +264,6 @@ public class Player implements SongManager.Observer {
         return filePointer != null;
     }
 
-    public synchronized boolean hasPrev() {
-        return false;
-    }
-
     public synchronized boolean playNext() {
         FilePointer filePointer = mPlaylistController.getSongAfter(mCurrentSongFilePointer);
         if (filePointer != null){
@@ -276,8 +272,24 @@ public class Player implements SongManager.Observer {
         }else {
             return false;
         }
-
     }
+
+    public synchronized boolean hasPrev() {
+        FilePointer filePointer = mPlaylistController.getSongBefore(mCurrentSongFilePointer);
+        return filePointer != null;
+    }
+
+
+    public synchronized boolean playPrev() {
+        FilePointer filePointer = mPlaylistController.getSongBefore(mCurrentSongFilePointer);
+        if (filePointer != null){
+            play(filePointer);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
 
     public static interface PlayerListener {
         void onPlaylistCalculation();
@@ -413,6 +425,23 @@ public class Player implements SongManager.Observer {
                startNextJob();
            }
        }
+
+        public synchronized FilePointer getSongBefore(FilePointer filePointer) {
+            if (mCurrentPlaylist == null) {
+                return null;
+            }
+            int index = getPlaylistFileIndex(filePointer);
+            if (index == -1) {
+                //plalist changed return first
+                return getSongFirst();
+            }
+            index--;
+            if (index < 0){
+                //TODO: add play loop logic
+                return null;
+            }
+            return mCurrentPlaylist.songList.get(index);
+        }
 
         public synchronized FilePointer getSongAfter(FilePointer filePointer) {
             if (mCurrentPlaylist == null) {

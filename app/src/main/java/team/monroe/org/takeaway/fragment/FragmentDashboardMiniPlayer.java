@@ -51,7 +51,7 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
 
             @Override
             protected float applyFraction() {
-                return 0.8f;
+                return 0.6f;
             }
 
             @Override
@@ -74,9 +74,19 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
                         return;
                     }
                 }else {
-                    if (application().player().hasPrev()) {
-                        ac_Content_showFromRight.hide();
-                        mPosition = Position.RIGHT;
+                    if (application().player().hasPrev()){
+                        ac_Content_showFromRight.hideAndCustomize(new AppearanceController.AnimatorCustomization() {
+                            @Override
+                            public void customize(Animator animator) {
+                                animator.addListener(new AnimatorListenerSupport(){
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        application().player().playPrev();
+                                        mPosition = Position.RIGHT;
+                                    }
+                                });
+                            }
+                        });
                         return;
                     }
                 }
