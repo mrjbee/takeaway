@@ -73,8 +73,8 @@ public class ActivityDashboard extends ActivitySupport<App>{
         );
 
         ac_miniPlayer = animateAppearance(view(R.id.frag_mini_player), ySlide(0, DisplayUtils.dpToPx(100, getResources())))
-                        .showAnimation(duration_constant(400),interpreter_accelerate(0.8f))
-                        .hideAnimation(duration_constant(300), interpreter_decelerate(0.5f))
+                        .showAnimation(duration_constant(1600),interpreter_accelerate(0.8f))
+                        .hideAnimation(duration_constant(1600), interpreter_decelerate(0.5f))
                         .build();
 
         if (savedInstanceState != null){

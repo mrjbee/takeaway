@@ -10,7 +10,6 @@ import org.monroe.team.corebox.utils.Closure;
 import org.monroe.team.corebox.utils.Lists;
 import org.monroe.team.corebox.utils.P;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -260,6 +259,26 @@ public class Player implements SongManager.Observer {
         return mBuffering;
     }
 
+    public synchronized boolean hasNext() {
+        FilePointer filePointer = mPlaylistController.getSongAfter(mCurrentSongFilePointer);
+        return filePointer != null;
+    }
+
+    public synchronized boolean hasPrev() {
+        return false;
+    }
+
+    public synchronized boolean playNext() {
+        FilePointer filePointer = mPlaylistController.getSongAfter(mCurrentSongFilePointer);
+        if (filePointer != null){
+            play(filePointer);
+            return true;
+        }else {
+            return false;
+        }
+
+    }
+
     public static interface PlayerListener {
         void onPlaylistCalculation();
         void onPlaylistChanged(Playlist playlist);
@@ -280,7 +299,7 @@ public class Player implements SongManager.Observer {
        private BackgroundTaskManager.BackgroundTask<Void> mBackgroundUpdateTask;
 
 
-       public PlaylistController() {
+        public PlaylistController() {
            mCurrentPlaylist = createEmptyPlayList();
        }
 
@@ -394,7 +413,41 @@ public class Player implements SongManager.Observer {
                startNextJob();
            }
        }
-   }
+
+        public synchronized FilePointer getSongAfter(FilePointer filePointer) {
+            if (mCurrentPlaylist == null) {
+                return null;
+            }
+            int index = getPlaylistFileIndex(filePointer);
+            if (index == -1) {
+                //plalist changed return first
+                return getSongFirst();
+            }
+            index++;
+            if (index >= mCurrentPlaylist.songList.size()){
+                //TODO: add play loop logic
+                return null;
+            }
+            return mCurrentPlaylist.songList.get(index);
+        }
+
+        private int getPlaylistFileIndex(FilePointer filePointer) {
+            for (int index = 0; index < mCurrentPlaylist.songList.size(); index++) {
+                if (mCurrentPlaylist.songList.get(index) == filePointer){
+                    return index;
+                }
+            }
+            return -1;
+        }
+
+        public  synchronized FilePointer getSongFirst() {
+            if (mCurrentPlaylist == null) {
+                return null;
+            }
+            //TODO: shuffle and so on
+            return mCurrentPlaylist.songList.get(0);
+        }
+    }
 
     class PlaylistUpdateJob implements Callable<Void> {
 

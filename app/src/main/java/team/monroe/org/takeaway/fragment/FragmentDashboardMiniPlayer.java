@@ -1,10 +1,13 @@
 package team.monroe.org.takeaway.fragment;
 
+import android.animation.Animator;
 import android.os.Bundle;
 import android.view.View;
 
+import org.monroe.team.android.box.app.ui.SlideTouchGesture;
+import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
-import org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector;
+import static org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector.*;
 import org.monroe.team.android.box.utils.DisplayUtils;
 
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
@@ -17,8 +20,11 @@ import team.monroe.org.takeaway.presentations.Playlist;
 public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity implements Player.PlayerListener {
 
     private FilePointer mFilePointer;
+
+
     private AppearanceController ac_Content_showFromRight;
     private AppearanceController ac_Content_showFromLeft;
+    private Position mPosition = Position.NORMAL;
     private boolean mReadyToPlay = false;
 
     @Override
@@ -29,15 +35,77 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ac_Content_showFromRight = animateAppearance(view(R.id.panel_song_content), xSlide(0f, DisplayUtils.screenWidth(getResources())))
-                .showAnimation(duration_constant(300), interpreter_overshot())
-                .hideAnimation(duration_constant(300), interpreter_accelerate(0.8f))
-                .build();
-        ac_Content_showFromLeft = animateAppearance(view(R.id.panel_song_content), xSlide(0f, -DisplayUtils.screenWidth(getResources())))
-                .showAnimation(duration_constant(300), interpreter_overshot())
+        final View mSongContentPanel = view(R.id.panel_song_content);
+        ac_Content_showFromRight = animateAppearance(mSongContentPanel, xSlide(0f, DisplayUtils.screenWidth(getResources())))
+                .showAnimation(duration_constant(500), interpreter_overshot())
                 .hideAnimation(duration_constant(300), interpreter_accelerate(0.8f))
                 .build();
 
+        ac_Content_showFromLeft = animateAppearance(mSongContentPanel, xSlide(0f, -DisplayUtils.screenWidth(getResources())))
+                .showAnimation(duration_constant(500), interpreter_overshot())
+                .hideAnimation(duration_constant(400), interpreter_accelerate(0.8f))
+                .build();
+
+        final float slideLimit = DisplayUtils.screenWidth(getResources()) / 2f;
+        mSongContentPanel.setOnTouchListener(new SlideTouchGesture(slideLimit, SlideTouchGesture.Axis.X) {
+
+            @Override
+            protected float applyFraction() {
+                return 0.8f;
+            }
+
+            @Override
+            protected void onApply(float x, float y, float slideValue, float fraction) {
+                float sign = getDirectionSign(slideValue);
+                if (sign < 0){
+                    if (application().player().hasNext()){
+                        ac_Content_showFromLeft.hideAndCustomize(new AppearanceController.AnimatorCustomization() {
+                            @Override
+                            public void customize(Animator animator) {
+                                animator.addListener(new AnimatorListenerSupport(){
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        application().player().playNext();
+                                        mPosition = Position.LEFT;
+                                    }
+                                });
+                            }
+                        });
+                        return;
+                    }
+                }else {
+                    if (application().player().hasPrev()) {
+                        ac_Content_showFromRight.hide();
+                        mPosition = Position.RIGHT;
+                        return;
+                    }
+                }
+                onCancel(x, y, slideValue, fraction);
+            }
+
+            @Override
+            protected void onCancel(float x, float y, float slideValue, float fraction) {
+                float sign = getDirectionSign(slideValue);
+                if (sign < 0){
+                    ac_Content_showFromRight.show();
+                }else {
+                    ac_Content_showFromLeft.show();
+                }
+            }
+
+            @Override
+            protected void onProgress(float x, float y, float slideValue, float fraction) {
+                float sign = getDirectionSign(slideValue);
+                mSongContentPanel.setTranslationX(slideLimit * fraction * sign);
+            }
+
+            private float getDirectionSign(float slideValue) {
+                if (slideValue > 0 ){
+                    return -1;
+                }
+                return 1;
+            }
+        });
         ac_Content_showFromLeft.showWithoutAnimation();
         ac_Content_showFromRight.showWithoutAnimation();
     }
@@ -47,7 +115,8 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         super.onStart();
         application().player().addPlayerListener(this);
         FilePointer filePointer = application().player().getCurrentSong();
-        update_currentSong(filePointer, !application().player().isBuffering(), false);
+        mReadyToPlay = !application().player().isBuffering();
+        update_currentSong(filePointer, false);
     }
 
     @Override
@@ -56,44 +125,113 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         application().player().removePlayerListener(this);
     }
 
-    private synchronized void update_currentSong(FilePointer filePointer, boolean readyToPlay, boolean animate) {
-        mReadyToPlay = readyToPlay;
-        if (filePointer == null){
+    private synchronized void update_currentSong(FilePointer filePointer, boolean animate) {
+
+        mReadyToPlay = false;
+        if(filePointer == null){
             dashboard().visibility_MiniPlayer(false, animate);
+            mFilePointer = null;
+            return;
+        } else if (mFilePointer == null && filePointer != null) {
             mFilePointer = filePointer;
+            dashboard().visibility_MiniPlayer(true, animate);
+            mPosition = Position.NORMAL;
+            update_songUI();
+            update_songBufferUI();
             return;
         }
 
-        if (mFilePointer == null){
-            mFilePointer = filePointer;
-            update_songUI();
-            dashboard().visibility_MiniPlayer(true, animate);
-        }else {
-            if (mFilePointer.equals(filePointer)){
-                update_songUI();
-                return;
-            }
-            mFilePointer = filePointer;
-            //TODO: internal animation here
-            SceneDirector.scenario()
+        mFilePointer = filePointer;
+
+        switch (mPosition){
+            case NORMAL:
+                scenario()
+                        .action(action_updatePosition(Position.IN_MOTION_TO_HIDE))
                         .hide(ac_Content_showFromRight)
                         .then()
+                        .action(action_updatePosition(Position.RIGHT))
+                        .action(new Runnable() {
+                            @Override
+                            public void run() {
+                                update_songUI();
+                                update_songBufferUI();
+                            }
+                        })
+                        .then()
+                            .action(action_updatePosition(Position.IN_MOTION_TO_SHOW))
+                            .show(ac_Content_showFromRight)
+                            .then()
+                                .action(action_updatePosition(Position.NORMAL))
+                        .play();
+                return;
+            case LEFT:
+                scenario()
+                        .action_hide_without_animation(ac_Content_showFromRight)
+                        .action(new Runnable() {
+                            @Override
+                            public void run() {
+                                update_songUI();
+                                update_songBufferUI();
+                            }
+                        })
+                        .action(action_updatePosition(Position.IN_MOTION_TO_SHOW))
+                        .show(ac_Content_showFromRight)
+                            .then()
+                                .action(action_updatePosition(Position.NORMAL))
+                        .play();
+                return;
+
+            case RIGHT:
+                scenario()
+                        .action_hide_without_animation(ac_Content_showFromLeft)
+                        .action(new Runnable() {
+                            @Override
+                            public void run() {
+                                update_songUI();
+                                update_songBufferUI();
+                            }
+                        })
+                        .action(action_updatePosition(Position.IN_MOTION_TO_SHOW))
+                        .show(ac_Content_showFromLeft)
+                            .then()
+                                .action(action_updatePosition(Position.NORMAL))
+                    .play();
+                return;
+            case IN_MOTION_TO_SHOW:
+                scenario()
+                        .action_wait(400)
+                        .then()
+                            .action_hide_without_animation(ac_Content_showFromLeft)
                             .action(new Runnable() {
                                 @Override
                                 public void run() {
                                     update_songUI();
+                                    update_songBufferUI();
                                 }
                             })
-                            .then()
-                                .show(ac_Content_showFromRight)
+                            .action(action_updatePosition(Position.IN_MOTION_TO_SHOW))
+                            .show(ac_Content_showFromLeft)
+                                .then()
+                                    .action(action_updatePosition(Position.NORMAL))
                         .play();
         }
+    }
 
+    private Runnable action_updatePosition(final Position position) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                mPosition = position;
+            }
+        };
     }
 
     private void update_songUI() {
         if (mFilePointer == null)return;
         view_text(R.id.text_song_caption).setText(mFilePointer.getNormalizedTitle());
+    }
+
+    private void update_songBufferUI() {
         if (mReadyToPlay){
             view(R.id.progress_song_buffering).setVisibility(View.GONE);
             view(R.id.image_song_cover).setVisibility(View.VISIBLE);
@@ -125,11 +263,18 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
 
     @Override
     public void onCurrentSongChanged(FilePointer filePointer) {
-        update_currentSong(filePointer, false, true);
+        update_currentSong(filePointer, true);
     }
 
     @Override
     public void onCurrentSongReady(FilePointer filePointer) {
-        update_currentSong(filePointer, true, true);
+        mReadyToPlay = true;
+        if (mPosition != Position.IN_MOTION_TO_HIDE){
+            update_songBufferUI();
+        }
+    }
+
+    private enum Position {
+       NORMAL, IN_MOTION_TO_HIDE, IN_MOTION_TO_SHOW, LEFT, RIGHT
     }
 }

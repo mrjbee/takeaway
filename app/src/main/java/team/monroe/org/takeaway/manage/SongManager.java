@@ -44,6 +44,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
     private void prepare() {
+        mMediaPlayer.reset();
         if (mSongFile.isBroken()){
             mObserver.onSongBroken(this, mSongFile);
             return;
