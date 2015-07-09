@@ -62,6 +62,6 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:padding="3dp"
-            android:src="@drawable/android_play_round" />
+            android:src="@drawable/android_stop" />
     </RelativeLayout>
 </LinearLayout>

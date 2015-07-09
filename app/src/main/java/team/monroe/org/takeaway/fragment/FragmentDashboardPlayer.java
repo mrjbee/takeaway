@@ -147,4 +147,14 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     public void onCurrentSongReady(FilePointer filePointer) {
 
     }
+
+    @Override
+    public void onCurrentSongPlay() {
+
+    }
+
+    @Override
+    public void onCurrentSongStop() {
+
+    }
 }

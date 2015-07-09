@@ -22,6 +22,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     private final Observer mObserver;
     private float mVolumeFraction = 0.2f;
     private ObjectAnimator mFadeAnimator;
+    private boolean mPrepared = false;
 
     public SongManager(String driverName, Observer mObserver) {
         this.mObserver = mObserver;
@@ -37,14 +38,17 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
 
     public synchronized void setup(SongFile songFile){
         log.i("Setup song: "+songFile.getFilePointer().relativePath);
+        mPrepared = false;
+        mMediaPlayer.reset();
         mSongFile = songFile;
+
         if (mSongFile.isReady()){
             prepare();
         }
+
     }
 
-    private void prepare() {
-        mMediaPlayer.reset();
+    private synchronized void prepare() {
         if (mSongFile.isBroken()){
             mObserver.onSongBroken(this, mSongFile);
             return;
@@ -67,7 +71,11 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
+    public synchronized void onPrepared(MediaPlayer mp) {
+        if (mSongFile == null){
+            return;
+        }
+        mPrepared = true;
         mObserver.onSongPreparedToPlay(this, mSongFile);
     }
 
@@ -136,12 +144,35 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         mMediaPlayer.start();
     }
 
-    public boolean isPlaying() {
+    public synchronized boolean isPlaying() {
         return mMediaPlayer.isPlaying();
     }
 
-    public void stop() {
+
+    public synchronized void stop() {
         log.i("Request to stop");
+        if (mFadeAnimator != null && mFadeAnimator.isRunning()){
+            mFadeAnimator.cancel();
+        }
+        if (mPrepared) {
+            if (mMediaPlayer.isPlaying()){
+                mMediaPlayer.pause();
+            }
+            mMediaPlayer.seekTo(0);
+        }
+    }
+
+    public synchronized void release() {
+        if (mSongFile == null) return;
+        log.i("Request to releaseWithFade");
+        if (mFadeAnimator != null && mFadeAnimator.isRunning()){
+            mFadeAnimator.cancel();
+        }
+        actualStop();
+    }
+
+    public synchronized void releaseWithFade() {
+        log.i("Request to releaseWithFade");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }
@@ -151,18 +182,35 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         mFadeAnimator.addListener(new AnimatorListenerSupport(){
             @Override
             public void onAnimationEnd(Animator animation) {
-                stopAndReset();
+                actualStop();
             }
         });
         setVolumeFraction(mVolumeFraction);
-        mMediaPlayer.start();
+        if (mPrepared ) {
+            mMediaPlayer.start();
+        }
         mFadeAnimator.start();
     }
 
-    private void stopAndReset() {
-        mMediaPlayer.stop();
-        mMediaPlayer.reset();
+    private void actualStop() {
+        if (mPrepared) {
+            if (mMediaPlayer.isPlaying()){
+                mMediaPlayer.stop();
+            }
+        }
         mObserver.onSongPlayComplete(this, mSongFile);
+        mSongFile = null;
+        mPrepared = false;
+    }
+
+    public boolean isSetupFor(SongFile song) {
+        return mSongFile == song;
+    }
+
+    public void resume() {
+        if (mPrepared){
+            mMediaPlayer.start();
+        }
     }
 
     public static interface Observer {

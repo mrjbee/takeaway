@@ -3,11 +3,13 @@ package team.monroe.org.takeaway.fragment;
 import android.animation.Animator;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 
 import org.monroe.team.android.box.app.ui.SlideTouchGesture;
 import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector.*;
+
 import org.monroe.team.android.box.utils.DisplayUtils;
 
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
@@ -26,6 +28,8 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     private AppearanceController ac_Content_showFromLeft;
     private Position mPosition = Position.NORMAL;
     private boolean mReadyToPlay = false;
+    private ImageButton mSongPlayBtn;
+    private AppearanceController ac_SongPlayButton;
 
     @Override
     protected int getLayoutId() {
@@ -36,6 +40,19 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         final View mSongContentPanel = view(R.id.panel_song_content);
+        mSongPlayBtn = view(R.id.action_song_play, ImageButton.class);
+        mSongPlayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                action_songActionButton();
+            }
+        });
+        ac_SongPlayButton = animateAppearance(mSongPlayBtn, scale(1f,0f))
+                .showAnimation(duration_constant(300), interpreter_overshot())
+                .hideAnimation(duration_constant(200), interpreter_accelerate(0.8f))
+                .hideAndGone()
+                .build();
+
         ac_Content_showFromRight = animateAppearance(mSongContentPanel, xSlide(0f, DisplayUtils.screenWidth(getResources())))
                 .showAnimation(duration_constant(500), interpreter_overshot())
                 .hideAnimation(duration_constant(300), interpreter_accelerate(0.8f))
@@ -45,6 +62,8 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
                 .showAnimation(duration_constant(500), interpreter_overshot())
                 .hideAnimation(duration_constant(400), interpreter_accelerate(0.8f))
                 .build();
+
+        ac_SongPlayButton.hideWithoutAnimation();
 
         final float slideLimit = DisplayUtils.screenWidth(getResources()) / 2f;
         mSongContentPanel.setOnTouchListener(new SlideTouchGesture(slideLimit, SlideTouchGesture.Axis.X) {
@@ -120,13 +139,29 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         ac_Content_showFromRight.showWithoutAnimation();
     }
 
+    private void action_songActionButton() {
+        ac_SongPlayButton.hide();
+        if (application().player().isSongPlaying()){
+            application().player().stop();
+        }else {
+            application().player().resume();
+        }
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         application().player().addPlayerListener(this);
         FilePointer filePointer = application().player().getCurrentSong();
-        mReadyToPlay = !application().player().isBuffering();
         update_currentSong(filePointer, false);
+        mReadyToPlay = !application().player().isBuffering();
+        update_songBufferUI();
+
+        if (application().player().isSongPlaying()){
+            onCurrentSongPlay();
+        } else {
+            onCurrentSongStop();
+        }
     }
 
     @Override
@@ -283,6 +318,24 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
             update_songBufferUI();
         }
     }
+
+    @Override
+    public void onCurrentSongPlay() {
+        final int drawable_icon = R.drawable.android_stop;
+        updateButtonIcon(drawable_icon);
+    }
+
+    @Override
+    public void onCurrentSongStop() {
+        final int drawable_icon = R.drawable.android_play_round;
+        updateButtonIcon(drawable_icon);
+    }
+
+    private void updateButtonIcon(final int drawable_icon) {
+        mSongPlayBtn.setImageResource(drawable_icon);
+        ac_SongPlayButton.show();
+    }
+
 
     private enum Position {
        NORMAL, IN_MOTION_TO_HIDE, IN_MOTION_TO_SHOW, LEFT, RIGHT
