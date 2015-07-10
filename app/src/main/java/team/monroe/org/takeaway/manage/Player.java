@@ -11,6 +11,7 @@ import org.monroe.team.corebox.utils.Lists;
 import org.monroe.team.corebox.utils.P;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -551,6 +552,15 @@ public class Player implements SongManager.Observer {
             List<FilePointer> songList = new ArrayList<>();
             explore(filePointer, songList);
             checkAndStop();
+            Lists.iterateAndRemove(songList, new Closure<Iterator<FilePointer>, Boolean>() {
+                @Override
+                public Boolean execute(Iterator<FilePointer> arg) {
+                    if (Player.this.mPlaylistController.mPlaylistUnderBuild.songList.indexOf(arg.next()) != -1){
+                        arg.remove();
+                    }
+                    return true;
+                }
+            });
             Player.this.mPlaylistController.mPlaylistUnderBuild.songList.addAll(songList);
             return null;
         }
