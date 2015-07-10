@@ -327,18 +327,26 @@ public class Player implements SongManager.Observer {
             mSongAwaitingToRelease.release();
             mSongAwaitingToRelease = null;
         }
-        //Switch this to top
-        //mSongManagerPool.add(0, mSongManagerPool.remove(mSongManagerPool.indexOf(songManager)));
     }
 
     @Override
     public void onSongEnd(SongManager songManager) {
-            if (hasNext()) {
-                songManager.release();
-                playNext();
-            }else {
-                pause();
-            }
+        log.i("On song end");
+        if (songManager != mSongManagerPool.get(1)) return;
+
+        if (hasNext()) {
+            songManager.release();
+            playNext();
+        }else {
+            pause();
+        }
+    }
+
+    @Override
+    public void onSongNearEnd(SongManager songManager) {
+        log.i("On song end");
+        if (songManager != mSongManagerPool.get(1)) return;
+        playNext();
     }
 
     public synchronized FilePointer getCurrentSong() {

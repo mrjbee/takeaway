@@ -10,6 +10,8 @@ import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.corebox.log.L;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.SongFile;
@@ -23,6 +25,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     private float mVolumeFraction = 0.2f;
     private ObjectAnimator mFadeAnimator;
     private boolean mPrepared = false;
+    private Timer mNextPlayTimer;
 
     public SongManager(String driverName, Observer mObserver) {
         this.mObserver = mObserver;
@@ -136,6 +139,51 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             setVolumeFraction(1f);
         }
         mMediaPlayer.start();
+        nextSongTimer_schedule();
+    }
+
+    private synchronized void nextSongTimer_schedule() {
+        log.i("[NEXT_SONG_TIME] Scheduling timer ... " );
+        if(mNextPlayTimer != null){
+           nextSongTimer_cancel();
+           return;
+        }
+        long nextSongTime = getSongTimeLeft();
+        log.i("[NEXT_SONG_TIME] Delay = " + nextSongTime );
+        if (nextSongTime  == -1) return;
+
+        mNextPlayTimer = new Timer("next_song_timer", true);
+        long fadeOutDuration = 1000 * 7;
+        if (nextSongTime < fadeOutDuration){
+            log.i("[NEXT_SONG_TIME] No time doing now ");
+            nextSongTimer_onTime();
+        }else {
+            log.i("[NEXT_SONG_TIME] Scheduling after = "+(nextSongTime - fadeOutDuration));
+            mNextPlayTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    nextSongTimer_onTime();
+                }
+            }, nextSongTime - fadeOutDuration);
+        }
+
+    }
+
+    private synchronized void nextSongTimer_onTime() {
+        log.i("[NEXT_SONG_TIME] On time = "+ mNextPlayTimer);
+        if (mNextPlayTimer == null) return;
+        nextSongTimer_cancel();
+        mObserver.onSongNearEnd(this);
+    }
+
+    private synchronized void nextSongTimer_cancel() {
+        log.i("[NEXT_SONG_TIME] Cancel = "+ mNextPlayTimer);
+        if(mNextPlayTimer == null){
+            return;
+        }
+        mNextPlayTimer.cancel();
+        mNextPlayTimer.purge();
+        mNextPlayTimer = null;
     }
 
     public synchronized boolean isPlaying() {
@@ -143,6 +191,13 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         return mMediaPlayer.isPlaying();
     }
 
+    public synchronized void stop() {
+        log.i("Request to stop");
+        pause();
+        if (mPrepared) {
+            mMediaPlayer.seekTo(0);
+        }
+    }
 
     public synchronized void pause() {
         log.i("Request to pause");
@@ -153,12 +208,15 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             if (mMediaPlayer.isPlaying()){
                 mMediaPlayer.pause();
             }
-            //mMediaPlayer.seekTo(0);
         }
+        nextSongTimer_cancel();
     }
+
+
 
     public synchronized void release() {
         if (mSongFile == null) return;
+        nextSongTimer_cancel();
         log.i("Request to release");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
@@ -166,11 +224,19 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         actualStop();
     }
 
-    public synchronized void releaseWithFade() {
+    public synchronized boolean releaseWithFade() {
         log.i("Request to release with fade");
+        nextSongTimer_cancel();
+        if (!isPlaying()){
+            log.i("Request to release with fade [not playing]");
+            release();
+            return false;
+        }
+
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }
+
         mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",mVolumeFraction, 0.05f);
         mFadeAnimator.setDuration(1000 * 5);
         mFadeAnimator.setInterpolator(new DecelerateInterpolator(0.9f));
@@ -180,11 +246,10 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
                 actualStop();
             }
         });
+
         setVolumeFraction(mVolumeFraction);
-        if (mPrepared ) {
-            mMediaPlayer.start();
-        }
         mFadeAnimator.start();
+        return true;
     }
 
     private synchronized void actualStop() {
@@ -206,6 +271,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         mVolumeFraction = 1f;
         if (mPrepared){
             mMediaPlayer.start();
+            nextSongTimer_schedule();
         }
     }
 
@@ -215,6 +281,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         void onSongPreparedToPlay(SongManager songManager, SongFile mSongFile);
         void onSongPlayStop(SongManager songManager, SongFile mSongFile);
         void onSongEnd(SongManager songManager);
+        void onSongNearEnd(SongManager songManager);
     }
 
 }
