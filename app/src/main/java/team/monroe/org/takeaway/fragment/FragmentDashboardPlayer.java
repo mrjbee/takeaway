@@ -3,12 +3,12 @@ package team.monroe.org.takeaway.fragment;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
-import org.monroe.team.android.box.data.Data;
 
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.manage.Player;
@@ -23,6 +23,10 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     private GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> mPlaylistAdapter;
     private TextView mPlaylistText;
     private TextView mSongsText;
+
+    private FilePointer mPlayFilePointer;
+    private boolean mSongPlaying = false;
+    private boolean mSongBuffering = false;
 
     @Override
     protected int getLayoutId() {
@@ -57,23 +61,59 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
                     TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
                     TextView description = (TextView) convertView.findViewById(R.id.item_description);
                     View separator = convertView.findViewById(R.id.separator);
-
+                    ImageView imageView = (ImageView) convertView.findViewById(R.id.item_image);
                     @Override
-                    public void update(FilePointer filePointer, int position) {
+                    public void update(final FilePointer filePointer, int position) {
+                        convertView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                               onSongClick(filePointer);
+                            }
+                        });
                         if (position == 0) separator.setVisibility(View.GONE);
-
                         caption.setText(filePointer.getNormalizedTitle());
                         description.setText(filePointer.relativePath);
+                        int color = 0;
+                        int coverImageResource = R.drawable.android_note_lightgray;
+                        float coverAlpha = 1f;
+                        color = getResources().getColor(R.color.text_dark);
+                        if (filePointer == mPlayFilePointer){
+                            if (mSongBuffering){
+                                coverAlpha = 0.4f;
+                            }
+                            if (mSongPlaying){
+                                coverImageResource = R.drawable.android_equ_pink;
+                            }else {
+                                coverImageResource = R.drawable.android_equ_lightgray;
+                            }
+                            color = getResources().getColor(R.color.text_highlight);
+                        }
+                        imageView.setAlpha(coverAlpha);
+                        imageView.setImageResource(coverImageResource);
+                        caption.setTextColor(color);
                     }
 
                     @Override
                     public void cleanup() {
                         separator.setVisibility(View.VISIBLE);
+                        convertView.setOnClickListener(null);
                     }
                 };
             }
         }, R.layout.item_playlist);
         mItemList.setAdapter(mPlaylistAdapter);
+    }
+
+    private void onSongClick(FilePointer filePointer) {
+        if (mPlayFilePointer == filePointer){
+            if (application().player().isSongPlaying()){
+                application().player().pause();
+            }else {
+                application().player().resume();
+            }
+        }else {
+            application().player().play(filePointer);
+        }
     }
 
     private void hide_all() {
@@ -87,6 +127,9 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     public void onStart() {
         super.onStart();
         application().player().addPlayerListener(this);
+        mPlayFilePointer = application().player().getCurrentSong();
+        mSongPlaying = application().player().isSongPlaying();
+        mSongBuffering = application().player().isBuffering();
         update_playlist(application().player().getPlaylist());
     }
 
@@ -136,21 +179,28 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
 
     @Override
     public void onCurrentSongChanged(FilePointer filePointer) {
-
+        mPlayFilePointer = filePointer;
+        mSongPlaying = application().player().isSongPlaying();
+        mSongBuffering = true;
+        mPlaylistAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onCurrentSongReady(FilePointer filePointer) {
-
+        mPlayFilePointer = filePointer;
+        mSongBuffering = false;
+        mPlaylistAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onCurrentSongPlay() {
-
+        mSongPlaying = true;
+        mPlaylistAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onCurrentSongStop() {
-
+        mSongPlaying = false;
+        mPlaylistAdapter.notifyDataSetChanged();
     }
 }

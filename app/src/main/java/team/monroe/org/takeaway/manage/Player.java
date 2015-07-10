@@ -53,7 +53,6 @@ public class Player implements SongManager.Observer {
         for (SongManager songManager : mSongManagerPool) {
             songManager.onSongReady(filePointer);
         }
-
     }
 
     public synchronized void addPlayerListener(PlayerListener listener){
@@ -117,10 +116,10 @@ public class Player implements SongManager.Observer {
         }
     }
 
-    public synchronized void stop() {
-        log.i("Stop song");
+    public synchronized void pause() {
+        log.i("Pause song");
         mSongManagerPool.get(0).release();
-        mSongManagerPool.get(1).stop();
+        mSongManagerPool.get(1).pause();
         mSongPlayState = SongPlayState.STOP;
         notifyListeners(new Closure<PlayerListener, Void>() {
             @Override
@@ -235,7 +234,7 @@ public class Player implements SongManager.Observer {
 
     @Override
     public synchronized void onSongPreparedToPlay(SongManager songManager, final SongFile mSongFile) {
-        log.i("Play song [prepared] = "+mSongFile.getFilePointer().relativePath);
+        log.i("Play song [prepared] = " + mSongFile.getFilePointer().relativePath);
         if (songManager == mSongManagerPool.get(1)){
             mBuffering = false;
             notifyListeners(new Closure<PlayerListener, Void>() {
@@ -246,7 +245,7 @@ public class Player implements SongManager.Observer {
                 }
             });
 
-            log.i("Play song [prepared]. Start playing = "+mSongFile.getFilePointer().relativePath);
+            log.i("Play song [prepared]. Start playing = " + mSongFile.getFilePointer().relativePath);
             //top player ready start to play
             if (isSongPlaying()) {
                 songManager.play(mSongManagerPool.get(0).isPlaying());
@@ -320,13 +319,23 @@ public class Player implements SongManager.Observer {
 
 
     @Override
-    public synchronized void onSongPlayComplete(SongManager songManager, SongFile mSongFile) {
+    public synchronized void onSongPlayStop(SongManager songManager, SongFile mSongFile) {
         if (mSongFile != null && mSongFile == mSongAwaitingToRelease){
             mSongAwaitingToRelease.release();
             mSongAwaitingToRelease = null;
         }
         //Switch this to top
         //mSongManagerPool.add(0, mSongManagerPool.remove(mSongManagerPool.indexOf(songManager)));
+    }
+
+    @Override
+    public void onSongEnd(SongManager songManager) {
+            if (hasNext()) {
+                songManager.release();
+                playNext();
+            }else {
+                pause();
+            }
     }
 
     public synchronized FilePointer getCurrentSong() {

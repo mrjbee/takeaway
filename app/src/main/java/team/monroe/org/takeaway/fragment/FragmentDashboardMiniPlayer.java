@@ -142,7 +142,7 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     private void action_songActionButton() {
         ac_SongPlayButton.hide();
         if (application().player().isSongPlaying()){
-            application().player().stop();
+            application().player().pause();
         }else {
             application().player().resume();
         }

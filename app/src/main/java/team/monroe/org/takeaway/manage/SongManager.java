@@ -90,11 +90,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
 
     @Override
     public synchronized void onCompletion(MediaPlayer mp) {
-        //TODO: might be more tricky if song less then 5 seconds ;) as then fade animator going to be fadeout and no completion
-        if (mFadeAnimator!= null && mFadeAnimator.isRunning()){
-            mFadeAnimator.cancel();
-        }
-        mObserver.onSongPlayComplete(this, mSongFile);
+        mObserver.onSongEnd(this);
     }
 
     @Override
@@ -148,8 +144,8 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
 
-    public synchronized void stop() {
-        log.i("Request to stop");
+    public synchronized void pause() {
+        log.i("Request to pause");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }
@@ -157,7 +153,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             if (mMediaPlayer.isPlaying()){
                 mMediaPlayer.pause();
             }
-            mMediaPlayer.seekTo(0);
+            //mMediaPlayer.seekTo(0);
         }
     }
 
@@ -175,7 +171,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }
-        mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",mVolumeFraction, 0.2f);
+        mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",mVolumeFraction, 0.05f);
         mFadeAnimator.setDuration(1000 * 5);
         mFadeAnimator.setInterpolator(new DecelerateInterpolator(0.9f));
         mFadeAnimator.addListener(new AnimatorListenerSupport(){
@@ -197,7 +193,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
                 mMediaPlayer.stop();
             }
         }
-        mObserver.onSongPlayComplete(this, mSongFile);
+        mObserver.onSongPlayStop(this, mSongFile);
         mSongFile = null;
         mPrepared = false;
     }
@@ -207,6 +203,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
     public void resume() {
+        mVolumeFraction = 1f;
         if (mPrepared){
             mMediaPlayer.start();
         }
@@ -216,7 +213,8 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         void onCriticalError(SongManager songManager, Exception e);
         void onSongBroken(SongManager songManager, SongFile mSongFile);
         void onSongPreparedToPlay(SongManager songManager, SongFile mSongFile);
-        void onSongPlayComplete(SongManager songManager, SongFile mSongFile);
+        void onSongPlayStop(SongManager songManager, SongFile mSongFile);
+        void onSongEnd(SongManager songManager);
     }
 
 }

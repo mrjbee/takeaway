@@ -113,11 +113,12 @@
     <color name="text.light">#fff8f8f8</color>
     <color name="text.light.shadow">#66000000</color>
     <color name="text.light.darken">#83F8F8F8</color>
-    <color name="text.dark">#ff5d5d5d</color>
-    <color name="text.dark.lighter">#ff9d9d9d</color>
     <color name="text.dark.outer.glow">#b9ffffff</color>
+    <color name="text.dark.lighter">#ff9d9d9d</color>
+    <color name="text.dark">#ff5d5d5d</color>
     <color name="highlight">#ee002d</color>
     <color name="highlight2">#f01f37</color>
+    <color name="text.highlight">#ffef5563</color>
     <color name="transperent">#00FFFFFF</color>
     <color name="button.pressed">#2B000000</color>
 
