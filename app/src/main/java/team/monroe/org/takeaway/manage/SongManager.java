@@ -163,7 +163,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
 
     public synchronized void release() {
         if (mSongFile == null) return;
-        log.i("Request to releaseWithFade");
+        log.i("Request to release");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }
@@ -171,7 +171,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
     public synchronized void releaseWithFade() {
-        log.i("Request to releaseWithFade");
+        log.i("Request to release with fade");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
         }

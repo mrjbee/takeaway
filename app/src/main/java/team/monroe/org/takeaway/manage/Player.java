@@ -218,6 +218,7 @@ public class Player implements SongManager.Observer {
         }
 
         SongManager topSongManger = mSongManagerPool.get(0);
+        topSongManger.release();
         topSongManger.setup(mCurrentPlayingSong);
         mSongManagerPool.add(mSongManagerPool.remove(0));
 
