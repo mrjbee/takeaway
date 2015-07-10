@@ -153,7 +153,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         if (nextSongTime  == -1) return;
 
         mNextPlayTimer = new Timer("next_song_timer", true);
-        long fadeOutDuration = 1000 * 7;
+        long fadeOutDuration = 1000 * 5 * 2;
         if (nextSongTime < fadeOutDuration){
             log.i("[NEXT_SONG_TIME] No time doing now ");
             nextSongTimer_onTime();
