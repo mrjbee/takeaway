@@ -115,18 +115,20 @@ public class DownloadManager {
     }
 
     public synchronized void releaseStreamFile(SongFile.StreamFile streamFile) {
-        log.d("Release stream file "+streamFile.getFilePointer().relativePath);
+        log.d("Release cached file "+streamFile.getFilePointer().relativePath +" = "+streamFile.state);
         int index = mStreamFilesRequestList.indexOf(streamFile);
         if (index == -1){
-            log.e("Releasing ERROR "+streamFile.getFilePointer().relativePath);
+            log.e("Release cached file [ERROR] "+streamFile.getFilePointer().relativePath);
             throw new IllegalStateException("Unknown stream file");
         }
 
         mStreamFilesRequestList.remove(index);
         if (streamFile.state == SongFile.StreamFile.State.FINISHED){
-            log.d("Removing cached files "+streamFile.getFilePointer().relativePath);
+            log.d("Release cached file [REMOVE]: "+streamFile.getFilePointer().relativePath);
             File cacheFile = toCacheFile(streamFile);
             cacheFile.delete();
+        }else {
+            log.d("Release cached file [SKIPPED] "+streamFile.getFilePointer().relativePath);
         }
     }
 
@@ -161,7 +163,7 @@ public class DownloadManager {
             while ((count = inputStream.read(data)) != -1) {
                 if (Thread.currentThread().isInterrupted()) {
                     log.d("Downloading interrupted "+streamFile.getFilePointer().relativePath);
-                    streamFile.state = SongFile.StreamFile.State.NOT_STARTED;
+                    streamFile.state = SongFile.StreamFile.State.INTERRUPTED;
                     streamFile.transfer.releaseInput();
                     output.close();
                     streamFile.releaseSpace();

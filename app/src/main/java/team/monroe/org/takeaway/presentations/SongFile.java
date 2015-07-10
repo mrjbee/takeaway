@@ -118,7 +118,8 @@ public interface SongFile {
             NOT_STARTED,
             STARTED,
             FINISHED,
-            ERROR
+            ERROR,
+            INTERRUPTED
         }
     }
 }

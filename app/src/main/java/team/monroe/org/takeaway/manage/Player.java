@@ -153,13 +153,11 @@ public class Player implements SongManager.Observer {
             return;
         }
 
-        boolean currentPlayingSongReleaseRequired = true;
+        boolean currentPlayingSongReleaseRequired = response.indexOf(mCurrentPlayingSong) == -1;
         if (mSongPlayQueue != null) {
-            for (SongFile songFile : mSongPlayQueue) {
-                if (mCurrentPlayingSong != songFile && response.indexOf(songFile) == -1) {
-                    songFile.release();
-                }else if (mCurrentPlayingSong == songFile){
-                    currentPlayingSongReleaseRequired = false;
+            for (SongFile oldSongFile : mSongPlayQueue) {
+                if (mCurrentPlayingSong != oldSongFile && response.indexOf(oldSongFile) == -1) {
+                    oldSongFile.release();
                 }
             }
         }
@@ -298,6 +296,7 @@ public class Player implements SongManager.Observer {
     public synchronized void onSongPlayComplete(SongManager songManager, SongFile mSongFile) {
         if (mSongFile != null && mSongFile == mSongAwaitingToRelease){
             mSongAwaitingToRelease.release();
+            mSongAwaitingToRelease = null;
         }
         //Switch this to top
         //mSongManagerPool.add(0, mSongManagerPool.remove(mSongManagerPool.indexOf(songManager)));
