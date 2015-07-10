@@ -143,6 +143,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
     public synchronized boolean isPlaying() {
+        if (!mPrepared) return false;
         return mMediaPlayer.isPlaying();
     }
 

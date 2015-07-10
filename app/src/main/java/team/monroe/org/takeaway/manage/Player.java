@@ -88,24 +88,14 @@ public class Player implements SongManager.Observer {
         mPlaylistController.addToPlayList(filePointer);
     }
 
-    public synchronized void stop() {
-        mSongManagerPool.get(0).release();
-        mSongManagerPool.get(1).stop();
-        mSongPlayState = SongPlayState.STOP;
-        notifyListeners(new Closure<PlayerListener, Void>() {
-            @Override
-            public Void execute(PlayerListener arg) {
-                arg.onCurrentSongStop();
-                return null;
-            }
-        });
-    }
 
     public synchronized boolean resume() {
+        log.i("Resume song");
         SongManager songManager = mSongManagerPool.get(1);
         mSongPlayState = SongPlayState.PLAY;
         if (songManager.isSetupFor(mCurrentPlayingSong)){
             //resume
+            log.i("Resume song [actual resuming]");
             songManager.resume();
             notifyListeners(new Closure<PlayerListener, Void>() {
                 @Override
@@ -117,12 +107,28 @@ public class Player implements SongManager.Observer {
             return true;
         } else {
             if (mCurrentPlayingSong == null){
+                log.i("Resume song [nothing to resume]");
                 return false;
             }else {
                 //Waiting for callback
+                log.i("Resume song [postponed resume]. Waiting song for playing");
                 return true;
             }
         }
+    }
+
+    public synchronized void stop() {
+        log.i("Stop song");
+        mSongManagerPool.get(0).release();
+        mSongManagerPool.get(1).stop();
+        mSongPlayState = SongPlayState.STOP;
+        notifyListeners(new Closure<PlayerListener, Void>() {
+            @Override
+            public Void execute(PlayerListener arg) {
+                arg.onCurrentSongStop();
+                return null;
+            }
+        });
     }
 
     public synchronized void playFirstFromPlaylist() {
@@ -137,6 +143,7 @@ public class Player implements SongManager.Observer {
     }
 
     public synchronized void play(FilePointer filePointer) {
+        log.i("Play song");
         mCurrentSongFilePointer = filePointer;
         List<FilePointer> nearestPlaySongList = generateNextPlayQueue(filePointer);
         mModel.execute(GetSoundFiles.class, nearestPlaySongList, new Model.BackgroundResultCallback<List<SongFile>>() {
@@ -160,8 +167,10 @@ public class Player implements SongManager.Observer {
 
 
     private synchronized void process_playQueue(List<SongFile> response) {
+        log.i("Play song asynch [Song File List Ready]");
         if (!response.get(0).getFilePointer().equals(mCurrentSongFilePointer)) {
             //Old response
+            log.i("Play song asynch [Song List To Old]");
             return;
         }
 
@@ -183,7 +192,9 @@ public class Player implements SongManager.Observer {
         }
 
         mCurrentPlayingSong = response.get(0);
+        log.i("Play song asynch [current song] = "+mCurrentPlayingSong.getFilePointer().relativePath);
         if (mCurrentPlayingSong instanceof SongFile.NotAvailableSongFile) {
+            log.i("Play song asynch [current song bad] = "+mCurrentPlayingSong.getFilePointer().relativePath);
             mBuffering = false;
             mSongPlayState = SongPlayState.STOP;
             notifyListeners(new Closure<PlayerListener, Void>() {
@@ -221,6 +232,31 @@ public class Player implements SongManager.Observer {
         });
     }
 
+    @Override
+    public synchronized void onSongPreparedToPlay(SongManager songManager, final SongFile mSongFile) {
+        log.i("Play song [prepared] = "+mSongFile.getFilePointer().relativePath);
+        if (songManager == mSongManagerPool.get(1)){
+            mBuffering = false;
+            notifyListeners(new Closure<PlayerListener, Void>() {
+                @Override
+                public Void execute(PlayerListener arg) {
+                    arg.onCurrentSongReady(mSongFile.getFilePointer());
+                    return null;
+                }
+            });
+
+            log.i("Play song [prepared]. Start playing = "+mSongFile.getFilePointer().relativePath);
+            //top player ready start to play
+            if (isSongPlaying()) {
+                songManager.play(mSongManagerPool.get(0).isPlaying());
+            }
+            if (mSongManagerPool.get(0).isPlaying()){
+                mSongManagerPool.get(0).releaseWithFade();
+            }else {
+                mSongManagerPool.get(0).release();
+            }
+        }
+    }
 
     private synchronized List<FilePointer> generateNextPlayQueue(FilePointer filePointer) {
         List<FilePointer> answer = new ArrayList<>(4);
@@ -280,29 +316,7 @@ public class Player implements SongManager.Observer {
 
     }
 
-    @Override
-    public synchronized void onSongPreparedToPlay(SongManager songManager, final SongFile mSongFile) {
-        log.d("Song ready to play");
-        if (songManager == mSongManagerPool.get(1)){
-            mBuffering = false;
-            notifyListeners(new Closure<PlayerListener, Void>() {
-                @Override
-                public Void execute(PlayerListener arg) {
-                    arg.onCurrentSongReady(mSongFile.getFilePointer());
-                    return null;
-                }
-            });
 
-            log.d("Start playing song");
-            //top player ready start to play
-            if (isSongPlaying()) {
-                songManager.play(mSongManagerPool.get(0).isPlaying());
-            }
-            if (mSongManagerPool.get(0).isPlaying()){
-                mSongManagerPool.get(0).releaseWithFade();
-            }
-        }
-    }
 
     @Override
     public synchronized void onSongPlayComplete(SongManager songManager, SongFile mSongFile) {
