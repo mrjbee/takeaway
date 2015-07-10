@@ -130,11 +130,14 @@ public class Player implements SongManager.Observer {
         });
     }
 
-    public synchronized void playFirstFromPlaylist() {
+    private synchronized void playOnPlaylistChange() {
+
         if (mSongPlayState == SongPlayState.STOP || mSongPlayState == SongPlayState.PAUSED){
             return;
         }
-
+        if (mPlaylistController.hasSong(mCurrentSongFilePointer)){
+            return;
+        }
         FilePointer filePointer = mPlaylistController.getFirstSong();
         if (filePointer != mCurrentSongFilePointer){
             play(filePointer);
@@ -496,7 +499,7 @@ public class Player implements SongManager.Observer {
                        return null;
                    }
                });
-               playFirstFromPlaylist();
+               playOnPlaylistChange();
            }else {
                LOG.d("Playlist creation next task ...");
                startNextJob();
@@ -517,7 +520,7 @@ public class Player implements SongManager.Observer {
                        return null;
                    }
                });
-               playFirstFromPlaylist();
+               playOnPlaylistChange();
            }else {
                LOG.d("Playlist creation next task ...");
                startNextJob();
@@ -578,6 +581,11 @@ public class Player implements SongManager.Observer {
         public synchronized FilePointer getFirstSong() {
             if (mCurrentPlaylist == null || mCurrentPlaylist.songList.size() == 0) return null;
             return mCurrentPlaylist.songList.get(0);
+        }
+
+        public boolean hasSong(FilePointer songToCheck) {
+            if (mCurrentPlaylist == null || mCurrentPlaylist.songList.size() == 0) return false;
+            return mCurrentPlaylist.songList.indexOf(songToCheck) != -1;
         }
     }
 
