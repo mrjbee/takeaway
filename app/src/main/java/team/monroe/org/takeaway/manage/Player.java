@@ -34,7 +34,7 @@ public class Player implements SongManager.Observer {
     private List<SongFile> mSongPlayQueue;
     private ArrayList<SongManager> mSongManagerPool = new ArrayList<>();
     private boolean mBuffering = false;
-    private SongPlayState mSongPlayState = SongPlayState.STOP;
+    private SongPlayState mSongPlayState = SongPlayState.NOT_USED;
 
     public Player(Context context, Model model) {
         this.mModel = model;
@@ -122,6 +122,17 @@ public class Player implements SongManager.Observer {
                 //Waiting for callback
                 return true;
             }
+        }
+    }
+
+    public synchronized void playFirstFromPlaylist() {
+        if (mSongPlayState == SongPlayState.STOP || mSongPlayState == SongPlayState.PAUSED){
+            return;
+        }
+
+        FilePointer filePointer = mPlaylistController.getFirstSong();
+        if (filePointer != mCurrentSongFilePointer){
+            play(filePointer);
         }
     }
 
@@ -359,7 +370,7 @@ public class Player implements SongManager.Observer {
     }
 
     private static enum SongPlayState {
-        STOP, PAUSED, PLAY
+        NOT_USED, STOP, PAUSED, PLAY
     }
 
     private class PlaylistController{
@@ -461,6 +472,7 @@ public class Player implements SongManager.Observer {
                        return null;
                    }
                });
+               playFirstFromPlaylist();
            }else {
                LOG.d("Playlist creation next task ...");
                startNextJob();
@@ -481,6 +493,7 @@ public class Player implements SongManager.Observer {
                        return null;
                    }
                });
+               playFirstFromPlaylist();
            }else {
                LOG.d("Playlist creation next task ...");
                startNextJob();
@@ -537,7 +550,14 @@ public class Player implements SongManager.Observer {
             //TODO: shuffle and so on
             return mCurrentPlaylist.songList.get(0);
         }
+
+        public synchronized FilePointer getFirstSong() {
+            if (mCurrentPlaylist == null || mCurrentPlaylist.songList.size() == 0) return null;
+            return mCurrentPlaylist.songList.get(0);
+        }
     }
+
+
 
     class PlaylistUpdateJob implements Callable<Void> {
 

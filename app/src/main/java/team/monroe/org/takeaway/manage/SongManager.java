@@ -89,7 +89,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
     }
 
     @Override
-    public void onCompletion(MediaPlayer mp) {
+    public synchronized void onCompletion(MediaPlayer mp) {
         //TODO: might be more tricky if song less then 5 seconds ;) as then fade animator going to be fadeout and no completion
         if (mFadeAnimator!= null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
@@ -124,7 +124,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         mMediaPlayer.setVolume(volumeFraction, volumeFraction);
     }
 
-    public void play(boolean fadeIn) {
+    public synchronized void play(boolean fadeIn) {
         log.i("Request to play");
         if (mFadeAnimator != null && mFadeAnimator.isRunning()){
             mFadeAnimator.cancel();
@@ -190,7 +190,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         mFadeAnimator.start();
     }
 
-    private void actualStop() {
+    private synchronized void actualStop() {
         if (mPrepared) {
             if (mMediaPlayer.isPlaying()){
                 mMediaPlayer.stop();
@@ -201,7 +201,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         mPrepared = false;
     }
 
-    public boolean isSetupFor(SongFile song) {
+    public synchronized boolean isSetupFor(SongFile song) {
         return mSongFile == song;
     }
 

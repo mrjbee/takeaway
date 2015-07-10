@@ -20,7 +20,6 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     private View mLoadingPanel;
     private ListView mItemList;
     private View mNoItemsPanel;
-    private Data.DataChangeObserver<Playlist> playlistDataChangeObserver;
     private GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> mPlaylistAdapter;
     private TextView mPlaylistText;
     private TextView mSongsText;
@@ -88,7 +87,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     public void onStart() {
         super.onStart();
         application().player().addPlayerListener(this);
-        update_playlist(application().player().getPlaylist(), false);
+        update_playlist(application().player().getPlaylist());
     }
 
     @Override
@@ -105,10 +104,10 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
 
     @Override
     public void onPlaylistChanged(Playlist playlist) {
-        update_playlist(playlist, true);
+        update_playlist(playlist);
     }
 
-    private void update_playlist(Playlist playlist, boolean autoplay) {
+    private void update_playlist(Playlist playlist) {
         hide_all();
         if (playlist == null || playlist.songList.isEmpty()) {
             mNoItemsPanel.setVisibility(View.VISIBLE);
@@ -122,9 +121,6 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
             mPlaylistAdapter.notifyDataSetChanged();
 
             mItemList.setVisibility(View.VISIBLE);
-            if (autoplay) {
-                application().player().play(playlist.songList.get(0));
-            }
         }
     }
 
