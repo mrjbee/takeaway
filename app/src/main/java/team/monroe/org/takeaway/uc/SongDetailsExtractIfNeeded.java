@@ -2,22 +2,19 @@ package team.monroe.org.takeaway.uc;
 
 import android.media.MediaMetadataRetriever;
 
-import org.monroe.team.android.box.db.DAOSupport;
-import org.monroe.team.android.box.db.TransactionUserCase;
 import org.monroe.team.corebox.app.Model;
 import org.monroe.team.corebox.services.ServiceRegistry;
-
-import java.io.File;
-
-import team.monroe.org.takeaway.db.Dao;
+import org.monroe.team.corebox.uc.UserCaseSupport;
+import org.monroe.team.corebox.utils.P;
 import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.presentations.SongFile;
 
-public class ExploreSongDetails extends TransactionUserCase<SongFile, SongDetails, Dao> {
+public class SongDetailsExtractIfNeeded extends UserCaseSupport<SongFile, SongDetails> {
 
-    public ExploreSongDetails(ServiceRegistry serviceRegistry) {
+    public SongDetailsExtractIfNeeded(ServiceRegistry serviceRegistry) {
         super(serviceRegistry);
     }
+
 
     private SongDetails getSongDetails(SongFile request) {
         MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
@@ -33,11 +30,12 @@ public class ExploreSongDetails extends TransactionUserCase<SongFile, SongDetail
     }
 
     @Override
-    protected SongDetails transactionalExecute(SongFile request, Dao dao) {
-        SongDetails answer = using(Model.class).execute(GetSongDetailsFromDB.class, request.getFilePointer().getSongId());
+    protected SongDetails executeImpl(SongFile request) {
+        SongDetails answer = using(Model.class).execute(SongDetailsFromDB.class, request.getFilePointer().getSongId());
         if (answer == null){
             answer = getSongDetails(request);
-            dao.insertSongDetails(request.getFilePointer().getSongId(), answer.artist, answer.album, answer.title);
+            request.getFilePointer().details = answer;
+            using(Model.class).execute(SongDetailsSave.class, request.getFilePointer());
         }
         return answer;
     }

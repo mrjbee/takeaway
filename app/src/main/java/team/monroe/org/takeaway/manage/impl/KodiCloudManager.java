@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudManager;
@@ -181,6 +183,64 @@ public class KodiCloudManager implements CloudManager {
                 String vfsPath = json.asObject("result").asObject("details").asString("path");
 
                 return new KodiFileTransfer(prepare_VfsUrl(sourceConfiguration, vfsPath));
+            }
+        });
+    }
+
+    @Override
+    public Answer<Map<String, String>> getFileDetailsMap(final CloudConfigurationManager.Configuration sourceConfiguration, final String fileId) {
+
+        return sendAndBuild(new Send() {
+            @Override
+            public HttpManager.Response<Json> doSend() throws HttpManager.BadUrlException, HttpManager.NoRouteToHostException, HttpManager.InvalidBodyFormatException, IOException {
+                return httpManager.post(
+                        prepare_Url(sourceConfiguration),
+                        prepare_JsonRequest(
+                                rpc_request("Files.GetFileDetails")
+                                        .field("params",
+                                                JsonBuilder.object()
+                                                    .field("file", fileId)
+                                                    .field("media", "music")
+                                                    .field("properties", JsonBuilder.array()
+                                                                            .add("artist")
+                                                                            .add("album")
+                                                                            .add("title")))),
+                        prepare_RequestDetails(),
+                        prepare_JsonResponse()
+                );
+            }
+        }, new BuildBody<Map<String, String>>() {
+            @Override
+            public Map<String, String> doBuild(Json json) {
+                if (!json.asObject("result").exists("filedetails")) return null;
+                Json.JsonObject fileDetails = json.asObject("result").asObject("filedetails");
+                HashMap<String, String> answer =new HashMap<String, String>();
+                String album = fileDetails.asString("album");
+                String title = fileDetails.asString("title");
+
+                if (album != null && !album.isEmpty()){
+                    answer.put("album", album);
+                }
+                if (title != null && !title.isEmpty()){
+                    answer.put("title", title);
+                }
+
+                if (!fileDetails.exists("artist")){
+                    return answer;
+                }
+
+                Json.JsonArray artists = fileDetails.asArray("artist");
+                StringBuilder builder = new StringBuilder();
+                for(int i = 0; i < artists.size(); i++){
+                    String artist = artists.asString(i);
+                    if (artist != null && !artist.isEmpty()) {
+                        builder.append(" & "+artist.trim());
+                    }
+                }
+                if (builder.length() > 0){
+                    answer.put("artist", builder.substring(3));
+                }
+                return answer;
             }
         });
     }

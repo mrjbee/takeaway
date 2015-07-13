@@ -2,23 +2,26 @@ package team.monroe.org.takeaway.manage.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.CloudManager;
+import team.monroe.org.takeaway.manage.CloudMetadataProvider;
 import team.monroe.org.takeaway.manage.FileProvider;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
+import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 
-public class KodiFileProvider implements FileProvider {
+public class KodiCloudProvider implements FileProvider, CloudMetadataProvider {
 
     private final CloudManager cloudManager;
     private final CloudConnectionManager cloudConnectionManager;
     private final CloudConfigurationManager cloudConfigurationManager;
 
-    public KodiFileProvider(CloudManager cloudManager, CloudConnectionManager cloudConnectionManager, CloudConfigurationManager cloudConfigurationManager) {
+    public KodiCloudProvider(CloudManager cloudManager, CloudConnectionManager cloudConnectionManager, CloudConfigurationManager cloudConfigurationManager) {
         this.cloudManager = cloudManager;
         this.cloudConnectionManager = cloudConnectionManager;
         this.cloudConfigurationManager = cloudConfigurationManager;
@@ -44,6 +47,25 @@ public class KodiFileProvider implements FileProvider {
         CloudConfigurationManager.Configuration configuration = cloudConfigurationManager.get();
         CloudManager.RemoteFile sourceRemoteFile = getSourceForFilePointer(filePointer, configuration);
         return sourceRemoteFile.path + filePointer.relativePath;
+    }
+
+    @Override
+    public SongDetails getFiledDetails(FilePointer filePointer) throws FileOperationException {
+        if (filePointer.type != FilePointer.Type.FILE) return null;
+        CloudConfigurationManager.Configuration configuration = cloudConfigurationManager.get();
+        CloudManager.RemoteFile sourceRemoteFile = getSourceForFilePointer(filePointer, configuration);
+        CloudManager.Answer<Map<String,String>> fileDetails = cloudManager.getFileDetailsMap(configuration, sourceRemoteFile.path + filePointer.relativePath);
+        if (!fileDetails.isSuccess()){
+            throw new FileOperationException(null, FileOperationException.ErrorCode.from(fileDetails.status), fileDetails.errorDescription);
+        }
+
+        String artist = fileDetails.body.get("artist");
+        String album = fileDetails.body.get("album");
+        String title = fileDetails.body.get("title");
+        if (artist != null){
+            return new SongDetails(artist, album, title);
+        }
+        return null;
     }
 
     @Override
@@ -91,4 +113,5 @@ public class KodiFileProvider implements FileProvider {
     private String truncate(String path, String startWith) {
         return path.replaceFirst(startWith,"");
     }
+
 }

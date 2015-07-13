@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.manage.FileProvider;
 import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
@@ -32,13 +33,21 @@ public class GetFileContent extends UserCaseSupport<FilePointer, List<FilePointe
             return Collections.emptyList();
         }
 
-        FileProvider fileProvider = using(FileProvider.class);
+        final FileProvider fileProvider = using(FileProvider.class);
+        final CloudManager cloudManager = using(CloudManager.class);
+
         try {
-            List<FilePointer> answer = fileProvider.getNestedFiles(request);
+            final List<FilePointer> answer = fileProvider.getNestedFiles(request);
             Lists.each(answer, new Closure<FilePointer, Void>() {
                 @Override
                 public Void execute(FilePointer arg) {
-                    arg.details = using(Model.class).execute(GetSongDetailsFromDB.class, arg.getSongId());
+                    arg.details = using(Model.class).execute(SongDetailsFromDB.class, arg.getSongId());
+                    if (arg.details == null){
+                        arg.details = using(Model.class).execute(SongDetailsFromCloud.class, arg);
+                        if (arg.details != null){
+                            using(Model.class).execute(SongDetailsSave.class, arg);
+                        }
+                    }
                     return null;
                 }
             });
@@ -48,6 +57,7 @@ public class GetFileContent extends UserCaseSupport<FilePointer, List<FilePointe
                     return lhs.name.compareTo(rhs.name);
                 }
             });
+
             return answer;
         } catch (FileOperationException e) {
             throw new ApplicationException(e);

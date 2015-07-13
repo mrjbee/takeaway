@@ -21,9 +21,10 @@ import team.monroe.org.takeaway.db.TakeAwaySchema;
 import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.CloudManager;
+import team.monroe.org.takeaway.manage.CloudMetadataProvider;
 import team.monroe.org.takeaway.manage.DownloadManager;
 import team.monroe.org.takeaway.manage.FileProvider;
-import team.monroe.org.takeaway.manage.impl.KodiFileProvider;
+import team.monroe.org.takeaway.manage.impl.KodiCloudProvider;
 import team.monroe.org.takeaway.manage.impl.LocalFileProvider;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.impl.KodiCloudManager;
@@ -74,9 +75,10 @@ public class AppModel extends AndroidModel {
         CloudConfigurationManager configurationManager = new CloudConfigurationManager(context);
         serviceRegistry.registrate(CloudConfigurationManager.class, configurationManager);
         CloudManager cloudManager = new KodiCloudManager(new HttpManager());
-        FileProvider fileProvider = new KodiFileProvider(cloudManager, cloudConnectionManager, configurationManager);
+        KodiCloudProvider fileProvider = new KodiCloudProvider(cloudManager, cloudConnectionManager, configurationManager);
         serviceRegistry.registrate(CloudManager.class, cloudManager);
         serviceRegistry.registrate(FileProvider.class, fileProvider);
+        serviceRegistry.registrate(CloudMetadataProvider.class, fileProvider);
     }
 
     public interface DownloadObserver {

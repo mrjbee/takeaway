@@ -23,7 +23,7 @@ import team.monroe.org.takeaway.presentations.SongFile;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 import team.monroe.org.takeaway.uc.CheckCloudConnection;
-import team.monroe.org.takeaway.uc.ExploreSongDetails;
+import team.monroe.org.takeaway.uc.SongDetailsExtractIfNeeded;
 import team.monroe.org.takeaway.uc.GetCloudSources;
 import team.monroe.org.takeaway.uc.GetFileContent;
 
@@ -136,7 +136,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
     @Override
     public void onSongFileDownloadDone(final SongFile songFile) {
         if (songFile.getFilePointer().details != null) return;
-        fetchValue(ExploreSongDetails.class, songFile, new NoOpValueAdapter<SongDetails>(), new ValueObserver<SongDetails>() {
+        fetchValue(SongDetailsExtractIfNeeded.class, songFile, new NoOpValueAdapter<SongDetails>(), new ValueObserver<SongDetails>() {
             @Override
             public void onSuccess(final SongDetails value) {
                 songFile.getFilePointer().details = value;

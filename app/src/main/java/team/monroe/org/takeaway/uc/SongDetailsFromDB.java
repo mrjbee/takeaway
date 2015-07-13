@@ -7,9 +7,9 @@ import org.monroe.team.corebox.services.ServiceRegistry;
 import team.monroe.org.takeaway.db.Dao;
 import team.monroe.org.takeaway.presentations.SongDetails;
 
-public class GetSongDetailsFromDB extends TransactionUserCase<String, SongDetails, Dao> {
+public class SongDetailsFromDB extends TransactionUserCase<String, SongDetails, Dao> {
 
-    public GetSongDetailsFromDB(ServiceRegistry serviceRegistry) {
+    public SongDetailsFromDB(ServiceRegistry serviceRegistry) {
         super(serviceRegistry);
     }
 

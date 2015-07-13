@@ -1,6 +1,7 @@
 package team.monroe.org.takeaway.manage;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CloudManager {
 
@@ -8,6 +9,7 @@ public interface CloudManager {
     public Answer<List<RemoteFile>> getSources(CloudConfigurationManager.Configuration sourceConfiguration);
     public Answer<List<RemoteFile>> getFolderContent(CloudConfigurationManager.Configuration sourceConfiguration, String folderId);
     public Answer<DownloadManager.Transfer> createTransfer(CloudConfigurationManager.Configuration sourceConfiguration, String fileId);
+    Answer<Map<String,String>> getFileDetailsMap(CloudConfigurationManager.Configuration configuration, String fileId);
 
     public static class RemoteFile {
 
