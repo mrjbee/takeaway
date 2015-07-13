@@ -25,7 +25,7 @@ public class FilePointer implements Serializable {
         }else {
             normolizedName = name
                     .replaceAll("\\.[^ .]+$", "")
-                    .replaceFirst("^[0-9]+", "")
+                    .replaceFirst("^[0-9. ]+", "")
                     .replace("_", " ")
                     .replace("-", " ")
                     .replaceAll(" +"," ")
