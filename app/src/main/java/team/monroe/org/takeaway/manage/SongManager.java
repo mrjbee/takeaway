@@ -267,12 +267,22 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         return mSongFile == song;
     }
 
-    public void resume() {
+    public synchronized void resume() {
         mVolumeFraction = 1f;
         if (mPrepared){
             mMediaPlayer.start();
             nextSongTimer_schedule();
         }
+    }
+
+    public synchronized long getDuration(){
+        if (!mPrepared) return -1;
+        return mMediaPlayer.getDuration();
+    }
+
+    public synchronized long getPosition(){
+        if (!mPrepared) return -1;
+        return mMediaPlayer.getCurrentPosition();
     }
 
     public static interface Observer {

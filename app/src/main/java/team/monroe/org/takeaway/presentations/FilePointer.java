@@ -1,11 +1,13 @@
 package team.monroe.org.takeaway.presentations;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 public class FilePointer implements Serializable {
 
     public final Source source;
     public final String relativePath;
+    public final String normolizedName;
     public final String name;
     public final Type type;
 
@@ -14,10 +16,25 @@ public class FilePointer implements Serializable {
         this.relativePath = relativePath;
         this.name = name;
         this.type = type;
+        if (type == Type.FOLDER){
+            normolizedName = name
+                    .replace("_", " ")
+                    .replace("-", " ")
+                    .replaceAll(" +"," ")
+                    .replaceAll("^ +","");
+        }else {
+            normolizedName = name
+                    .replaceAll("\\.[^ .]+$", "")
+                    .replaceFirst("^[0-9]+", "")
+                    .replace("_", " ")
+                    .replace("-", " ")
+                    .replaceAll(" +"," ")
+                    .replaceAll("^ +","");
+        }
     }
 
     public String getNormalizedTitle(){
-       return name.replace(".mp3","").replace("_", " ").replace("-", " ").replaceAll(" +"," ");
+        return normolizedName;
     }
 
     @Override

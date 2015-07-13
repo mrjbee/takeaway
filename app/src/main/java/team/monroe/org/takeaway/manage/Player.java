@@ -392,6 +392,12 @@ public class Player implements SongManager.Observer {
         return mSongPlayState == SongPlayState.PLAY;
     }
 
+    public synchronized long[] getDurationAndPosition() {
+        SongManager songManager = mSongManagerPool.get(1);
+        long[] answer = new long[]{songManager.getDuration(), songManager.getPosition()};
+        return answer;
+    }
+
 
     public static interface PlayerListener {
         void onPlaylistCalculation();

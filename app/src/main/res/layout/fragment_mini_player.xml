@@ -6,6 +6,15 @@
     android:orientation="vertical"
     android:paddingTop="10dp">
 
+    <team.monroe.org.takeaway.view.ProgressView
+        android:id="@+id/progress_song"
+        android:layout_width="fill_parent"
+        android:layout_height="8dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        />
+
+
     <RelativeLayout
         android:id="@+id/panel_song_content"
         android:paddingLeft="20dp"

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 
+import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.app.ui.SlideTouchGesture;
 import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
@@ -18,6 +19,7 @@ import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
+import team.monroe.org.takeaway.view.ProgressView;
 
 public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity implements Player.PlayerListener {
 
@@ -30,6 +32,8 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     private boolean mReadyToPlay = false;
     private ImageButton mSongPlayBtn;
     private AppearanceController ac_SongPlayButton;
+    private ProgressView mSongProgressView;
+    private ApplicationSupport.PeriodicalAction mSongProgressUpdateAction;
 
     @Override
     protected int getLayoutId() {
@@ -41,6 +45,10 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         super.onActivityCreated(savedInstanceState);
         final View mSongContentPanel = view(R.id.panel_song_content);
         mSongPlayBtn = view(R.id.action_song_play, ImageButton.class);
+        mSongProgressView = view(R.id.progress_song, ProgressView.class);
+
+        mSongProgressView.setProgress(1, ProgressView.AnimationSpeed.NO_ANIMATION);
+
         mSongPlayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,12 +170,36 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         } else {
             onCurrentSongStop();
         }
+
+        mSongProgressUpdateAction = application().preparePeriodicalAction(new Runnable() {
+            @Override
+            public void run() {
+                update_SongProgress(true);
+            }
+        });
+        mSongProgressUpdateAction.start(500, 500);
+        update_SongProgress(false);
+    }
+
+    private void update_SongProgress(boolean animate) {
+        if (activity() == null) return;
+        long[] durationAndPosition = application().player().getDurationAndPosition();
+        float progress = 0;
+        if (durationAndPosition[0] != -1){
+            progress = (float) ((double)durationAndPosition[1]/ (double)durationAndPosition[0]);
+        }
+        if (animate) {
+            mSongProgressView.setProgress(progress, progress == 0 ? ProgressView.AnimationSpeed.SLOW : ProgressView.AnimationSpeed.NORMAL);
+        } else {
+            mSongProgressView.setProgress(progress, ProgressView.AnimationSpeed.NO_ANIMATION);
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
         application().player().removePlayerListener(this);
+        mSongProgressUpdateAction.stop();
     }
 
     private synchronized void update_currentSong(FilePointer filePointer, boolean animate) {
@@ -340,4 +372,5 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     private enum Position {
        NORMAL, IN_MOTION_TO_HIDE, IN_MOTION_TO_SHOW, LEFT, RIGHT
     }
+
 }

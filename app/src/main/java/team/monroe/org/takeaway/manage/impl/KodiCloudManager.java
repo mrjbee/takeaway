@@ -5,6 +5,7 @@ import org.monroe.team.android.box.json.JsonBuilder;
 import org.monroe.team.android.box.services.HttpManager;
 import org.monroe.team.corebox.log.L;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -143,9 +144,11 @@ public class KodiCloudManager implements CloudManager {
                 //"file":"/mnt/bigdata/Musik/Mark 2009/10-so_far_from_the_clyde.mp3","filetype":"file","label":"10-so_far_from_the_clyde.mp3","type":"unknown"
                 for (int i=0;i<sources.size();i++){
                     Json.JsonObject source = sources.asObject(i);
+                    String path = source.asString("file");
+                    File pathAsFile = new File(path);
                     answer.add(new RemoteFile(
                             source.asString("file"),
-                            source.asString("label"),
+                            pathAsFile.getName(),
                             "directory".equals(source.asString("filetype")))
                     );
                 }
