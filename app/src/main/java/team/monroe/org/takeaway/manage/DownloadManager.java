@@ -37,10 +37,11 @@ public class DownloadManager {
 
     private ExecutorService mCacheDownloadExecutor = Executors.newFixedThreadPool(2);
     private P<Future, SongFile.StreamFile> mCurrentCacheDownload;
+    private final Closure<SongFile, Void> onSongFileReadyFunction;
 
-
-    public DownloadManager(Context context) {
+    public DownloadManager(Context context, Closure<SongFile, Void> onSongFileReadyFunction) {
         this.context = context;
+        this.onSongFileReadyFunction = onSongFileReadyFunction;
         File cacheRootFile = _chooseCacheFolder(context);
         mCacheFolder = new File(cacheRootFile, "online");
         delete(mCacheFolder);
@@ -228,7 +229,7 @@ public class DownloadManager {
     }
 
     private void notifyFilePreparing(SongFile.StreamFile streamFile, boolean successful) {
-        Event.send(context, Events.FILE_PREPARED, new P<FilePointer, Boolean>(streamFile.getFilePointer(), successful));
+        onSongFileReadyFunction.execute(streamFile);
     }
 
     private File asCacheFile(FilePointer filePointer) {
@@ -257,4 +258,5 @@ public class DownloadManager {
     public static enum Priority{
         HIGHEST, HIGH, MEDIUM, LOW
     }
+
 }

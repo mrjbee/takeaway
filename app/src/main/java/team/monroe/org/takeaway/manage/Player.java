@@ -15,13 +15,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import team.monroe.org.takeaway.AppModel;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongFile;
 import team.monroe.org.takeaway.uc.GetFileContent;
 import team.monroe.org.takeaway.uc.GetSoundFiles;
 
-public class Player implements SongManager.Observer {
+public class Player implements SongManager.Observer, AppModel.DownloadObserver {
 
     private final static L.Logger log = L.create("PLAYER.PLAY");
     private final Model mModel;
@@ -36,22 +37,17 @@ public class Player implements SongManager.Observer {
     private boolean mBuffering = false;
     private SongPlayState mSongPlayState = SongPlayState.NOT_USED;
 
-    public Player(Context context, Model model) {
+    public Player(Context context, AppModel model) {
         this.mModel = model;
-        Event.subscribeOnEvent(context, this, Events.FILE_PREPARED, new Closure<P<FilePointer, Boolean>, Void>() {
-            @Override
-            public Void execute(P<FilePointer, Boolean> filePrepared) {
-                onFileReady(filePrepared.first, filePrepared.second);
-                return null;
-            }
-        });
+        model.downloadObservers.add(this);
         mSongManagerPool.add(new SongManager("PRIMARY", this));
         mSongManagerPool.add(new SongManager("SECONDARY", this));
     }
 
-    private synchronized void onFileReady(FilePointer filePointer, boolean readyStatus) {
+    @Override
+    public synchronized void onSongFileDownloadDone(SongFile songFile) {
         for (SongManager songManager : mSongManagerPool) {
-            songManager.onSongReady(filePointer);
+            songManager.onSongReady(songFile.getFilePointer());
         }
     }
 
@@ -397,6 +393,8 @@ public class Player implements SongManager.Observer {
         long[] answer = new long[]{songManager.getDuration(), songManager.getPosition()};
         return answer;
     }
+
+
 
 
     public static interface PlayerListener {

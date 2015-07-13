@@ -15,13 +15,15 @@ import org.monroe.team.android.box.utils.DisplayUtils;
 
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
 
+import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
+import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.view.ProgressView;
 
-public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity implements Player.PlayerListener {
+public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver {
 
     private FilePointer mFilePointer;
 
@@ -159,6 +161,7 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     @Override
     public void onStart() {
         super.onStart();
+        application().observers_songDetails.add(this);
         application().player().addPlayerListener(this);
         FilePointer filePointer = application().player().getCurrentSong();
         update_currentSong(filePointer, false);
@@ -306,6 +309,11 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     private void update_songUI() {
         if (mFilePointer == null)return;
         view_text(R.id.text_song_caption).setText(mFilePointer.getNormalizedTitle());
+        if (mFilePointer.details != null){
+            if (mFilePointer.details.title != null){
+                view_text(R.id.text_song_caption).setText(mFilePointer.details.title);
+            }
+        }
     }
 
     private void update_songBufferUI() {
@@ -366,6 +374,14 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
     private void updateButtonIcon(final int drawable_icon) {
         mSongPlayBtn.setImageResource(drawable_icon);
         ac_SongPlayButton.show();
+    }
+
+    @Override
+    public void onDetails(FilePointer pointer, SongDetails songDetails) {
+            if (pointer.equals(mFilePointer)){
+                mFilePointer.details = songDetails;
+                update_songUI();
+            }
     }
 
 

@@ -7,6 +7,8 @@ import org.monroe.team.android.box.event.Event;
 import org.monroe.team.android.box.services.SettingManager;
 import org.monroe.team.android.box.utils.AndroidLogImplementation;
 import org.monroe.team.corebox.log.L;
+import org.monroe.team.corebox.utils.Closure;
+import org.monroe.team.corebox.utils.ObserverSupport;
 
 import java.util.List;
 
@@ -16,14 +18,16 @@ import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.presentations.FilePointer;
-import team.monroe.org.takeaway.presentations.Playlist;
+import team.monroe.org.takeaway.presentations.SongDetails;
+import team.monroe.org.takeaway.presentations.SongFile;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 import team.monroe.org.takeaway.uc.CheckCloudConnection;
+import team.monroe.org.takeaway.uc.ExploreSongDetails;
 import team.monroe.org.takeaway.uc.GetCloudSources;
 import team.monroe.org.takeaway.uc.GetFileContent;
 
-public class App extends ApplicationSupport<AppModel> {
+public class App extends ApplicationSupport<AppModel> implements AppModel.DownloadObserver{
 
     static {
         L.setup(new AndroidLogImplementation());
@@ -31,6 +35,7 @@ public class App extends ApplicationSupport<AppModel> {
 
     public PersistRangeDataProvider<FilePointer, List<FilePointer>> data_range_folder;
     public Data<List<Source>> data_sources;
+    public final ObserverSupport<OnSongDetailsObserver> observers_songDetails = new ObserverSupport<>();
 
     @Override
     protected void onPostCreate() {
@@ -60,6 +65,15 @@ public class App extends ApplicationSupport<AppModel> {
         };
 
         model().usingService(CloudConnectionManager.class).startWatcher();
+        listener_addDownloadManager(this);
+    }
+
+    public void listener_addDownloadManager(AppModel.DownloadObserver observer) {
+        model().downloadObservers.add(observer);
+    }
+
+    public void listener_removeDownloadManager(AppModel.DownloadObserver observer) {
+        model().downloadObservers.remove(observer);
     }
 
     @Override
@@ -117,5 +131,33 @@ public class App extends ApplicationSupport<AppModel> {
 
     public Player player(){
         return model().usingService(Player.class);
+    }
+
+    @Override
+    public void onSongFileDownloadDone(final SongFile songFile) {
+        if (songFile.getFilePointer().details != null) return;
+        fetchValue(ExploreSongDetails.class, songFile, new NoOpValueAdapter<SongDetails>(), new ValueObserver<SongDetails>() {
+            @Override
+            public void onSuccess(final SongDetails value) {
+                songFile.getFilePointer().details = value;
+                observers_songDetails.notify(new Closure<OnSongDetailsObserver, Void>() {
+                    @Override
+                    public Void execute(OnSongDetailsObserver arg) {
+                        arg.onDetails(songFile.getFilePointer(), value);
+                        return null;
+                    }
+                });
+            }
+
+            @Override
+            public void onFail(Throwable exception) {
+                processException(exception);
+            }
+
+        });
+    }
+
+    public interface OnSongDetailsObserver {
+        public void onDetails(FilePointer pointer, SongDetails songDetails);
     }
 }

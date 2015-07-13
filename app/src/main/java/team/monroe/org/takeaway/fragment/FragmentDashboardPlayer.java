@@ -10,12 +10,15 @@ import android.widget.TextView;
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 
+import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
+import team.monroe.org.takeaway.presentations.SongDetails;
+import team.monroe.org.takeaway.view.FormatUtils;
 
-public class FragmentDashboardPlayer extends FragmentDashboardActivity implements Player.PlayerListener{
+public class FragmentDashboardPlayer extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver {
 
     private View mLoadingPanel;
     private ListView mItemList;
@@ -71,8 +74,8 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
                             }
                         });
                         if (position == 0) separator.setVisibility(View.GONE);
-                        caption.setText(filePointer.getNormalizedTitle());
-                        description.setText(filePointer.relativePath);
+                        caption.setText(FormatUtils.getSongTitle(filePointer, getResources()));
+                        description.setText(FormatUtils.getArtistAlbumString(filePointer, getResources()));
                         int color = 0;
                         int coverImageResource = R.drawable.android_note_lightgray;
                         float coverAlpha = 1f;
@@ -131,6 +134,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
         mSongPlaying = application().player().isSongPlaying();
         mSongBuffering = application().player().isBuffering();
         update_playlist(application().player().getPlaylist());
+        application().observers_songDetails.add(this);
     }
 
     @Override
@@ -201,6 +205,11 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     @Override
     public void onCurrentSongStop() {
         mSongPlaying = false;
+        mPlaylistAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDetails(FilePointer pointer, SongDetails songDetails) {
         mPlaylistAdapter.notifyDataSetChanged();
     }
 }

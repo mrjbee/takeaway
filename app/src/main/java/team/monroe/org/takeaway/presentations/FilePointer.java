@@ -10,6 +10,7 @@ public class FilePointer implements Serializable {
     public final String normolizedName;
     public final String name;
     public final Type type;
+    public SongDetails details;
 
     public FilePointer(Source source, String relativePath, String name, Type type) {
         this.source = source;
@@ -55,6 +56,10 @@ public class FilePointer implements Serializable {
         int result = source.hashCode();
         result = 31 * result + relativePath.hashCode();
         return result;
+    }
+
+    public String getSongId() {
+       return source.id + ":"+relativePath;
     }
 
     public static enum Type {

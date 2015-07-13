@@ -1,8 +1,11 @@
 package team.monroe.org.takeaway.uc;
 
 import org.monroe.team.android.box.services.SettingManager;
+import org.monroe.team.corebox.app.Model;
 import org.monroe.team.corebox.services.ServiceRegistry;
 import org.monroe.team.corebox.uc.UserCaseSupport;
+import org.monroe.team.corebox.utils.Closure;
+import org.monroe.team.corebox.utils.Lists;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +35,13 @@ public class GetFileContent extends UserCaseSupport<FilePointer, List<FilePointe
         FileProvider fileProvider = using(FileProvider.class);
         try {
             List<FilePointer> answer = fileProvider.getNestedFiles(request);
+            Lists.each(answer, new Closure<FilePointer, Void>() {
+                @Override
+                public Void execute(FilePointer arg) {
+                    arg.details = using(Model.class).execute(GetSongDetailsFromDB.class, arg.getSongId());
+                    return null;
+                }
+            });
             Collections.sort(answer, new Comparator<FilePointer>() {
                 @Override
                 public int compare(FilePointer lhs, FilePointer rhs) {
