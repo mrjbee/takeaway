@@ -13,9 +13,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,21 +33,34 @@ public class DownloadManager {
     private final Context context;
     private final File mCacheFolder;
 
-    private final List<SongFile.StreamFile> mStreamFilesRequestList = new ArrayList<>();
+    private final List<P<String, WeakReference<SongFile.StreamFile>>> mStreamFileCache = new ArrayList<>();
 
     private ExecutorService mCacheDownloadExecutor = Executors.newFixedThreadPool(2);
     private P<Future, SongFile.StreamFile> mCurrentCacheDownload;
 
+
     public DownloadManager(Context context) {
         this.context = context;
-        File cacheRootFile = chooseCacheFolder(context);
+        File cacheRootFile = _chooseCacheFolder(context);
         mCacheFolder = new File(cacheRootFile, "online");
+        delete(mCacheFolder);
         if (!mCacheFolder.exists() && !mCacheFolder.mkdirs()){
            throw new IllegalStateException("Could not create cache folder");
         }
     }
 
-    private File chooseCacheFolder(Context context) {
+    private void delete(File folder) {
+        for (File file : folder.listFiles()) {
+            if (file.isDirectory()){
+                delete(file);
+            }else {
+                file.delete();
+            }
+        }
+        folder.delete();
+    }
+
+    private File _chooseCacheFolder(Context context) {
         File sdcard = Environment.getExternalStorageDirectory();
         if (sdcard.exists()){
             File answer = new File(sdcard, "TakeAway");
@@ -56,19 +71,21 @@ public class DownloadManager {
         return context.getExternalCacheDir();
     }
 
-    public synchronized SongFile createStreamFile(FilePointer filePointer, Transfer transfer, Priority priority) {
-        SongFile.StreamFile streamFile = (SongFile.StreamFile) renewExistingStreamFile(filePointer, priority);
+    public synchronized SongFile streamFileCreate(FilePointer filePointer, Transfer transfer, Priority priority) {
+        SongFile.StreamFile streamFile = (SongFile.StreamFile) streamFileFromCache(filePointer, priority);
         if (streamFile == null){
-            streamFile = new SongFile.StreamFile(filePointer, priority, transfer, this);
-            mStreamFilesRequestList.add(streamFile);
+            File cacheFile = asCacheFile(filePointer);
+            streamFile = new SongFile.StreamFile(filePointer, priority, transfer, this, cacheFile);
+            mStreamFileCache.add(new P<String, WeakReference<SongFile.StreamFile>>(cacheFile.getAbsolutePath(), new WeakReference<SongFile.StreamFile>(streamFile)));
         }
         return streamFile;
     }
 
 
-    public synchronized SongFile renewExistingStreamFile(FilePointer filePointer, Priority priority) {
-        for (SongFile.StreamFile streamFile : mStreamFilesRequestList) {
-                if (streamFile.getFilePointer().equals(filePointer)){
+    public synchronized SongFile streamFileFromCache(FilePointer filePointer, Priority priority) {
+        for (P<String, WeakReference<SongFile.StreamFile>> stringWeakReferenceP : mStreamFileCache) {
+            SongFile.StreamFile streamFile = stringWeakReferenceP.second.get();
+                if (streamFile != null && streamFile.getFilePointer().equals(filePointer)){
                     streamFile.priority = priority;
                     return streamFile;
                 }
@@ -76,83 +93,103 @@ public class DownloadManager {
         return null;
     }
 
-    public synchronized void reorderStreamFileQueue() {
-
-        Collections.sort(mStreamFilesRequestList, new Comparator<SongFile.StreamFile>() {
+    public synchronized void streamFileStartNextDownloading() {
+        Collections.sort(mStreamFileCache, new Comparator<P<String, WeakReference<SongFile.StreamFile>>>() {
             @Override
-            public int compare(SongFile.StreamFile lhs, SongFile.StreamFile rhs) {
-                return lhs.priority.compareTo(rhs.priority);
+            public int compare(P<String, WeakReference<SongFile.StreamFile>> lhs, P<String, WeakReference<SongFile.StreamFile>> rhs) {
+                SongFile.StreamFile lsf = lhs.second.get();
+                SongFile.StreamFile rsf = rhs.second.get();
+                if (lsf == null) return -1;
+                if (rsf == null) return 1;
+                return lsf.priority.compareTo(rsf.priority);
             }
         });
 
-        SongFile.StreamFile candidateStreamFile = Lists.find(mStreamFilesRequestList, new Closure<SongFile.StreamFile, Boolean>() {
+        P<String, WeakReference<SongFile.StreamFile>> candidateStreamFileP = Lists.find(mStreamFileCache, new Closure<P<String, WeakReference<SongFile.StreamFile>>, Boolean>() {
             @Override
-            public Boolean execute(SongFile.StreamFile arg) {
-                return arg.state != SongFile.StreamFile.State.FINISHED;
+            public Boolean execute(P<String, WeakReference<SongFile.StreamFile>> arg) {
+                SongFile.StreamFile file = arg.second.get();
+                return  file != null && file.state != SongFile.StreamFile.State.FINISHED;
             }
         });
 
+        SongFile.StreamFile candidateStreamFile = candidateStreamFileP == null? null: candidateStreamFileP.second.get();
+
+        //Check if current downloading not equals to current downloading
         if (mCurrentCacheDownload != null) {
             if (candidateStreamFile == null || mCurrentCacheDownload.second == candidateStreamFile) {
                 return;
             }
             mCurrentCacheDownload.first.cancel(true);
         }
-
-        scheduleCacheDownloading(candidateStreamFile);
+        if (candidateStreamFile == null) return;
+        _scheduleCacheDownloading(candidateStreamFile);
     }
 
-    private void scheduleCacheDownloading(SongFile.StreamFile candidateStreamFile) {
+    private synchronized void clearCache() {
+        Lists.iterateAndRemove(mStreamFileCache, new Closure<Iterator<P<String, WeakReference<SongFile.StreamFile>>>, Boolean>() {
+            @Override
+            public Boolean execute(Iterator<P<String, WeakReference<SongFile.StreamFile>>> arg) {
+                P<String, WeakReference<SongFile.StreamFile>> pair = arg.next();
+                if (pair.second.get() == null) {
+                    if (!clearCacheCheckFileUsage(pair.first)) {
+                        boolean deleteResult = new File(pair.first).delete();
+                        log.i("Removing cache file [status " + deleteResult + "] : " + pair.first);
+                    }
+                    arg.remove();
+                }
+                return false;
+            }
+        });
+    }
+
+    private boolean clearCacheCheckFileUsage(String first) {
+        for (P<String, WeakReference<SongFile.StreamFile>> stringWeakReferenceP : mStreamFileCache) {
+            if (stringWeakReferenceP.first.equals(first) && stringWeakReferenceP.second.get() != null){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void _scheduleCacheDownloading(SongFile.StreamFile candidateStreamFile) {
         Future future = mCacheDownloadExecutor.submit(candidateStreamFile);
         mCurrentCacheDownload = new P<>(future, candidateStreamFile);
     }
 
 
-    public synchronized void updateStreamFilePriority(Priority priority) {
-        for (SongFile.StreamFile streamFile : mStreamFilesRequestList) {
-            streamFile.priority = priority;
+    public synchronized void streamFileQueuePriorityUpdate(Priority priority) {
+        for (P<String, WeakReference<SongFile.StreamFile>> stringWeakReferenceP : mStreamFileCache) {
+            SongFile.StreamFile streamFile = stringWeakReferenceP.second.get();
+            if (streamFile != null){
+                streamFile.priority = priority;
+            }
         }
     }
 
-    public synchronized void releaseStreamFile(SongFile.StreamFile streamFile) {
-        log.d("Release cached file "+streamFile.getFilePointer().relativePath +" = "+streamFile.state);
-        int index = mStreamFilesRequestList.indexOf(streamFile);
-        if (index == -1){
-            log.e("Release cached file [ERROR] "+streamFile.getFilePointer().relativePath);
-            throw new IllegalStateException("Unknown stream file");
-        }
-
-        mStreamFilesRequestList.remove(index);
-        if (streamFile.state == SongFile.StreamFile.State.FINISHED){
-            log.d("Release cached file [REMOVE]: "+streamFile.getFilePointer().relativePath);
-            File cacheFile = toCacheFile(streamFile);
-            cacheFile.delete();
-        }else {
-            log.d("Release cached file [SKIPPED] "+streamFile.getFilePointer().relativePath);
-        }
+    public synchronized void streamFileRelease(SongFile.StreamFile streamFile) {
+        /* Nothing as working using week references */
     }
 
-    public void downloadInCache(SongFile.StreamFile streamFile) {
+    public void streamFileDownload(SongFile.StreamFile streamFile) {
+        clearCache();
         log.d("Start actual downloading "+streamFile.getFilePointer().relativePath);
         if (streamFile.state == SongFile.StreamFile.State.FINISHED){
             log.d("File already downloaded "+streamFile.getFilePointer().relativePath);
-            reorderStreamFileQueue();
+            streamFileStartNextDownloading();
             return;
         }
         streamFile.state = SongFile.StreamFile.State.STARTED;
-        File cacheFile = toCacheFile(streamFile);
+        File cacheFile = streamFile.cacheFile;
         File cacheFileFolder = cacheFile.getParentFile();
         if (!cacheFileFolder.exists() && !cacheFileFolder.mkdirs()){
             log.w("Coulnot create folder", cacheFileFolder.getAbsolutePath());
             streamFile.state = SongFile.StreamFile.State.ERROR;
             notifyFilePreparing(streamFile, false);
-            reorderStreamFileQueue();
+            streamFileStartNextDownloading();
             return;
         }
-
-        streamFile.cacheFile = cacheFile;
-        streamFile.releaseSpace();
-
+        cacheFile.delete();
         FileOutputStream output = null;
         try {
             log.d("Open stream "+streamFile.getFilePointer().relativePath);
@@ -166,7 +203,6 @@ public class DownloadManager {
                     streamFile.state = SongFile.StreamFile.State.INTERRUPTED;
                     streamFile.transfer.releaseInput();
                     output.close();
-                    streamFile.releaseSpace();
                     return;
                 }
                 output.write(data, 0, count);
@@ -175,10 +211,9 @@ public class DownloadManager {
         } catch (Exception e) {
             log.e("Error during downloading "+streamFile.getFilePointer().relativePath, e);
             streamFile.state = SongFile.StreamFile.State.ERROR;
-            streamFile.releaseSpace();
             streamFile.transfer.releaseInput();
             notifyFilePreparing(streamFile, false);
-            reorderStreamFileQueue();
+            streamFileStartNextDownloading();
         }
 
         if (output != null) try {
@@ -189,16 +224,16 @@ public class DownloadManager {
         streamFile.transfer.releaseInput();
         streamFile.state = SongFile.StreamFile.State.FINISHED;
         notifyFilePreparing(streamFile, true);
-        reorderStreamFileQueue();
+        streamFileStartNextDownloading();
     }
 
     private void notifyFilePreparing(SongFile.StreamFile streamFile, boolean successful) {
         Event.send(context, Events.FILE_PREPARED, new P<FilePointer, Boolean>(streamFile.getFilePointer(), successful));
     }
 
-    private File toCacheFile(SongFile.StreamFile streamFile) {
-        File answer = new File(mCacheFolder, streamFile.getFilePointer().source.id);
-        answer = new File(answer, streamFile.getFilePointer().relativePath);
+    private File asCacheFile(FilePointer filePointer) {
+        File answer = new File(mCacheFolder, filePointer.source.id);
+        answer = new File(answer, filePointer.relativePath);
         return answer;
     }
 

@@ -74,18 +74,19 @@ public interface SongFile {
         public final DownloadManager.Transfer transfer;
         public State state = State.NOT_STARTED;
         public final DownloadManager downloadManager;
-        public File cacheFile;
+        public final File cacheFile;
 
-        public StreamFile(FilePointer filePointer, DownloadManager.Priority priority, DownloadManager.Transfer transfer, DownloadManager downloadManager) {
+        public StreamFile(FilePointer filePointer, DownloadManager.Priority priority, DownloadManager.Transfer transfer, DownloadManager downloadManager, File cacheFile) {
             super(filePointer);
             this.priority = priority;
             this.transfer = transfer;
             this.downloadManager = downloadManager;
+            this.cacheFile = cacheFile;
         }
 
         @Override
         public synchronized void release() {
-            downloadManager.releaseStreamFile(this);
+            downloadManager.streamFileRelease(this);
         }
 
         @Override
@@ -106,13 +107,8 @@ public interface SongFile {
 
         @Override
         public synchronized void run() {
-            downloadManager.downloadInCache(this);
+            downloadManager.streamFileDownload(this);
         }
-
-        public boolean releaseSpace() {
-            return !cacheFile.exists() || cacheFile.delete();
-        }
-
 
         public enum State{
             NOT_STARTED,
