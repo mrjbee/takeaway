@@ -49,6 +49,11 @@
     <style name="Text.Body.Smaller" parent="Text.Body">
         <item name="android:textSize">14sp</item>
     </style>
+
+    <style name="Text.Body.Small" parent="Text.Body">
+        <item name="android:textSize">10sp</item>
+    </style>
+
     <style name="Text.Body.Light" parent="Text.Body">
         <item name="android:textColor">@color/text.light</item>
         <item name="android:textColorHint">@color/text.light.darken</item>

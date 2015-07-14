@@ -1,11 +1,10 @@
 package team.monroe.org.takeaway.fragment;
 
-/**
- * Created by mrjbee on 6/11/15.
- */
-public class FragmentDashboardSlideHome extends FragmentDashboardMockSlide {
+import team.monroe.org.takeaway.R;
+
+public class FragmentDashboardSlideHome extends FragmentDashboardSlide {
     @Override
-    protected String getHelloString() {
-        return "Home";
+    protected int getLayoutId() {
+        return R.layout.fragment_dashboard_home_slide;
     }
 }
