@@ -2,6 +2,8 @@ package team.monroe.org.takeaway.view;
 
 import android.content.res.Resources;
 
+import org.monroe.team.corebox.utils.DateUtils;
+
 import team.monroe.org.takeaway.presentations.FilePointer;
 
 final public class FormatUtils {
@@ -49,6 +51,20 @@ final public class FormatUtils {
             return fallbackString;
         }else {
             return filePointer.details.artist;
+        }
+    }
+
+    public static String toTimeString(long timeMs) {
+        long[] periods = DateUtils.splitperiod(timeMs);
+        return asDoubleDigitString(periods[2])+":"+asDoubleDigitString(periods[3]);
+    }
+
+    private static String asDoubleDigitString(Number period) {
+        String string = period.toString();
+        if (string.length() == 1){
+            return "0"+string;
+        }else {
+           return string;
         }
     }
 }

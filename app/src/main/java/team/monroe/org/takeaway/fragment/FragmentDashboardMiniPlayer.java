@@ -27,15 +27,12 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
 
     private FilePointer mFilePointer;
 
-
     private AppearanceController ac_Content_showFromRight;
     private AppearanceController ac_Content_showFromLeft;
     private Position mPosition = Position.NORMAL;
     private boolean mReadyToPlay = false;
     private ImageButton mSongPlayBtn;
     private AppearanceController ac_SongPlayButton;
-    private ProgressView mSongProgressView;
-    private ApplicationSupport.PeriodicalAction mSongProgressUpdateAction;
 
     @Override
     protected int getLayoutId() {
@@ -47,10 +44,6 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         super.onActivityCreated(savedInstanceState);
         final View mSongContentPanel = view(R.id.panel_song_content);
         mSongPlayBtn = view(R.id.action_song_play, ImageButton.class);
-        mSongProgressView = view(R.id.progress_song, ProgressView.class);
-
-        mSongProgressView.setProgress(1, ProgressView.AnimationSpeed.NO_ANIMATION);
-
         mSongPlayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,35 +167,12 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
             onCurrentSongStop();
         }
 
-        mSongProgressUpdateAction = application().preparePeriodicalAction(new Runnable() {
-            @Override
-            public void run() {
-                update_SongProgress(true);
-            }
-        });
-        mSongProgressUpdateAction.start(500, 500);
-        update_SongProgress(false);
-    }
-
-    private void update_SongProgress(boolean animate) {
-        if (activity() == null) return;
-        long[] durationAndPosition = application().player().getDurationAndPosition();
-        float progress = 0;
-        if (durationAndPosition[0] != -1){
-            progress = (float) ((double)durationAndPosition[1]/ (double)durationAndPosition[0]);
-        }
-        if (animate) {
-            mSongProgressView.setProgress(progress, progress == 0 ? ProgressView.AnimationSpeed.SLOW : ProgressView.AnimationSpeed.NORMAL);
-        } else {
-            mSongProgressView.setProgress(progress, ProgressView.AnimationSpeed.NO_ANIMATION);
-        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
         application().player().removePlayerListener(this);
-        mSongProgressUpdateAction.stop();
     }
 
     private synchronized void update_currentSong(FilePointer filePointer, boolean animate) {
