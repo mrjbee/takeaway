@@ -54,7 +54,7 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
         mSecondaryHeader = view(R.id.panel_secondary_header, ViewGroup.class);
 
         ac_secondaryPanel = animateAppearance(mSecondaryHeader, heightSlide((int) DisplayUtils.dpToPx(50, getResources()),0))
-                .showAnimation(duration_constant(500), interpreter_overshot())
+                .showAnimation(duration_constant(500), interpreter_accelerate_decelerate())
                 .hideAnimation(duration_constant(300), interpreter_accelerate(0.9f))
                 .hideAndGone()
                 .build();
