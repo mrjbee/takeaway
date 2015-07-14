@@ -27,4 +27,28 @@ final public class FormatUtils {
            return "by "+ artist;
        }
     }
+
+    public static String getArtistString(FilePointer filePointer, Resources resources) {
+        if (filePointer.details == null || filePointer.details.artist == null || filePointer.details.artist.isEmpty()){
+            return "Unknown Artist";
+        }else {
+            return filePointer.details.artist;
+        }
+    }
+
+    public static String getAlbumString(FilePointer filePointer, Resources resources) {
+        if (filePointer.details == null || filePointer.details.album == null || filePointer.details.album.isEmpty()){
+            return "Unknown Album";
+        }else {
+            return filePointer.details.album;
+        }
+    }
+
+    public static String getArtistString(FilePointer filePointer, String fallbackString) {
+        if (filePointer.details == null || filePointer.details.album == null || filePointer.details.album.isEmpty()){
+            return fallbackString;
+        }else {
+            return filePointer.details.artist;
+        }
+    }
 }

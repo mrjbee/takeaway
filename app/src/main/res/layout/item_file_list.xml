@@ -44,16 +44,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Caption"
-            style="@style/Text.Body.Smaller"
+            style="@style/Text.Body.Bigger"
             />
 
         <TextView
+            android:paddingTop="5dp"
             android:id="@+id/item_description"
             android:layout_below="@+id/item_caption"
             android:layout_alignLeft="@+id/item_caption"
             android:layout_width="wrap_content"
+            android:maxWidth="100dp"
             android:layout_height="wrap_content"
-            android:text="File"
+            android:text="Description"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="15dp"
+            style="@style/Text.Body.Smaller"
+            />
+        <TextView
+            android:id="@+id/item_description_2"
+            android:layout_toRightOf="@+id/item_description"
+            android:layout_alignBaseline="@+id/item_description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Description 2"
+            android:layout_marginRight="20dp"
             android:paddingBottom="15dp"
             style="@style/Text.Body.Optional"
             />

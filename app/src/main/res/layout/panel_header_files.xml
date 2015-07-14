@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:text="Media Collection"
                 android:singleLine="true"
-                style="@style/Text.Body.Smaller"
+                style="@style/Text.Body.Caption"
                 />
 
             <TextView

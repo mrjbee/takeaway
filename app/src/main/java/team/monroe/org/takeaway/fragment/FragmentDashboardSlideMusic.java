@@ -20,6 +20,7 @@ import org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.event.Event;
 import org.monroe.team.android.box.utils.DisplayUtils;
+import org.monroe.team.android.box.utils.FileUtils;
 import org.monroe.team.corebox.utils.Closure;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Source;
+import team.monroe.org.takeaway.view.FormatUtils;
 import team.monroe.org.takeaway.view.WarningViewPresenter;
 
 public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  implements ContractBackButton{
@@ -157,6 +159,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
                     TextView caption = (TextView) convertView.findViewById(R.id.item_caption);
                     TextView description = (TextView) convertView.findViewById(R.id.item_description);
+                    TextView description2 = (TextView) convertView.findViewById(R.id.item_description_2);
+
                     View separator = convertView.findViewById(R.id.separator);
                     View background = convertView.findViewById(R.id.panel_content);
                     ImageButton image = (ImageButton) convertView.findViewById(R.id.item_image);
@@ -184,10 +188,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                         updateIcon(filePointer);
 
                         if (filePointer.type == FilePointer.Type.FILE){
-                            description.setText("Song");
+                            description.setText(FormatUtils.getArtistString(filePointer, getResources()));
+                            description2.setVisibility(View.VISIBLE);
+                            description2.setText(FormatUtils.getAlbumString(filePointer, getResources()));
                         }else {
-                            description.setText("Music Collection");
+                            description.setText(FormatUtils.getArtistString(filePointer, "Music Collection"));
+                            description2.setVisibility(View.GONE);
                         }
+
                         image.setFocusable(false);
                         background.setBackgroundResource(backgroundResource);
                         separator.setVisibility(position == 0? View.GONE : View.VISIBLE);

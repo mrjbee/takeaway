@@ -41,6 +41,11 @@
         <item name="android:shadowColor">@color/text.dark.outer.glow</item>
     </style>
 
+    <style name="Text.Body.Bigger" parent="Text.Body">
+        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif-condensed</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
     <style name="Text.Body.Smaller" parent="Text.Body">
         <item name="android:textSize">14sp</item>
     </style>
