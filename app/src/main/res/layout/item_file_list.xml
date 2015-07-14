@@ -3,15 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
     >
 
     <RelativeLayout
         android:id="@+id/panel_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/panel_left_right_shadow"
         android:orientation="vertical"
         >
 

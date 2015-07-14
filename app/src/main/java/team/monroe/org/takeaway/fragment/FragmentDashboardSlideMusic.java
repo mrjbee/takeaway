@@ -181,10 +181,6 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
                         mPlayAnimator.showWithoutAnimation();
                         mFilePointer = filePointer;
-                        int backgroundResource = R.drawable.panel_left_right_shadow;
-                        if (position == 0){
-                            backgroundResource = R.drawable.panel_round_top;
-                        }
                         updateIcon(filePointer);
 
                         if (filePointer.type == FilePointer.Type.FILE){
@@ -197,7 +193,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                         }
 
                         image.setFocusable(false);
-                        background.setBackgroundResource(backgroundResource);
+                        background.setBackgroundResource(0);
                         separator.setVisibility(position == 0? View.GONE : View.VISIBLE);
                         caption.setText(filePointer.getNormalizedTitle());
                         image.setOnClickListener(new View.OnClickListener() {
