@@ -452,11 +452,16 @@ public class DynamicListView extends ListView {
     }
 
     private void notifySwapElementsDone() {
-        if (!mSwapNotificationRequired) return;
-        mSwapNotificationRequired = false;
-        if (mSwapListener != null){
-            mSwapListener.onSwapFinished();
+        if (!mSwapNotificationRequired) {
+            if (mSwapListener != null){
+                mSwapListener.onSwapCanceled();
+            }
+        }else {
+            if (mSwapListener != null) {
+                mSwapListener.onSwapFinished();
+            }
         }
+        mSwapNotificationRequired = false;
     }
 
     /**
@@ -623,5 +628,6 @@ public class DynamicListView extends ListView {
     public static interface OnElementsSwapListener {
         void onSwapFinished();
         void onSwapStart();
+        void onSwapCanceled();
     }
 }

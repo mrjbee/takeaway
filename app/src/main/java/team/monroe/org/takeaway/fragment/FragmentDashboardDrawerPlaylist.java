@@ -1,5 +1,6 @@
 package team.monroe.org.takeaway.fragment;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -13,6 +14,7 @@ import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.android.box.app.ui.SlideTouchGesture;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
 
+import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
 import org.monroe.team.android.box.utils.DisplayUtils;
 import org.monroe.team.corebox.utils.Closure;
@@ -83,13 +85,24 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
                     ImageView imageView = (ImageView) convertView.findViewById(R.id.item_image);
                     View content = convertView.findViewById(R.id.panel_content);
                     AppearanceController ac_content;
+                    public FilePointer mFilePointer;
+
+
+                    @Override
+                    public void discoverUI() {
+                        ac_content = animateAppearance(content, xSlide(0f, mDashWeight))
+                                .showAnimation(duration_constant(800), interpreter_overshot())
+                                .hideAnimation(duration_constant(600), interpreter_decelerate(0.8f))
+                                .build();
+                    }
 
                     @Override
                     public void update(final FilePointer filePointer, int position) {
-                        ac_content = animateAppearance(content, xSlide(0f, mDashWeight))
-                                .showAnimation(duration_constant(200), interpreter_overshot())
-                                .hideAnimation(duration_constant(200), interpreter_decelerate(0.8f))
-                                .build();
+                        mFilePointer = filePointer;
+                        if (ac_content == null){
+                            discoverUI();
+                        }
+
                         ac_content.showWithoutAnimation();
                         imageView.setOnTouchListener(new SlideTouchGesture(mDashWeight/2f, SlideTouchGesture.Axis.X_RIGHT) {
 
@@ -111,8 +124,25 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
                             @Override
                             protected void onApply(float x, float y, float slideValue, float fraction) {
                                 mItemList.touchHandling(true);
-                                ac_content.hide();
-                                onSongDelete(filePointer);
+                                if(mPlayFilePointer == mFilePointer){
+                                   ac_content.show();
+                                   return;
+                                }
+                                ac_content.hideAndCustomize(new AppearanceController.AnimatorCustomization() {
+                                    @Override
+                                    public void customize(Animator animator) {
+                                        final  FilePointer pointerToDelete = mFilePointer;
+                                        animator.addListener(new AnimatorListenerSupport(){
+                                            @Override
+                                            public void onAnimationEnd(Animator animation) {
+                                                if (!onSongDelete(pointerToDelete) && mFilePointer == pointerToDelete){
+                                                    ac_content.show();
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+
                             }
 
                             @Override
@@ -165,8 +195,8 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         });
     }
 
-    private void onSongDelete(FilePointer filePointer) {
-
+    private boolean onSongDelete(FilePointer filePointer) {
+        return application().player().playlist_removeFrom(mPlaylist, filePointer);
     }
 
     private void onSongClick(FilePointer filePointer) {
@@ -195,7 +225,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         mPlayFilePointer = application().player().getCurrentSong();
         mSongPlaying = application().player().isSongPlaying();
         mSongBuffering = application().player().isBuffering();
-        update_playlist(application().player().getPlaylist());
+        update_playlist(application().player().playlist());
         application().observers_songDetails.add(this);
     }
 
@@ -288,13 +318,18 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     }
 
     @Override
+    public void onSwapCanceled() {
+        mSwapInProgress = false;
+    }
+
+    @Override
     public void onSwapFinished() {
         mSwapInProgress = false;
         List<FilePointer> fileList = new ArrayList<>();
         for (int i=0; i < mPlaylistAdapter.getCount(); i++ ){
             fileList.add(mPlaylistAdapter.getItem(i));
         }
-        application().player().updatePlaylistOrder(mPlaylist, fileList);
+        application().player().playlist_updateOrder(mPlaylist, fileList);
     }
 
     public static class PlaylistAdapter extends GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> implements DynamicListAdapter {

@@ -20,7 +20,6 @@ import org.monroe.team.android.box.app.ui.animation.apperrance.SceneDirector;
 import org.monroe.team.android.box.data.Data;
 import org.monroe.team.android.box.event.Event;
 import org.monroe.team.android.box.utils.DisplayUtils;
-import org.monroe.team.android.box.utils.FileUtils;
 import org.monroe.team.corebox.utils.Closure;
 
 import java.util.ArrayList;
@@ -96,9 +95,9 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 List<FilePointer> songFileList = getCurrentSongFiles();
                 for (int i=0; i< songFileList.size(); i++){
                     if (i == 0){
-                        application().player().clearAndAddToPlayList(songFileList.get(i));
+                        application().player().playlist_clearAndAdd(songFileList.get(i));
                     }else {
-                        application().player().addToPlayList(songFileList.get(i));
+                        application().player().playlist_add(songFileList.get(i));
                     }
                 }
 
@@ -110,7 +109,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             public void onClick(View v) {
                 List<FilePointer> songFileList = getCurrentSongFiles();
                 for (int i=0; i< songFileList.size(); i++){
-                    application().player().addToPlayList(songFileList.get(i));
+                    application().player().playlist_add(songFileList.get(i));
                 }
             }
         });

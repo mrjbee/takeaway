@@ -123,9 +123,9 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
 
     public void function_updateActivePlaylist(FilePointer filePointer, boolean append) {
        if (!append) {
-           model().usingService(Player.class).clearAndAddToPlayList(filePointer);
+           model().usingService(Player.class).playlist_clearAndAdd(filePointer);
        }else {
-           model().usingService(Player.class).addToPlayList(filePointer);
+           model().usingService(Player.class).playlist_add(filePointer);
        }
     }
 
