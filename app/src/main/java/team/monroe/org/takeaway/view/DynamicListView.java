@@ -93,6 +93,7 @@ public class DynamicListView extends ListView {
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
     private boolean mSwapNotificationRequired = false;
     private OnElementsSwapListener mSwapListener;
+    private boolean mTouchHandlingEnabled = true;
 
     public DynamicListView(Context context) {
         super(context);
@@ -246,7 +247,15 @@ public class DynamicListView extends ListView {
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!mTouchHandlingEnabled) return false;
+
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
     public boolean onTouchEvent (MotionEvent event) {
+        if (!mTouchHandlingEnabled) return false;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -606,6 +615,10 @@ public class DynamicListView extends ListView {
             }
         }
     };
+
+    public void touchHandling(boolean enabled) {
+        mTouchHandlingEnabled = enabled;
+    }
 
     public static interface OnElementsSwapListener {
         void onSwapFinished();

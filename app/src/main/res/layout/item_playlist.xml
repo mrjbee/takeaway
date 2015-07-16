@@ -5,6 +5,22 @@
     android:layout_height="60dp"
     >
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:background="@color/highlight"
+        android:orientation="horizontal"
+    >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remove"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            style="@style/Text.Body.Light"
+            android:textAllCaps="true"
+            />
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/panel_content"
@@ -13,6 +29,7 @@
         android:orientation="vertical"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
+        android:background="@color/background.light"
         >
 
         <ImageView
@@ -24,19 +41,11 @@
             android:src="@drawable/android_note_lightgray"
             />
 
-        <LinearLayout
-            android:id="@+id/separator"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:background="#7BD1D1D1"
-            android:orientation="vertical" />
+
 
         <TextView
             android:id="@+id/item_caption"
             android:layout_toRightOf="@+id/item_image"
-            android:layout_below="@+id/separator"
             android:layout_marginTop="15dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="20dp"
@@ -60,5 +69,14 @@
 
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/separator"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="#7BD1D1D1"
+        android:orientation="vertical" />
 
 </RelativeLayout>

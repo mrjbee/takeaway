@@ -10,6 +10,11 @@ import android.widget.TextView;
 
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
+import org.monroe.team.android.box.app.ui.SlideTouchGesture;
+import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
+
+import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
+import org.monroe.team.android.box.utils.DisplayUtils;
 import org.monroe.team.corebox.utils.Closure;
 
 import java.util.ArrayList;
@@ -39,6 +44,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     private boolean mSongBuffering = false;
     private boolean mSwapInProgress = false;
     private Playlist mPlaylist;
+    private float mDashWeight;
 
     @Override
     protected int getLayoutId() {
@@ -48,6 +54,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mDashWeight = DisplayUtils.dpToPx(400, getResources());
         getFragmentView().setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -74,15 +81,48 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
                     TextView description = (TextView) convertView.findViewById(R.id.item_description);
                     View separator = convertView.findViewById(R.id.separator);
                     ImageView imageView = (ImageView) convertView.findViewById(R.id.item_image);
+                    View content = convertView.findViewById(R.id.panel_content);
+                    AppearanceController ac_content;
 
                     @Override
                     public void update(final FilePointer filePointer, int position) {
-                        /*convertView.setOnClickListener(new View.OnClickListener() {
+                        ac_content = animateAppearance(content, xSlide(0f, mDashWeight))
+                                .showAnimation(duration_constant(200), interpreter_overshot())
+                                .hideAnimation(duration_constant(200), interpreter_decelerate(0.8f))
+                                .build();
+                        ac_content.showWithoutAnimation();
+                        imageView.setOnTouchListener(new SlideTouchGesture(mDashWeight/2f, SlideTouchGesture.Axis.X_RIGHT) {
+
                             @Override
-                            public void onClick(View v) {
-                                onSongClick(filePointer);
+                            protected float applyFraction() {
+                                return 0.8f;
                             }
-                        });*/
+
+                            @Override
+                            protected void onStart(float x, float y) {
+                                mItemList.touchHandling(false);
+                            }
+
+                            @Override
+                            protected void onProgress(float x, float y, float slideValue, float fraction) {
+                                content.setTranslationX(mDashWeight/2f * fraction/2f);
+                            }
+
+                            @Override
+                            protected void onApply(float x, float y, float slideValue, float fraction) {
+                                mItemList.touchHandling(true);
+                                ac_content.hide();
+                                onSongDelete(filePointer);
+                            }
+
+                            @Override
+                            protected void onCancel(float x, float y, float slideValue, float fraction) {
+                                mItemList.touchHandling(true);
+                                ac_content.show();
+                            }
+
+                        });
+
                         if (position == 0) separator.setVisibility(View.GONE);
                         caption.setText(FormatUtils.getSongTitle(filePointer, getResources()));
                         description.setText(FormatUtils.getArtistAlbumString(filePointer, getResources()));
@@ -123,6 +163,10 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
                 onSongClick(mPlaylistAdapter.getItem(position));
             }
         });
+    }
+
+    private void onSongDelete(FilePointer filePointer) {
+
     }
 
     private void onSongClick(FilePointer filePointer) {
