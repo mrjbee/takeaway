@@ -129,11 +129,11 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             mFadeAnimator.cancel();
         }
         if (fadeIn) {
-            mFadeAnimator = ObjectAnimator.ofFloat(this, "volumeFraction", mVolumeFraction, 1f);
+            mFadeAnimator = ObjectAnimator.ofFloat(this, "volumeFraction", 0.2f, 1f);
             mFadeAnimator.setStartDelay(1000 * 3);
             mFadeAnimator.setDuration(1000 * 5);
             mFadeAnimator.setInterpolator(new AccelerateInterpolator(0.9f));
-            setVolumeFraction(mVolumeFraction);
+            setVolumeFraction(0.2f);
             mFadeAnimator.start();
         }else {
             setVolumeFraction(1f);
@@ -237,7 +237,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             mFadeAnimator.cancel();
         }
 
-        mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",mVolumeFraction, 0.05f);
+        mFadeAnimator = ObjectAnimator.ofFloat(this,"volumeFraction",mVolumeFraction, 0.2f);
         mFadeAnimator.setDuration(1000 * 5);
         mFadeAnimator.setInterpolator(new DecelerateInterpolator(0.9f));
         mFadeAnimator.addListener(new AnimatorListenerSupport(){

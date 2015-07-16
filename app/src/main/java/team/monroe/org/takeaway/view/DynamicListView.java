@@ -24,7 +24,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -37,6 +36,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+
+import team.monroe.org.takeaway.R;
 
 /**
  * The dynamic listview is an extension of listview that supports cell dragging
@@ -61,9 +62,9 @@ import android.widget.ListView;
  */
 public class DynamicListView extends ListView {
 
-    private final int SMOOTH_SCROLL_AMOUNT_AT_EDGE = 15;
-    private final int MOVE_DURATION = 150;
-    private final int LINE_THICKNESS = 15;
+    private final int SMOOTH_SCROLL_AMOUNT_AT_EDGE = 20;
+    private final int MOVE_DURATION = 100;
+    private final int LINE_THICKNESS = 5;
 
     private int mLastEventY = -1;
 
@@ -90,6 +91,8 @@ public class DynamicListView extends ListView {
 
     private boolean mIsWaitingForScrollFinish = false;
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+    private boolean mSwapNotificationRequired = false;
+    private OnElementsSwapListener mSwapListener;
 
     public DynamicListView(Context context) {
         super(context);
@@ -120,6 +123,9 @@ public class DynamicListView extends ListView {
     private OnItemLongClickListener mOnItemLongClickListener =
             new OnItemLongClickListener() {
                 public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
+                    if (mSwapListener != null){
+                        mSwapListener.onSwapStart();
+                    }
                     mTotalOffset = 0;
 
                     int position = pointToPosition(mDownX, mDownY);
@@ -172,7 +178,7 @@ public class DynamicListView extends ListView {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(LINE_THICKNESS);
-        paint.setColor(Color.BLACK);
+        paint.setColor(getResources().getColor(R.color.highlight));
 
         can.drawBitmap(bitmap, 0, 0, null);
         can.drawRect(rect, paint);
@@ -244,6 +250,7 @@ public class DynamicListView extends ListView {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
+                mSwapNotificationRequired = false;
                 mDownX = (int)event.getX();
                 mDownY = (int)event.getY();
                 mActivePointerId = event.getPointerId(0);
@@ -367,13 +374,9 @@ public class DynamicListView extends ListView {
     }
 
     private void swapElements(int indexOne, int indexTwo) {
+        mSwapNotificationRequired = true;
         DynamicListAdapter dynamicListAdapter = (DynamicListAdapter) getAdapter();
         dynamicListAdapter.swapData(indexOne, indexTwo);
-        /**
-        Object temp = arrayList.get(indexOne);
-        arrayList.set(indexOne, arrayList.get(indexTwo));
-        arrayList.set(indexTwo, temp);
-         **/
     }
 
 
@@ -425,8 +428,25 @@ public class DynamicListView extends ListView {
                 }
             });
             hoverViewAnimator.start();
+            notifySwapElementsDone();
         } else {
             touchEventsCancelled();
+        }
+    }
+
+    public OnElementsSwapListener getSwapListener() {
+        return mSwapListener;
+    }
+
+    public void setSwapListener(OnElementsSwapListener mSwapListener) {
+        this.mSwapListener = mSwapListener;
+    }
+
+    private void notifySwapElementsDone() {
+        if (!mSwapNotificationRequired) return;
+        mSwapNotificationRequired = false;
+        if (mSwapListener != null){
+            mSwapListener.onSwapFinished();
         }
     }
 
@@ -446,6 +466,7 @@ public class DynamicListView extends ListView {
         mCellIsMobile = false;
         mIsMobileScrolling = false;
         mActivePointerId = INVALID_POINTER_ID;
+        notifySwapElementsDone();
     }
 
     /**
@@ -585,4 +606,9 @@ public class DynamicListView extends ListView {
             }
         }
     };
+
+    public static interface OnElementsSwapListener {
+        void onSwapFinished();
+        void onSwapStart();
+    }
 }

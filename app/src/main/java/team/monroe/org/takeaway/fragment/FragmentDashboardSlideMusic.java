@@ -81,13 +81,13 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
         mMediaHeaderContentAC = combine(
                 animateAppearance(mHeaderFilesView.findViewById(R.id.panel_media_folder_content), heightSlide((int) DisplayUtils.dpToPx(100, getResources()),0))
-                .showAnimation(duration_constant(500),interpreter_accelerate(0.8f))
-                .hideAnimation(duration_constant(500), interpreter_accelerate(0.5f))
+                .showAnimation(duration_constant(300),interpreter_accelerate(0.8f))
+                .hideAnimation(duration_constant(300), interpreter_accelerate(0.5f))
                 .hideAndGone(),
 
                 animateAppearance(mHeaderFilesView.findViewById(R.id.panel_media_folder_content), alpha(1f, 0f))
-                .showAnimation(duration_constant(400), interpreter_decelerate(0.8f))
-                .hideAnimation(duration_constant(200), interpreter_accelerate(0.5f))
+                .showAnimation(duration_constant(200), interpreter_decelerate(0.8f))
+                .hideAnimation(duration_constant(150), interpreter_accelerate(0.5f))
         );
         mMediaHeaderContentAC.hideWithoutAnimation();
         mHeaderFilesView.findViewById(R.id.action_folder_playlist).setOnClickListener(new View.OnClickListener() {

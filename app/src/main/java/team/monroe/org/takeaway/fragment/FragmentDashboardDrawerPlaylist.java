@@ -6,14 +6,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.corebox.utils.Closure;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
@@ -22,12 +22,13 @@ import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.view.DynamicListAdapter;
+import team.monroe.org.takeaway.view.DynamicListView;
 import team.monroe.org.takeaway.view.FormatUtils;
 
-public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver {
+public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver, DynamicListView.OnElementsSwapListener {
 
     private View mLoadingPanel;
-    private ListView mItemList;
+    private DynamicListView mItemList;
     private View mNoItemsPanel;
     private GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> mPlaylistAdapter;
     private TextView mPlaylistText;
@@ -36,6 +37,8 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     private FilePointer mPlayFilePointer;
     private boolean mSongPlaying = false;
     private boolean mSongBuffering = false;
+    private boolean mSwapInProgress = false;
+    private Playlist mPlaylist;
 
     @Override
     protected int getLayoutId() {
@@ -57,8 +60,8 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         mSongsText = (TextView) mSongsListHeaderView.findViewById(R.id.text_song_count);
 
         mLoadingPanel = view(R.id.panel_loading);
-        mItemList = view_list(R.id.list_items);
-        //mItemList.addHeaderView(mSongsListHeaderView, null, false);
+        mItemList = view(R.id.list_items, DynamicListView.class);
+        mItemList.setSwapListener(this);
         mNoItemsPanel = view(R.id.panel_no_items);
         hide_all();
 
@@ -170,6 +173,8 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     }
 
     private void update_playlist(Playlist playlist) {
+        if (mSwapInProgress) throw new IllegalStateException("Swap in progress");
+        mPlaylist = playlist;
         hide_all();
         if (playlist == null || playlist.songList.isEmpty()) {
             mNoItemsPanel.setVisibility(View.VISIBLE);
@@ -180,7 +185,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
 
             mPlaylistAdapter.clear();
             mPlaylistAdapter.addAll(playlist.songList);
-            mPlaylistAdapter.notifyDataSetChanged();
+            update_plalistListView();
             mItemList.setVisibility(View.VISIBLE);
 
         }
@@ -201,6 +206,11 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         mPlayFilePointer = filePointer;
         mSongPlaying = application().player().isSongPlaying();
         mSongBuffering = true;
+        update_plalistListView();
+    }
+
+    private void update_plalistListView() {
+        if (mSwapInProgress) return;
         mPlaylistAdapter.notifyDataSetChanged();
     }
 
@@ -208,24 +218,39 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     public void onCurrentSongReady(FilePointer filePointer) {
         mPlayFilePointer = filePointer;
         mSongBuffering = false;
-        mPlaylistAdapter.notifyDataSetChanged();
+        update_plalistListView();
     }
 
     @Override
     public void onCurrentSongPlay() {
         mSongPlaying = true;
-        mPlaylistAdapter.notifyDataSetChanged();
+        update_plalistListView();
     }
 
     @Override
     public void onCurrentSongStop() {
         mSongPlaying = false;
-        mPlaylistAdapter.notifyDataSetChanged();
+        update_plalistListView();
     }
 
     @Override
     public void onDetails(FilePointer pointer, SongDetails songDetails) {
-        mPlaylistAdapter.notifyDataSetChanged();
+        update_plalistListView();
+    }
+
+    @Override
+    public void onSwapStart() {
+        mSwapInProgress = true;
+    }
+
+    @Override
+    public void onSwapFinished() {
+        mSwapInProgress = false;
+        List<FilePointer> fileList = new ArrayList<>();
+        for (int i=0; i < mPlaylistAdapter.getCount(); i++ ){
+            fileList.add(mPlaylistAdapter.getItem(i));
+        }
+        application().player().updatePlaylistOrder(mPlaylist, fileList);
     }
 
     public static class PlaylistAdapter extends GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> implements DynamicListAdapter {
