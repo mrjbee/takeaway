@@ -1,14 +1,19 @@
 package team.monroe.org.takeaway.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
+import org.monroe.team.corebox.utils.Closure;
+
+import java.io.File;
 
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
@@ -16,9 +21,10 @@ import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
+import team.monroe.org.takeaway.view.DynamicListAdapter;
 import team.monroe.org.takeaway.view.FormatUtils;
 
-public class FragmentDashboardPlayer extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver {
+public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver {
 
     private View mLoadingPanel;
     private ListView mItemList;
@@ -33,7 +39,7 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
 
     @Override
     protected int getLayoutId() {
-        return R.layout.fragment_drawer_player;
+        return R.layout.fragment_drawer_playlist;
     }
 
     @Override
@@ -52,11 +58,11 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
 
         mLoadingPanel = view(R.id.panel_loading);
         mItemList = view_list(R.id.list_items);
-        mItemList.addHeaderView(mSongsListHeaderView, null, false);
+        //mItemList.addHeaderView(mSongsListHeaderView, null, false);
         mNoItemsPanel = view(R.id.panel_no_items);
         hide_all();
 
-        mPlaylistAdapter = new GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>>(activity(), new GetViewImplementation.ViewHolderFactory<GetViewImplementation.ViewHolder<FilePointer>>() {
+        mPlaylistAdapter = new PlaylistAdapter(activity(), new GetViewImplementation.ViewHolderFactory<GetViewImplementation.ViewHolder<FilePointer>>() {
             @Override
             public GetViewImplementation.ViewHolder<FilePointer> create(final View convertView) {
                 return new GetViewImplementation.GenericViewHolder<FilePointer>() {
@@ -65,14 +71,15 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
                     TextView description = (TextView) convertView.findViewById(R.id.item_description);
                     View separator = convertView.findViewById(R.id.separator);
                     ImageView imageView = (ImageView) convertView.findViewById(R.id.item_image);
+
                     @Override
                     public void update(final FilePointer filePointer, int position) {
-                        convertView.setOnClickListener(new View.OnClickListener() {
+                        /*convertView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                               onSongClick(filePointer);
+                                onSongClick(filePointer);
                             }
-                        });
+                        });*/
                         if (position == 0) separator.setVisibility(View.GONE);
                         caption.setText(FormatUtils.getSongTitle(filePointer, getResources()));
                         description.setText(FormatUtils.getArtistAlbumString(filePointer, getResources()));
@@ -80,13 +87,13 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
                         int coverImageResource = R.drawable.android_note_lightgray;
                         float coverAlpha = 1f;
                         color = getResources().getColor(R.color.text_dark);
-                        if (filePointer == mPlayFilePointer){
-                            if (mSongBuffering){
+                        if (filePointer == mPlayFilePointer) {
+                            if (mSongBuffering) {
                                 coverAlpha = 0.4f;
                             }
-                            if (mSongPlaying){
+                            if (mSongPlaying) {
                                 coverImageResource = R.drawable.android_equ_pink;
-                            }else {
+                            } else {
                                 coverImageResource = R.drawable.android_equ_lightgray;
                             }
                             color = getResources().getColor(R.color.text_highlight);
@@ -94,17 +101,25 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
                         imageView.setAlpha(coverAlpha);
                         imageView.setImageResource(coverImageResource);
                         caption.setTextColor(color);
+                        imageView.setFocusable(false);
+                        imageView.setFocusableInTouchMode(false);
+
                     }
 
                     @Override
                     public void cleanup() {
                         separator.setVisibility(View.VISIBLE);
-                        convertView.setOnClickListener(null);
                     }
                 };
             }
         }, R.layout.item_playlist);
         mItemList.setAdapter(mPlaylistAdapter);
+        mItemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onSongClick(mPlaylistAdapter.getItem(position));
+            }
+        });
     }
 
     private void onSongClick(FilePointer filePointer) {
@@ -166,8 +181,8 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
             mPlaylistAdapter.clear();
             mPlaylistAdapter.addAll(playlist.songList);
             mPlaylistAdapter.notifyDataSetChanged();
-
             mItemList.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -212,4 +227,46 @@ public class FragmentDashboardPlayer extends FragmentDashboardActivity implement
     public void onDetails(FilePointer pointer, SongDetails songDetails) {
         mPlaylistAdapter.notifyDataSetChanged();
     }
+
+    public static class PlaylistAdapter extends GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> implements DynamicListAdapter {
+
+        public PlaylistAdapter(Context context, GetViewImplementation.ViewHolderFactory<GetViewImplementation.ViewHolder<FilePointer>> factory, int layoutId) {
+            super(context, factory, layoutId);
+        }
+
+        public PlaylistAdapter(Context context, int layoutId, GetViewImplementation<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> getView) {
+            super(context, layoutId, getView);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            if (position < 0) return  -1;
+            if (position>getCount()-1) return -1;
+            return getItem(position).getSongId().hashCode();
+        }
+
+        @Override
+        public void swapData(final int indexOne, final int indexTwo) {
+            updateWithoutNotification(new Closure<GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>>, Void>() {
+                @Override
+                public Void execute(GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> arg) {
+                    int minPosition = Math.min(indexOne, indexTwo);
+                    int maxPosition = Math.max(indexOne, indexTwo);
+                    FilePointer minPositionData = getItem(minPosition);
+                    FilePointer maxPositionData = getItem(maxPosition);
+                    arg.remove(maxPositionData);
+                    arg.remove(minPositionData);
+                    arg.insert(maxPositionData, minPosition);
+                    arg.insert(minPositionData, maxPosition);
+                    return null;
+                }
+            });
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+    }
+
 }

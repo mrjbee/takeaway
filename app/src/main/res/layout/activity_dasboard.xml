@@ -54,7 +54,7 @@
     <!-- The navigation drawer -->
     <fragment
         android:id="@+id/left_drawer"
-        android:name="team.monroe.org.takeaway.fragment.FragmentDashboardPlayer"
+        android:name="team.monroe.org.takeaway.fragment.FragmentDashboardDrawerPlaylist"
         android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
@@ -62,7 +62,7 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
         android:background="#111"
-        tools:layout="@layout/fragment_drawer_player" />
+        tools:layout="@layout/fragment_drawer_playlist" />
 
 
 </android.support.v4.widget.DrawerLayout>

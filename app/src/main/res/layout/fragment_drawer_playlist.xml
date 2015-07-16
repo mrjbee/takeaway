@@ -54,7 +54,7 @@
         android:layout_below="@+id/panel_header"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-        <ListView
+        <team.monroe.org.takeaway.view.DynamicListView
             android:id="@+id/list_items"
             android:visibility="visible"
             android:layout_width="fill_parent"
