@@ -8,15 +8,9 @@
         android:id="@+id/panel_header"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/drawer_player_header"
-        android:background="@color/highlight"
+        android:background="@drawable/background_panel_main"
         android:orientation="vertical"
         >
-
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/big_icon"/>
         <LinearLayout
             android:visibility="visible"
             android:layout_alignParentBottom="true"
@@ -54,17 +48,69 @@
         android:layout_below="@+id/panel_header"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-        <team.monroe.org.takeaway.view.DynamicListView
-            android:id="@+id/list_items"
-            android:visibility="visible"
+        <LinearLayout
+            android:id="@+id/panel_list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:dividerHeight="0dp"
-            android:divider="@null"
-            android:listSelector="@color/transperent"
-            android:background="@color/transperent"
-            android:scrollbars="vertical"
-            />
+            android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="5dp"
+                    android:background="@color/background.light">
+
+                    <TextView
+                        android:id="@+id/text_song_count"
+                        android:layout_weight="1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="22 Songs"
+                        android:singleLine="true"
+                        style="@style/Text.Body.Optional"
+                        />
+
+                    <TextView
+                        android:id="@+id/text_playlist_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Playlist Caption"
+                        android:singleLine="true"
+                        style="@style/Text.Body.Smaller"
+                        android:layout_marginRight="10dp"
+                        />
+
+                    <ImageButton
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:padding="3dp"
+                        android:src="@drawable/android_more"
+                        style="@style/Button.Round.Action"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/separator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="#7BD1D1D1"
+                    android:orientation="vertical" />
+
+            <team.monroe.org.takeaway.view.DynamicListView
+                android:id="@+id/list_items"
+                android:visibility="visible"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:dividerHeight="0dp"
+                android:divider="@null"
+                android:listSelector="@color/transperent"
+                android:background="@color/transperent"
+                android:scrollbars="vertical"
+                />
+        </LinearLayout>
         <RelativeLayout
             android:visibility="gone"
             android:id="@+id/panel_no_items"

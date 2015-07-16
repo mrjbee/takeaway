@@ -47,6 +47,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     private boolean mSwapInProgress = false;
     private Playlist mPlaylist;
     private float mDashWeight;
+    private View mPlayListPanel;
 
     @Override
     protected int getLayoutId() {
@@ -64,9 +65,10 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             }
         });
 
-        View mSongsListHeaderView = getActivity().getLayoutInflater().inflate(R.layout.panel_player_top, null);
-        mPlaylistText = (TextView) mSongsListHeaderView.findViewById(R.id.text_playlist_title);
-        mSongsText = (TextView) mSongsListHeaderView.findViewById(R.id.text_song_count);
+        mPlayListPanel = view(R.id.panel_list);
+
+        mPlaylistText = view_text(R.id.text_playlist_title);
+        mSongsText =  view_text(R.id.text_song_count);
 
         mLoadingPanel = view(R.id.panel_loading);
         mItemList = view(R.id.list_items, DynamicListView.class);
@@ -108,12 +110,13 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
 
                             @Override
                             protected float applyFraction() {
-                                return 0.8f;
+                                return 0.95f;
                             }
 
                             @Override
                             protected void onStart(float x, float y) {
                                 mItemList.touchHandling(false);
+                                ac_content.showWithoutAnimation();
                             }
 
                             @Override
@@ -153,9 +156,9 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
 
                         });
 
-                        if (position == 0) separator.setVisibility(View.GONE);
+                        if (position != -2) separator.setVisibility(View.GONE);
                         caption.setText(FormatUtils.getSongTitle(filePointer, getResources()));
-                        description.setText(FormatUtils.getArtistAlbumString(filePointer, getResources()));
+                        description.setText(FormatUtils.getArtistString(filePointer, getResources()));
                         int color = 0;
                         int coverImageResource = R.drawable.android_note_lightgray;
                         float coverAlpha = 1f;
@@ -213,7 +216,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
 
     private void hide_all() {
         mLoadingPanel.setVisibility(View.GONE);
-        mItemList.setVisibility(View.GONE);
+        mPlayListPanel.setVisibility(View.GONE);
         mNoItemsPanel.setVisibility(View.GONE);
     }
 
@@ -260,8 +263,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             mPlaylistAdapter.clear();
             mPlaylistAdapter.addAll(playlist.songList);
             update_plalistListView();
-            mItemList.setVisibility(View.VISIBLE);
-
+            mPlayListPanel.setVisibility(View.VISIBLE);
         }
     }
 
