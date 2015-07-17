@@ -23,7 +23,7 @@ import team.monroe.org.takeaway.R;
 
 public class SeekProgressView extends View{
 
-    private static float FRACTION_PICKER_MIN = 0.25f;
+    private static float FRACTION_PICKER_MIN = 0.4f;
     private static float FRACTION_PICKER_MAX = 1f;
 
     private Paint mValuePaint;

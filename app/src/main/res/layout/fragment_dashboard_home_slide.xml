@@ -21,7 +21,10 @@
                 android:background="@drawable/body_top"
                 android:orientation="vertical">
 
-                <include layout="@layout/card_now_playing2" />
+                <include layout="@layout/card_now_playing" />
+                <Space
+                    android:layout_width="fill_parent"
+                    android:layout_height="60dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

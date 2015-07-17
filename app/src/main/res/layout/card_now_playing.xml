@@ -1,118 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/panel_now_playing"
     android:layout_width="fill_parent"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingTop="10dp"
+    android:layout_height="wrap_content"
     android:paddingBottom="10dp"
-    android:layout_height="220dp"
     android:orientation="vertical">
-    <TextView
-        android:text="Now playing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Text.Body"/>
+
     <RelativeLayout
-        android:layout_marginRight="20dp"
         android:id="@+id/panel_now_playing_cover"
-        android:layout_alignParentBottom="true"
-        android:layout_height="130dp"
-        android:layout_width="130dp">
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_centerInParent="true"
-            android:alpha="0.3"
-            android:src="@drawable/android_note_lightgray"/>
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_toRightOf="@+id/panel_now_playing_cover"
         android:layout_width="fill_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_height="160dp"
-        >
-            <TextView
-                android:id="@+id/text_now_playing_title"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Song Title"
-                style="@style/Text.Body.Bigger"
-            />
-
-            <team.monroe.org.takeaway.view.SeekProgressView
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_below="@+id/text_now_playing_title"
-                android:id="@+id/progress_now_playing"
-                android:layout_width="fill_parent"
-                android:layout_height="5dp" />
-
-            <TextView
-                android:layout_marginRight="5dp"
-                android:layout_width="wrap_content"
-                android:id="@+id/text_now_playing_artist_caption"
-                android:layout_below="@+id/progress_now_playing"
-                android:layout_height="wrap_content"
-                android:text="Artist"
-                style="@style/Text.Body.Optional"
-            />
-            <TextView
-                android:id="@+id/text_now_playing_artist"
-                android:layout_toRightOf="@+id/text_now_playing_artist_caption"
-                android:layout_alignBaseline="@+id/text_now_playing_artist_caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Artist"
-                android:singleLine="true"
-                style="@style/Text.Body"
-                />
-
-                <TextView
-                    android:layout_marginTop="5dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_width="wrap_content"
-                    android:id="@+id/text_now_playing_album_caption"
-                    android:layout_below="@+id/text_now_playing_artist_caption"
-                    android:layout_height="wrap_content"
-                    android:text="Album"
-                    style="@style/Text.Body.Optional"
-                    />
-                <TextView
-                    android:id="@+id/text_now_playing_album"
-                    android:layout_toRightOf="@+id/text_now_playing_album_caption"
-                    android:layout_alignBaseline="@+id/text_now_playing_album_caption"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Album"
-                    android:singleLine="true"
-                    style="@style/Text.Body"
-                    />
-                <LinearLayout
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/text_now_playing_album_caption"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <ImageButton
-                        style="@style/Button.Round.Action"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:padding="3dp"
-                        android:src="@drawable/android_prev"/>
-                    <ImageButton
-                            style="@style/Button.Round.Action"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:padding="3dp"
-                            android:src="@drawable/android_play_round_pink"/>
-                    <ImageButton
-                        style="@style/Button.Round.Action"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:padding="3dp"
-                        android:src="@drawable/android_next"/>
-                </LinearLayout>
+        android:layout_height="50dp"
+        android:background="@drawable/background_panel_main">
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"/>
     </RelativeLayout>
-</RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/panel_now_playing_progress"
+        android:layout_width="fill_parent"
+        android:layout_height="30dp"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/text_now_playing_time_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.Body.Small"
+            android:textColor="@color/highlight"
+            android:text="01:20"
+            />
+
+        <team.monroe.org.takeaway.view.SeekProgressView
+            android:id="@+id/progress_now_playing"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+        <TextView
+            android:id="@+id/text_now_playing_time_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.Body.Small"
+            android:text="03:20"
+            />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:id="@+id/text_now_playing_title"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Song Title"
+            style="@style/Text.Body.Caption"
+            />
+
+        <TextView
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="5dp"
+            android:id="@+id/text_now_playing_artist"
+            android:layout_below="@+id/text_now_playing_title"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artist"
+            android:singleLine="true"
+            style="@style/Text.Body"
+            />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/panel_now_playing_control"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/text_now_playing_album_caption"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        >
+        <ImageButton
+            android:id="@+id/action_now_playing_prev"
+            style="@style/Button.Round.Action"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:padding="3dp"
+            android:src="@drawable/android_prev"/>
+        <Space
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+        <ImageButton
+            android:id="@+id/action_now_playing_play"
+            style="@style/Button.Round.Action"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:padding="0dp"
+            android:background="@color/transperent"
+            android:src="@drawable/android_play_round_pink"/>
+        <Space
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+        <ImageButton
+            android:id="@+id/action_now_playing_next"
+            style="@style/Button.Round.Action"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:padding="3dp"
+            android:src="@drawable/android_next"/>
+    </LinearLayout>
+
+</LinearLayout>
