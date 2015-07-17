@@ -254,9 +254,21 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         if (mSwapInProgress) throw new IllegalStateException("Swap in progress");
         mPlaylist = playlist;
         hide_all();
+        if (playlist != null){
+            if (playlist.title == null){
+                mPlaylistText.setText("Recently Created");
+            }else {
+                mPlaylistText.setText(playlist.title);
+            }
+        }else {
+            mPlaylistText.setText("Nothing to play");
+        }
+        if (playlist == null || playlist.songList.isEmpty()){
+            mSongsText.setText("Add song to playlist");
+        }
+
         if (playlist == null || playlist.songList.isEmpty()) {
             mNoItemsPanel.setVisibility(View.VISIBLE);
-            mSongsText.setText("Nothing to play");
         } else {
             mSongsText.setText(playlist.songList.size()+" songs");
             mPlaylistAdapter.clear();

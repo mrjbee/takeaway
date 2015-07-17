@@ -6,6 +6,7 @@ import org.monroe.team.corebox.app.Model;
 import org.monroe.team.corebox.log.L;
 import org.monroe.team.corebox.services.BackgroundTaskManager;
 import org.monroe.team.corebox.utils.Closure;
+import org.monroe.team.corebox.utils.DateUtils;
 import org.monroe.team.corebox.utils.Lists;
 
 import java.util.ArrayList;
@@ -487,7 +488,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
        }
 
        private Playlist createEmptyPlayList() {
-           return new Playlist("no_name", new ArrayList<FilePointer>());
+           return new Playlist(DateUtils.msAsString(), null, new ArrayList<FilePointer>());
        }
 
        public Playlist getPlaylist(){
@@ -554,7 +555,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            if (mPlaylistUnderBuild == null && mCurrentPlaylist == null) {
                mPlaylistUnderBuild = createEmptyPlayList();
            } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
-               mPlaylistUnderBuild = mCurrentPlaylist.duplicate();
+               mPlaylistUnderBuild = mCurrentPlaylist;
            }
            mCurrentPlaylist = null;
            notifyListeners(new Closure<PlayerListener, Void>() {
