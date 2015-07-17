@@ -8,26 +8,23 @@ import java.util.List;
 
 public class Playlist implements Serializable{
 
-    public final String title;
     public final String id;
     public final List<FilePointer> songList;
 
 
-    public Playlist(String title, String id, List<FilePointer> songList) {
-        this.title = title;
+    public Playlist(String id, List<FilePointer> songList) {
         this.id = id;
         this.songList = songList;
     }
 
     public Playlist duplicate() {
-        return new Playlist(title, id + DateUtils.msAsString(), new ArrayList<>(songList));
+        return new Playlist(id + DateUtils.msAsString(), new ArrayList<>(songList));
     }
 
     @Override
     public String toString() {
         return "Playlist{" +
-                "title='" + title + '\'' +
-                ", id='" + id + '\'' +
+                "id='" + id + '\'' +
                 ", songList=" + songList +
                 '}';
     }

@@ -57,6 +57,9 @@ public class FragmentDashboardPagerSlider extends FragmentDashboardActivity impl
             @Override
             public void onPageSelected(int position) {
                 dashboard().onScreenChanged(position);
+                if (getPage(position) ==null){
+                    return;
+                }
                 getPage(position).onSelect();
             }
 

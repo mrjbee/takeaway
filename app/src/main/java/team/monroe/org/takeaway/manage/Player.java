@@ -487,7 +487,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
        }
 
        private Playlist createEmptyPlayList() {
-           return new Playlist("Playlist","no_name", new ArrayList<FilePointer>());
+           return new Playlist("no_name", new ArrayList<FilePointer>());
        }
 
        public Playlist getPlaylist(){

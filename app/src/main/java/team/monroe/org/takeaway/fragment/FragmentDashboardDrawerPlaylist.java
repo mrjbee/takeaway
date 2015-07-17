@@ -242,6 +242,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     public void onPlaylistCalculation() {
         hide_all();
         mLoadingPanel.setVisibility(View.VISIBLE);
+        mSongsText.setText("Loading. Please wait");
     }
 
     @Override
@@ -255,11 +256,9 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         hide_all();
         if (playlist == null || playlist.songList.isEmpty()) {
             mNoItemsPanel.setVisibility(View.VISIBLE);
+            mSongsText.setText("Nothing to play");
         } else {
-
             mSongsText.setText(playlist.songList.size()+" songs");
-            mPlaylistText.setText(playlist.title);
-
             mPlaylistAdapter.clear();
             mPlaylistAdapter.addAll(playlist.songList);
             update_plalistListView();

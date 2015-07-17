@@ -16,6 +16,45 @@
             android:layout_width="fill_parent"
             android:layout_height="150dp"
             android:scaleType="centerCrop"/>
+        <LinearLayout
+            android:visibility="visible"
+            android:layout_alignParentBottom="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="#2d000000"
+            >
+
+            <ImageButton
+                android:id="@+id/action_show_playlist"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:padding="3dp"
+                android:src="@drawable/android_playlist_light"
+                style="@style/Button.Round.Action"/>
+
+            <Space
+                android:layout_weight="1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <ImageButton
+                android:id="@+id/action_song_label"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:padding="3dp"
+                android:src="@drawable/android_label_light"
+                style="@style/Button.Round.Action"/>
+
+        </LinearLayout>
     </RelativeLayout>
 
     <LinearLayout
@@ -94,6 +133,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         >
+
         <ImageButton
             android:id="@+id/action_now_playing_prev"
             style="@style/Button.Round.Action"
@@ -124,6 +164,7 @@
             android:layout_height="55dp"
             android:padding="3dp"
             android:src="@drawable/android_next"/>
+
     </LinearLayout>
 
 </LinearLayout>

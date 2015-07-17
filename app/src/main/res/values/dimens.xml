@@ -3,7 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="drawer_player_header">200dp</dimen>
+    <dimen name="drawer_player_header">150dp</dimen>
     <dimen name="margin_side_body">5dp</dimen>
 
 </resources>

@@ -71,6 +71,12 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
                 action_songActionButton();
             }
         });
+        view(R.id.action_show_playlist).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                action_showPlaylistButton();
+            }
+        });
 
         view(R.id.action_now_playing_next).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +118,10 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
 
         ac_NowPlayingCard.hideWithoutAnimation();
         ac_SongPlayButton.hideWithoutAnimation();
+    }
+
+    private void action_showPlaylistButton() {
+        dashboard().openNavigationDrawer();
     }
 
     private void action_songActionButton() {

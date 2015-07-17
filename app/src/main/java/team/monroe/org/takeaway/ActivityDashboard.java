@@ -248,6 +248,9 @@ public class ActivityDashboard extends ActivitySupport<App>{
         }
     }
 
+    public void openNavigationDrawer() {
+        mDrawerLayout.openDrawer(view(R.id.left_drawer));
+    }
 
 
     public static interface OnSecondaryHeaderRequestSubscriber {

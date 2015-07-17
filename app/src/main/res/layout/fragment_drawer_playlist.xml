@@ -11,38 +11,66 @@
         android:background="@drawable/background_panel_main"
         android:orientation="vertical"
         >
-        <LinearLayout
-            android:visibility="visible"
+
+        <TextView
+            android:layout_above="@+id/space_center"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/text_playlist_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Music Flow"
+            android:singleLine="true"
+            style="@style/Text.Prompt.Secondary"
+            android:textColor="@color/text.light"
+            android:layout_marginRight="10dp"
+            />
+        <Space
+            android:id="@+id/space_center"
+            android:layout_centerInParent="true"
+            android:layout_width="1dp"
+            android:layout_height="1dp" />
+
+        <TextView
+            android:id="@+id/text_song_count"
+            android:layout_below="@+id/space_center"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="22 Songs"
+            android:singleLine="true"
+            style="@style/Text.Body.Light"
+            />
+
+        <ImageButton
+            android:id="@+id/action_mode_repeat"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
             android:layout_alignParentBottom="true"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:gravity="center_vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="5dp"
-            android:background="#2d000000"
-            >
-            <ImageButton
-                android:id="@+id/action_mode_shuffle"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="5dp"
-                android:src="@drawable/android_shuffle_light"
-                style="@style/Button.Round.Action"/>
+            android:layout_alignParentLeft="true"
+            android:layout_margin="5dp"
+            android:src="@drawable/android_repeat_light"
+            style="@style/Button.Round.Action"/>
 
-            <Space
-                android:layout_weight="1"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/bottom_left_corner"/>
 
-            <ImageButton
-                android:id="@+id/action_mode_repeat"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="5dp"
-                android:src="@drawable/android_repeat_light"
-                style="@style/Button.Round.Action"/>
-        </LinearLayout>
+        <ImageButton
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/action_now_playing_next"
+            style="@style/Button.Round.Action"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
+            android:src="@drawable/android_more_light"/>
     </RelativeLayout>
     <RelativeLayout
         android:layout_below="@+id/panel_header"
@@ -53,44 +81,6 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:orientation="vertical">
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingTop="10dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="10dp"
-                    android:paddingBottom="5dp"
-                    android:background="@color/background.light">
-
-                    <TextView
-                        android:id="@+id/text_song_count"
-                        android:layout_weight="1"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:text="22 Songs"
-                        android:singleLine="true"
-                        style="@style/Text.Body.Optional"
-                        />
-
-                    <TextView
-                        android:id="@+id/text_playlist_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Playlist Caption"
-                        android:singleLine="true"
-                        style="@style/Text.Body.Smaller"
-                        android:layout_marginRight="10dp"
-                        />
-
-                    <ImageButton
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:padding="3dp"
-                        android:src="@drawable/android_more"
-                        style="@style/Button.Round.Action"/>
-
-                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/separator"
