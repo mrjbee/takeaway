@@ -15,7 +15,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
 
-import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder;
 import org.monroe.team.android.box.app.ui.animation.apperrance.DefaultAppearanceController;
 import org.monroe.team.android.box.utils.DisplayUtils;
 import org.monroe.team.android.box.utils.Views;
@@ -29,8 +28,8 @@ public class SeekProgressView extends View{
 
     private Paint mValuePaint;
     private Paint mBackgroundPaint;
-    private float mProgress = 0.1f;
-    private float mPublicProgress = 0.1f;
+    private float mProgress = 0f;
+    private float mPublicProgress = 0f;
     private float mPickerMaxRadius;
     private float mPickerFraction = FRACTION_PICKER_MIN;
 
@@ -158,18 +157,38 @@ public class SeekProgressView extends View{
     }
 
     private float calculateProgress(MotionEvent event) {
-        return event.getX()/(float)getWidth();
+        float xPosition = event.getX() - draw_ProgressPlaceStartPosition();
+        float answer =  xPosition/(float)getWidth();
+        return Math.min(1,Math.max(answer, 0f));
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
         float linePosition = getHeight()/2;
-        canvas.drawLine(0,linePosition, getWidth(),linePosition, mBackgroundPaint);
-        float valueWidth = getWidth() * mProgress;
-        canvas.drawLine(0, linePosition, valueWidth, linePosition, mValuePaint);
+        canvas.drawLine(
+                draw_ProgressPlaceStartPosition(),
+                linePosition,
+                draw_ProgressPlaceStartPosition() + draw_ProgressPlaceWidth(),
+                linePosition,
+                mBackgroundPaint);
+        float valueWidth = draw_ProgressPlaceWidth() * mProgress;
+        canvas.drawLine(
+                draw_ProgressPlaceStartPosition(),
+                linePosition,
+                draw_ProgressPlaceStartPosition() + valueWidth,
+                linePosition,
+                mValuePaint);
         float pickerRadius = mPickerMaxRadius * mPickerFraction;
-        canvas.drawCircle(valueWidth, linePosition, pickerRadius, mValuePaint);
+        canvas.drawCircle(draw_ProgressPlaceStartPosition() + valueWidth, linePosition, pickerRadius, mValuePaint);
+    }
+
+    private float draw_ProgressPlaceStartPosition() {
+        return mPickerMaxRadius;
+    }
+
+    private float draw_ProgressPlaceWidth() {
+        return getWidth() - draw_ProgressPlaceStartPosition() * 2;
     }
 
     public float getProgress() {
