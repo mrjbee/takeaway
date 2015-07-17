@@ -51,11 +51,9 @@ public class DownloadManager {
     }
 
     private void delete(File folder) {
-        for (File file : folder.listFiles()) {
-            if (file.isDirectory()){
+        if (folder.isDirectory()){
+            for (File file : folder.listFiles()) {
                 delete(file);
-            }else {
-                file.delete();
             }
         }
         folder.delete();
