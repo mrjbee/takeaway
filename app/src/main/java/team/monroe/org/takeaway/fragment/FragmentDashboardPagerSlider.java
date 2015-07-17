@@ -3,6 +3,8 @@ package team.monroe.org.takeaway.fragment;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.view.MotionEvent;
+import android.view.View;
 
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.fragment.common.FragmentPagerAdapter;
@@ -100,5 +102,9 @@ public class FragmentDashboardPagerSlider extends FragmentDashboardActivity impl
         int curItem = mViewPager.getCurrentItem();
         Fragment fragment = getPage(curItem);
         return (FragmentDashboardSlide) fragment;
+    }
+
+    public void viewPagerGesture(boolean enabled) {
+        mViewPager.requestDisallowInterceptTouchEvent(!enabled);
     }
 }

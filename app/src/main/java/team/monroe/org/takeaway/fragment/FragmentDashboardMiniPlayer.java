@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 
-import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.app.ui.SlideTouchGesture;
 import org.monroe.team.android.box.app.ui.animation.AnimatorListenerSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
@@ -21,7 +20,6 @@ import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
-import team.monroe.org.takeaway.view.ProgressView;
 
 public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver {
 

@@ -166,6 +166,11 @@ public class ActivityDashboard extends ActivitySupport<App>{
         fragment.updateScreen(screenPosition);
     }
 
+    public void requestScreenChangeByTouchEnabled(boolean enabled) {
+        FragmentDashboardPagerSlider fragment = (FragmentDashboardPagerSlider) getFragmentManager().findFragmentById(R.id.frag_body);
+        fragment.viewPagerGesture(enabled);
+    }
+
     public void showDownloads() {
         mDownloadsShown = true;
         ac_downloadFragment.show();
@@ -242,6 +247,8 @@ public class ActivityDashboard extends ActivitySupport<App>{
             }
         }
     }
+
+
 
     public static interface OnSecondaryHeaderRequestSubscriber {
         public void onRequest(View secondaryHeaderContent);

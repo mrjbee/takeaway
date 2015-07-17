@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
@@ -14,32 +15,42 @@ import org.monroe.team.android.box.utils.DisplayUtils;
 
 import team.monroe.org.takeaway.R;
 
-public class ProgressView extends View{
+public class SeekProgressView extends View{
 
     private Paint mValuePaint;
     private Paint mBackgroundPaint;
     private float mProgress = 0.1f;
     private float mPublicProgress = 0.1f;
     private ObjectAnimator mProgressAnimator;
+    private SeekListener mSeekListener = NO_OP_SEEK_LISTENER;
 
-    public ProgressView(Context context) {
+    private final static SeekListener NO_OP_SEEK_LISTENER = new SeekListener() {
+        @Override
+        public void onSeekStart(SeekProgressView seekProgressView, float progress) {}
+        @Override
+        public void onSeekStop(SeekProgressView seekProgressView, float progress) {}
+        @Override
+        public void onSeek(SeekProgressView seekProgressView, float progress) {}
+    };
+
+    public SeekProgressView(Context context) {
         super(context);
         init();
     }
 
 
-    public ProgressView(Context context, AttributeSet attrs) {
+    public SeekProgressView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public ProgressView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SeekProgressView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public ProgressView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public SeekProgressView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -56,6 +67,42 @@ public class ProgressView extends View{
         mBackgroundPaint.setColor(getResources().getColor(R.color.gray));
         mBackgroundPaint.setAlpha(10);
     }
+
+    public SeekListener getSeekListener() {
+        if (mSeekListener == NO_OP_SEEK_LISTENER) return null;
+        return mSeekListener;
+    }
+
+    public void setSeekListener(SeekListener seekListener) {
+        this.mSeekListener = seekListener;
+        if (mSeekListener == null){
+            mSeekListener = NO_OP_SEEK_LISTENER;
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float progress = calculateProgress(event);
+        setProgress(progress, AnimationSpeed.NO_ANIMATION);
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+              mSeekListener.onSeekStart(this, progress);
+              break;
+            case MotionEvent.ACTION_MOVE:
+              mSeekListener.onSeek(this, progress);
+              break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+              mSeekListener.onSeekStop(this, progress);
+              break;
+        }
+        return true;
+    }
+
+    private float calculateProgress(MotionEvent event) {
+        return event.getX()/(float)getWidth();
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -115,4 +162,13 @@ public class ProgressView extends View{
     public static enum AnimationSpeed {
         NO_ANIMATION, NORMAL, SLOW
     }
+
+    public interface SeekListener {
+        void onSeekStart(SeekProgressView seekProgressView, float progress);
+        void onSeekStop(SeekProgressView seekProgressView, float progress);
+        void onSeek(SeekProgressView seekProgressView, float progress);
+    }
+
+
+
 }

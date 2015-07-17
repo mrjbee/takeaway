@@ -21,7 +21,7 @@
     <LinearLayout
         android:id="@+id/panel_now_playing_progress"
         android:layout_width="fill_parent"
-        android:layout_height="15dp"
+        android:layout_height="30dp"
         android:layout_margin="10dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
@@ -33,13 +33,14 @@
             android:textColor="@color/highlight"
             android:text="01:20"
             />
-        <team.monroe.org.takeaway.view.ProgressView
+
+        <team.monroe.org.takeaway.view.SeekProgressView
             android:id="@+id/progress_now_playing"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight="1"
             android:layout_width="fill_parent"
-            android:layout_height="5dp" />
+            android:layout_height="fill_parent" />
 
         <TextView
             android:id="@+id/text_now_playing_time_duration"

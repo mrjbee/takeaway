@@ -6,7 +6,6 @@ import android.widget.ImageButton;
 
 import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
-import org.monroe.team.android.box.utils.DisplayUtils;
 
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
@@ -15,13 +14,12 @@ import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.view.FormatUtils;
-import team.monroe.org.takeaway.view.ProgressView;
+import team.monroe.org.takeaway.view.SeekProgressView;
 
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.alpha;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.animateAppearance;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.combine;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.duration_constant;
-import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.heightSlide;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.interpreter_accelerate;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.interpreter_overshot;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.rotate;
@@ -34,7 +32,7 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
     private ImageButton mSongPlayBtn;
     private AppearanceController ac_SongPlayButton;
     private AppearanceController ac_NowPlayingCard;
-    private ProgressView mSongProgressView;
+    private SeekProgressView mSongSeekProgressView;
     private ApplicationSupport.PeriodicalAction mSongProgressUpdateAction;
     private AppearanceController ac_NowPlayingSongControl;
 
@@ -47,8 +45,25 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mSongPlayBtn = view(R.id.action_now_playing_play, ImageButton.class);
-        mSongProgressView = view(R.id.progress_now_playing, ProgressView.class);
-        mSongProgressView.setProgress(1, ProgressView.AnimationSpeed.NO_ANIMATION);
+        mSongSeekProgressView = view(R.id.progress_now_playing, SeekProgressView.class);
+        mSongSeekProgressView.setProgress(1, SeekProgressView.AnimationSpeed.NO_ANIMATION);
+        mSongSeekProgressView.setSeekListener(new SeekProgressView.SeekListener() {
+            @Override
+            public void onSeekStart(SeekProgressView seekProgressView, float progress) {
+                dashboard().requestScreenChangeByTouchEnabled(false);
+                mSongProgressUpdateAction.stop();
+            }
+
+            @Override
+            public void onSeekStop(SeekProgressView seekProgressView, float progress) {
+                dashboard().requestScreenChangeByTouchEnabled(true);
+                mSongProgressUpdateAction.start(0, 1000);
+            }
+
+            @Override
+            public void onSeek(SeekProgressView seekProgressView, float progress) {
+            }
+        });
 
         mSongPlayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,7 +144,7 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
                 update_SongProgress(true);
             }
         });
-        mSongProgressUpdateAction.start(500, 500);
+        mSongProgressUpdateAction.start(500, 1000);
         update_SongProgress(false);
     }
 
@@ -151,9 +166,9 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
         view_text(R.id.text_now_playing_time_duration).setText(durationText);
 
         if (animate) {
-            mSongProgressView.setProgress(progress, progress == 0 ? ProgressView.AnimationSpeed.SLOW : ProgressView.AnimationSpeed.NORMAL);
+            mSongSeekProgressView.setProgress(progress, progress == 0 ? SeekProgressView.AnimationSpeed.SLOW : SeekProgressView.AnimationSpeed.NORMAL);
         } else {
-            mSongProgressView.setProgress(progress, ProgressView.AnimationSpeed.NO_ANIMATION);
+            mSongSeekProgressView.setProgress(progress, SeekProgressView.AnimationSpeed.NO_ANIMATION);
         }
     }
 
