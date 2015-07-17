@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -11,16 +12,29 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
+import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
+
+import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder;
+import org.monroe.team.android.box.app.ui.animation.apperrance.DefaultAppearanceController;
 import org.monroe.team.android.box.utils.DisplayUtils;
+import org.monroe.team.android.box.utils.Views;
 
 import team.monroe.org.takeaway.R;
 
 public class SeekProgressView extends View{
 
+    private static float FRACTION_PICKER_MIN = 0.25f;
+    private static float FRACTION_PICKER_MAX = 1f;
+
     private Paint mValuePaint;
     private Paint mBackgroundPaint;
     private float mProgress = 0.1f;
     private float mPublicProgress = 0.1f;
+    private float mPickerMaxRadius;
+    private float mPickerFraction = FRACTION_PICKER_MIN;
+
+
     private ObjectAnimator mProgressAnimator;
     private SeekListener mSeekListener = NO_OP_SEEK_LISTENER;
 
@@ -32,6 +46,7 @@ public class SeekProgressView extends View{
         @Override
         public void onSeek(SeekProgressView seekProgressView, float progress) {}
     };
+    private AppearanceController ac_picker;
 
     public SeekProgressView(Context context) {
         super(context);
@@ -56,16 +71,57 @@ public class SeekProgressView extends View{
     }
 
     private void init() {
+        initPickerAnimation();
         mValuePaint = new Paint();
         mValuePaint.setStrokeWidth(DisplayUtils.dpToPx(3f, getResources()));
         mValuePaint.setAntiAlias(true);
-        mValuePaint.setColor(getResources().getColor(R.color.text_highlight));
-
+        mValuePaint.setColor(Views.color(this, R.color.text_highlight, Color.RED));
         mBackgroundPaint = new Paint();
-        mBackgroundPaint.setStrokeWidth(DisplayUtils.dpToPx(3f, getResources()));
+        mBackgroundPaint.setStrokeWidth(DisplayUtils.dpToPx(2f, getResources()));
         mBackgroundPaint.setAntiAlias(true);
-        mBackgroundPaint.setColor(getResources().getColor(R.color.gray));
+        mBackgroundPaint.setColor(Views.color(this, R.color.gray, Color.GRAY));
         mBackgroundPaint.setAlpha(10);
+
+        mPickerMaxRadius = DisplayUtils.dpToPx(15f, getResources());
+        ac_picker.hideWithoutAnimation();
+    }
+
+    private void initPickerAnimation() {
+        ac_picker = animateAppearance(this, new TypeBuilder<Float>() {
+            @Override
+            public DefaultAppearanceController.ValueGetter<Float> buildValueGetter() {
+                return new DefaultAppearanceController.ValueGetter<Float>() {
+                    @Override
+                    public Float getShowValue() {
+                        return FRACTION_PICKER_MAX;
+                    }
+
+                    @Override
+                    public Float getHideValue() {
+                        return FRACTION_PICKER_MIN;
+                    }
+
+                    @Override
+                    public Float getCurrentValue(View view) {
+                        return mPickerFraction;
+                    }
+                };
+            }
+
+            @Override
+            public TypedValueSetter<Float> buildValueSetter() {
+                return new TypedValueSetter<Float>(Float.class) {
+                    @Override
+                    public void setValue(View view, Float value) {
+                         mPickerFraction = value;
+                         invalidate();
+                    }
+                };
+            }
+        })
+        .showAnimation(duration_constant(100), interpreter_accelerate_decelerate())
+        .hideAnimation(duration_constant(300), interpreter_overshot())
+                .build();
     }
 
     public SeekListener getSeekListener() {
@@ -87,6 +143,7 @@ public class SeekProgressView extends View{
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
               mSeekListener.onSeekStart(this, progress);
+              ac_picker.show();
               break;
             case MotionEvent.ACTION_MOVE:
               mSeekListener.onSeek(this, progress);
@@ -94,6 +151,7 @@ public class SeekProgressView extends View{
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
               mSeekListener.onSeekStop(this, progress);
+              ac_picker.hide();
               break;
         }
         return true;
@@ -107,9 +165,11 @@ public class SeekProgressView extends View{
     @Override
     protected void onDraw(Canvas canvas) {
         float linePosition = getHeight()/2;
-        canvas.drawLine(0,linePosition,getWidth(),linePosition, mBackgroundPaint);
+        canvas.drawLine(0,linePosition, getWidth(),linePosition, mBackgroundPaint);
         float valueWidth = getWidth() * mProgress;
-        canvas.drawLine(0,linePosition,valueWidth,linePosition, mValuePaint);
+        canvas.drawLine(0, linePosition, valueWidth, linePosition, mValuePaint);
+        float pickerRadius = mPickerMaxRadius * mPickerFraction;
+        canvas.drawCircle(valueWidth, linePosition, pickerRadius, mValuePaint);
     }
 
     public float getProgress() {
