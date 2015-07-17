@@ -381,6 +381,17 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         playNext();
     }
 
+    @Override
+    public void onSongSeekCompleted() {
+        notifyListeners(new Closure<PlayerListener, Void>() {
+            @Override
+            public Void execute(PlayerListener arg) {
+                arg.onCurrentSongSeekCompleted();
+                return null;
+            }
+        });
+    }
+
     public synchronized FilePointer getCurrentSong() {
         return (mCurrentPlayingSong ==null) ? null:mCurrentPlayingSong.getFilePointer();
     }
@@ -430,7 +441,19 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         return answer;
     }
 
-
+    public synchronized void seekTo(float progress) {
+        SongManager songManager = mSongManagerPool.get(1);
+        long duration = songManager.getDuration();
+        if (duration == -1 || !songManager.seekTo((long) (duration * progress))){
+            notifyListeners(new Closure<PlayerListener, Void>() {
+                @Override
+                public Void execute(PlayerListener arg) {
+                    arg.onCurrentSongSeekCompleted();
+                    return null;
+                }
+            });
+        }
+    }
 
 
     public static interface PlayerListener {
@@ -442,6 +465,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         void onCurrentSongReady(FilePointer filePointer);
         void onCurrentSongPlay();
         void onCurrentSongStop();
+        void onCurrentSongSeekCompleted();
     }
 
     private static enum SongPlayState {

@@ -112,6 +112,8 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
+        mObserver.onSongSeekCompleted();
+        nextSongTimer_schedule();
     }
 
     public float getVolumeFraction() {
@@ -285,6 +287,13 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         return mMediaPlayer.getCurrentPosition();
     }
 
+    public boolean seekTo(long position) {
+        if (!mPrepared) return false;
+        nextSongTimer_cancel();
+        mMediaPlayer.seekTo((int) position);
+        return true;
+    }
+
     public static interface Observer {
         void onCriticalError(SongManager songManager, Exception e);
         void onSongBroken(SongManager songManager, SongFile mSongFile);
@@ -292,6 +301,7 @@ public class SongManager implements MediaPlayer.OnCompletionListener, MediaPlaye
         void onSongPlayStop(SongManager songManager, SongFile mSongFile);
         void onSongEnd(SongManager songManager);
         void onSongNearEnd(SongManager songManager);
+        void onSongSeekCompleted();
     }
 
 }

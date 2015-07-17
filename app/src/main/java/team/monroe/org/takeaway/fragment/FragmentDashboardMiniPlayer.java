@@ -339,6 +339,11 @@ public class FragmentDashboardMiniPlayer extends FragmentDashboardActivity imple
         updateButtonIcon(drawable_icon);
     }
 
+    @Override
+    public void onCurrentSongSeekCompleted() {
+
+    }
+
     private void updateButtonIcon(final int drawable_icon) {
         mSongPlayBtn.setImageResource(drawable_icon);
         ac_SongPlayButton.show();

@@ -310,6 +310,11 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     }
 
     @Override
+    public void onCurrentSongSeekCompleted() {
+
+    }
+
+    @Override
     public void onDetails(FilePointer pointer, SongDetails songDetails) {
         update_plalistListView();
     }

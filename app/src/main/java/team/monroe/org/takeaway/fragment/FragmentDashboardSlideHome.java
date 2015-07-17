@@ -57,7 +57,7 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
             @Override
             public void onSeekStop(SeekProgressView seekProgressView, float progress) {
                 dashboard().requestScreenChangeByTouchEnabled(true);
-                mSongProgressUpdateAction.start(0, 1000);
+                application().player().seekTo(progress);
             }
 
             @Override
@@ -276,6 +276,11 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
     public void onCurrentSongStop() {
         final int drawable_icon = R.drawable.android_play_round_pink;
         updateButtonIcon(drawable_icon);
+    }
+
+    @Override
+    public void onCurrentSongSeekCompleted() {
+        mSongProgressUpdateAction.start(0, 1000);
     }
 
     private void updateButtonIcon(final int drawable_icon) {
