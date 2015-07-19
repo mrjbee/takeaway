@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
@@ -48,6 +49,8 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     private Playlist mPlaylist;
     private float mDashWeight;
     private View mPlayListPanel;
+    private AppearanceController ac_playlistDetails;
+    private boolean mPlaylistDetailsShown = false;
 
     @Override
     protected int getLayoutId() {
@@ -74,7 +77,32 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         mItemList = view(R.id.list_items, DynamicListView.class);
         mItemList.setSwapListener(this);
         mNoItemsPanel = view(R.id.panel_no_items);
+
+        view(R.id.panel_playlist_details).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+
+        ac_playlistDetails = combine(
+                    animateAppearance(view(R.id.action_playlist_more), rotate(180f, 0f))
+                        .showAnimation(duration_constant(300), interpreter_overshot())
+                        .hideAnimation(duration_constant(500), interpreter_decelerate(0.8f)),
+                    animateAppearance(view(R.id.panel_playlist_details), ySlide(0, - DisplayUtils.screenHeight(getResources())))
+                        .showAnimation(duration_constant(400), interpreter_accelerate(0.8f))
+                        .hideAnimation(duration_constant(500), interpreter_decelerate(0.8f))
+                        .hideAndGone()
+        );
+
         hide_all();
+
+        view(R.id.action_playlist_more).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                action_onPlaylistMore();
+            }
+        });
 
         mPlaylistAdapter = new PlaylistAdapter(activity(), new GetViewImplementation.ViewHolderFactory<GetViewImplementation.ViewHolder<FilePointer>>() {
             @Override
@@ -198,6 +226,29 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         });
     }
 
+    private void action_onPlaylistMore() {
+        if (mPlaylist == null || mPlaylist.songList.isEmpty()){
+            Toast.makeText(activity(), "Playlist should be not empty",Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (mPlaylistDetailsShown){
+            hide_playlistDetails();
+        }else {
+            update_playlistDetails();
+        }
+    }
+
+    private void hide_playlistDetails() {
+        ac_playlistDetails.hide();
+        mPlaylistDetailsShown = false;
+    }
+
+    private void update_playlistDetails() {
+        mPlaylistDetailsShown = true;
+        ac_playlistDetails.show();
+
+    }
+
     private boolean onSongDelete(FilePointer filePointer) {
         return application().player().playlist_removeFrom(mPlaylist, filePointer);
     }
@@ -215,6 +266,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     }
 
     private void hide_all() {
+        hide_playlistDetails();
         mLoadingPanel.setVisibility(View.GONE);
         mPlayListPanel.setVisibility(View.GONE);
         mNoItemsPanel.setVisibility(View.GONE);
