@@ -8,6 +8,7 @@ import org.monroe.team.android.box.services.SettingManager;
 import org.monroe.team.android.box.utils.AndroidLogImplementation;
 import org.monroe.team.corebox.log.L;
 import org.monroe.team.corebox.utils.Closure;
+import org.monroe.team.corebox.utils.DateUtils;
 import org.monroe.team.corebox.utils.ObserverSupport;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
     public PersistRangeDataProvider<FilePointer, List<FilePointer>> data_range_folder;
     public Data<List<Source>> data_sources;
     public final ObserverSupport<OnSongDetailsObserver> observers_songDetails = new ObserverSupport<>();
+    public final ObserverSupport<OnPlaylistSaveObserver> observers_playlistSave = new ObserverSupport<>();
 
     @Override
     protected void onPostCreate() {
@@ -68,6 +70,44 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
 
         model().usingService(CloudConnectionManager.class).startWatcher();
         listener_addDownloadManager(this);
+        player().addPlayerListener(new Player.PlayerListenerSupport(){
+            @Override
+            public void onPlaylistChanged(final Playlist playlist) {
+                if (playlist.autosave && playlist.isSaveRequired()){
+                    savePlaylist(playlist, new ValueObserver<Void>() {
+                        @Override
+                        public void onSuccess(Void value) {
+                            observers_playlistSave.notify(new Closure<OnPlaylistSaveObserver, Void>() {
+                                @Override
+                                public Void execute(OnPlaylistSaveObserver arg) {
+                                    arg.onSave(playlist);
+                                    return null;
+                                }
+                            });
+                        }
+                        @Override
+                        public void onFail(Throwable exception) {
+                            observers_playlistSave.notify(new Closure<OnPlaylistSaveObserver, Void>() {
+                                @Override
+                                public Void execute(OnPlaylistSaveObserver arg) {
+                                    arg.onSaveRequired(playlist);
+                                    return null;
+                                }
+                            });
+                        }
+                    });
+                }else if (playlist.isSaveRequired()){
+                    observers_playlistSave.notify(new Closure<OnPlaylistSaveObserver, Void>() {
+                        @Override
+                        public Void execute(OnPlaylistSaveObserver arg) {
+                            arg.onSaveRequired(playlist);
+                            return null;
+                        }
+                    });
+                }
+
+            }
+        });
     }
 
     public void listener_addDownloadManager(AppModel.DownloadObserver observer) {
@@ -165,5 +205,10 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
 
     public interface OnSongDetailsObserver {
         public void onDetails(FilePointer pointer, SongDetails songDetails);
+    }
+
+    public interface OnPlaylistSaveObserver {
+        public void onSave(Playlist playlist);
+        public void onSaveRequired(Playlist playlist);
     }
 }

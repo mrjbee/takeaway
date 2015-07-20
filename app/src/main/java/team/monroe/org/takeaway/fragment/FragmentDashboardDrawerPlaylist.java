@@ -34,7 +34,7 @@ import team.monroe.org.takeaway.view.DynamicListAdapter;
 import team.monroe.org.takeaway.view.DynamicListView;
 import team.monroe.org.takeaway.view.FormatUtils;
 
-public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver, DynamicListView.OnElementsSwapListener {
+public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity implements Player.PlayerListener, App.OnSongDetailsObserver, DynamicListView.OnElementsSwapListener, App.OnPlaylistSaveObserver {
 
     private View mLoadingPanel;
     private DynamicListView mItemList;
@@ -52,6 +52,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     private View mPlayListPanel;
     private AppearanceController ac_playlistDetails;
     private boolean mPlaylistDetailsShown = false;
+    private View mSavePlalistActionButton;
 
     @Override
     protected int getLayoutId() {
@@ -83,6 +84,14 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;
+            }
+        });
+
+        mSavePlalistActionButton = view(R.id.action_playlist_save);
+        mSavePlalistActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                action_onPlaylistSaveExisting();
             }
         });
 
@@ -234,6 +243,20 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         });
     }
 
+    private void action_onPlaylistSaveExisting() {
+        mSavePlalistActionButton.setVisibility(View.GONE);
+        if (mPlaylist.isSaveRequired()){
+            application().savePlaylist(mPlaylist, activity().observe(new ActivitySupport.OnValue<Void>() {
+                @Override
+                public void action(Void aVoid) {
+                    if (getActivity() != null){
+                        Toast.makeText(getActivity(), "Playlist saved", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }));
+        }
+    }
+
     private void action_onPlaylistSave() {
         String title = view_text(R.id.edit_playlist_title).getText().toString();
         if (title.trim().isEmpty()){
@@ -293,6 +316,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
 
     private void hide_all() {
         hide_playlistDetails();
+        mSavePlalistActionButton.setVisibility(View.GONE);
         mLoadingPanel.setVisibility(View.GONE);
         mPlayListPanel.setVisibility(View.GONE);
         mNoItemsPanel.setVisibility(View.GONE);
@@ -307,12 +331,15 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         mSongBuffering = application().player().isBuffering();
         update_playlist(application().player().playlist());
         application().observers_songDetails.add(this);
+        application().observers_playlistSave.add(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         application().player().removePlayerListener(this);
+        application().observers_songDetails.remove(this);
+        application().observers_playlistSave.remove(this);
     }
 
     @Override
@@ -331,6 +358,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         if (mSwapInProgress) throw new IllegalStateException("Swap in progress");
         mPlaylist = playlist;
         hide_all();
+        update_playlistSaveUI();
         if (playlist != null){
             if (playlist.title == null){
                 mPlaylistText.setText("Recently Created");
@@ -353,6 +381,10 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             update_plalistListView();
             mPlayListPanel.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void update_playlistSaveUI() {
+        if (mPlaylist != null) mSavePlalistActionButton.setVisibility(mPlaylist.isSaveRequired()? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -425,6 +457,20 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             fileList.add(mPlaylistAdapter.getItem(i));
         }
         application().player().playlist_updateOrder(mPlaylist, fileList);
+    }
+
+    @Override
+    public void onSave(Playlist playlist) {
+        if (mPlaylist == playlist){
+            update_playlistSaveUI();
+        }
+    }
+
+    @Override
+    public void onSaveRequired(Playlist playlist) {
+        if (mPlaylist == playlist){
+            update_playlistSaveUI();
+        }
     }
 
     public static class PlaylistAdapter extends GenericListViewAdapter<FilePointer, GetViewImplementation.ViewHolder<FilePointer>> implements DynamicListAdapter {

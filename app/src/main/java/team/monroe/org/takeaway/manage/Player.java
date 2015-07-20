@@ -469,6 +469,54 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         void onCurrentSongSeekCompleted();
     }
 
+    public static class PlayerListenerSupport implements PlayerListener{
+
+        @Override
+        public void onPlaylistCalculation() {
+
+        }
+
+        @Override
+        public void onPlaylistChanged(Playlist playlist) {
+
+        }
+
+        @Override
+        public void onError(Throwable e) {
+
+        }
+
+        @Override
+        public void onUnavailableFile(FilePointer filePointer) {
+
+        }
+
+        @Override
+        public void onCurrentSongChanged(FilePointer filePointer) {
+
+        }
+
+        @Override
+        public void onCurrentSongReady(FilePointer filePointer) {
+
+        }
+
+        @Override
+        public void onCurrentSongPlay() {
+
+        }
+
+        @Override
+        public void onCurrentSongStop() {
+
+        }
+
+        @Override
+        public void onCurrentSongSeekCompleted() {
+
+        }
+    }
+
     private static enum SongPlayState {
         NOT_USED, STOP, PAUSED, PLAY
     }
@@ -503,6 +551,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
                 return;
             }
             mCurrentPlaylist.songList.remove(filePointer);
+            mCurrentPlaylist.dateModified = DateUtils.now().getTime();
             notifyListeners(new Closure<PlayerListener, Void>() {
                 @Override
                 public Void execute(PlayerListener arg) {
@@ -520,6 +569,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            }
            mCurrentPlaylist.songList.clear();
            mCurrentPlaylist.songList.addAll(fileList);
+           mCurrentPlaylist.dateModified = DateUtils.now().getTime();
            notifyListeners(new Closure<PlayerListener, Void>() {
                @Override
                public Void execute(PlayerListener arg) {
@@ -556,6 +606,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
                mPlaylistUnderBuild = createEmptyPlayList();
            } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
                mPlaylistUnderBuild = mCurrentPlaylist;
+               mPlaylistUnderBuild.dateModified = DateUtils.now().getTime();
            }
            mCurrentPlaylist = null;
            notifyListeners(new Closure<PlayerListener, Void>() {
@@ -598,6 +649,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            if (mPlaylistBuildJobList.isEmpty()){
                LOG.d("Playlist [empty] created notification");
                mCurrentPlaylist = createEmptyPlayList();
+               mPlaylistUnderBuild = null;
                mBackgroundUpdateTask = null;
                notifyListeners(new Closure<PlayerListener, Void>() {
                    @Override
@@ -619,6 +671,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            if (mPlaylistBuildJobList.isEmpty()){
                LOG.d("Playlist created notification");
                mCurrentPlaylist = mPlaylistUnderBuild;
+               mPlaylistUnderBuild = null;
                mBackgroundUpdateTask = null;
                notifyListeners(new Closure<PlayerListener, Void>() {
                    @Override

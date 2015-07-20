@@ -12,6 +12,8 @@ public class Playlist implements Serializable{
     public String title;
     public boolean autosave = false;
     public final List<FilePointer> songList;
+    public long dateModified = 0;
+    public long dateSaved = 0;
 
 
     public Playlist(String id, String title, List<FilePointer> songList) {
@@ -26,5 +28,9 @@ public class Playlist implements Serializable{
                 "id='" + id + '\'' +
                 ", songList=" + songList +
                 '}';
+    }
+
+    public boolean isSaveRequired() {
+        return title != null && dateModified > dateSaved;
     }
 }

@@ -171,6 +171,16 @@
         android:orientation="vertical"
         >
 
+        <ImageButton
+            android:id="@+id/action_playlist_save"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:layout_alignParentRight="true"
+            android:layout_margin="5dp"
+            android:src="@drawable/android_save_light"
+            style="@style/Button.Round.Action"/>
+
         <TextView
             android:layout_above="@+id/space_center"
             android:layout_centerHorizontal="true"
