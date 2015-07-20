@@ -26,6 +26,7 @@ import java.util.List;
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.manage.Player;
+import team.monroe.org.takeaway.manage.PlaylistManager;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
@@ -101,6 +102,13 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             @Override
             public void onClick(View v) {
                 action_onPlaylistMore();
+            }
+        });
+
+        view(R.id.action_playlist_details_save).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                action_onPlaylistSave();
             }
         });
 
@@ -224,6 +232,12 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
                 onSongClick(mPlaylistAdapter.getItem(position));
             }
         });
+    }
+
+    private void action_onPlaylistSave() {
+        PlaylistManager playlistManager = application().model().usingService(PlaylistManager.class);
+        Playlist playlist = playlistManager.getData(mPlaylist.id);
+        playlistManager.putData(mPlaylist);
     }
 
     private void action_onPlaylistMore() {

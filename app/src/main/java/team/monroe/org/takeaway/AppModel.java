@@ -7,6 +7,7 @@ import org.monroe.team.android.box.app.AndroidModel;
 import org.monroe.team.android.box.db.DAOFactory;
 import org.monroe.team.android.box.db.DAOSupport;
 import org.monroe.team.android.box.db.DBHelper;
+import org.monroe.team.android.box.db.TextDataBase;
 import org.monroe.team.android.box.db.TransactionManager;
 import org.monroe.team.android.box.services.HttpManager;
 import org.monroe.team.android.box.services.NetworkManager;
@@ -24,6 +25,7 @@ import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.manage.CloudMetadataProvider;
 import team.monroe.org.takeaway.manage.DownloadManager;
 import team.monroe.org.takeaway.manage.FileProvider;
+import team.monroe.org.takeaway.manage.PlaylistManager;
 import team.monroe.org.takeaway.manage.impl.KodiCloudProvider;
 import team.monroe.org.takeaway.manage.impl.LocalFileProvider;
 import team.monroe.org.takeaway.manage.Player;
@@ -41,6 +43,12 @@ public class AppModel extends AndroidModel {
     @Override
     protected void constructor(String appName, Context context, ServiceRegistry serviceRegistry) {
         super.constructor(appName, context, serviceRegistry);
+
+
+        PlaylistManager playlistManager = new PlaylistManager();
+        TextDataBase textDataBase = new TextDataBase(context, appName, 1, playlistManager);
+        serviceRegistry.registrate(PlaylistManager.class, playlistManager);
+
         downloadObservers = new ArrayList<>();
         serviceRegistry.registrate(DownloadManager.class, new DownloadManager(context, new Closure<SongFile, Void>() {
             @Override
