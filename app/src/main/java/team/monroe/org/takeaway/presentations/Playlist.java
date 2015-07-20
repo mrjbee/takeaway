@@ -9,7 +9,8 @@ import java.util.List;
 public class Playlist implements Serializable{
 
     public final String id;
-    public final String title;
+    public String title;
+    public boolean autosave = false;
     public final List<FilePointer> songList;
 
 

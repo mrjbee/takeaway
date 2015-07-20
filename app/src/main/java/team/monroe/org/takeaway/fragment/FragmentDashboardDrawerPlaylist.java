@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.app.ui.GenericListViewAdapter;
 import org.monroe.team.android.box.app.ui.GetViewImplementation;
 import org.monroe.team.android.box.app.ui.SlideTouchGesture;
@@ -26,7 +27,6 @@ import java.util.List;
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
 import team.monroe.org.takeaway.manage.Player;
-import team.monroe.org.takeaway.manage.PlaylistManager;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
@@ -235,9 +235,21 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     }
 
     private void action_onPlaylistSave() {
-        PlaylistManager playlistManager = application().model().usingService(PlaylistManager.class);
-        Playlist playlist = playlistManager.getData(mPlaylist.id);
-        playlistManager.putData(mPlaylist);
+        String title = view_text(R.id.edit_playlist_title).getText().toString();
+        if (title.trim().isEmpty()){
+            Toast.makeText(getActivity(),"Please set title",Toast.LENGTH_LONG).show();
+            return;
+        }
+        mPlaylist.title=  title;
+        mPlaylist.autosave = view_check(R.id.check_playlist_autosave).isChecked();
+        application().savePlaylist(mPlaylist, activity().observe(new ActivitySupport.OnValue<Void>() {
+            @Override
+            public void action(Void o) {
+                if (activity() == null) return;
+                update_playlist(mPlaylist);
+                hide_playlistDetails();
+            }
+        }));
     }
 
     private void action_onPlaylistMore() {
@@ -285,7 +297,6 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         mPlayListPanel.setVisibility(View.GONE);
         mNoItemsPanel.setVisibility(View.GONE);
     }
-
 
     @Override
     public void onStart() {

@@ -18,11 +18,13 @@ import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.presentations.FilePointer;
+import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.presentations.SongFile;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 import team.monroe.org.takeaway.uc.CheckCloudConnection;
+import team.monroe.org.takeaway.uc.SavePlaylist;
 import team.monroe.org.takeaway.uc.SongDetailsExtractIfNeeded;
 import team.monroe.org.takeaway.uc.GetCloudSources;
 import team.monroe.org.takeaway.uc.GetFileContent;
@@ -155,6 +157,10 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
             }
 
         });
+    }
+
+    public void savePlaylist(Playlist playlist, ValueObserver<Void> observer) {
+        fetchValue(SavePlaylist.class, playlist, new NoOpValueAdapter<Void>(), observer);
     }
 
     public interface OnSongDetailsObserver {

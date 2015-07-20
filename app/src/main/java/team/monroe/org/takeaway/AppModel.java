@@ -25,7 +25,7 @@ import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.manage.CloudMetadataProvider;
 import team.monroe.org.takeaway.manage.DownloadManager;
 import team.monroe.org.takeaway.manage.FileProvider;
-import team.monroe.org.takeaway.manage.PlaylistManager;
+import team.monroe.org.takeaway.manage.PlaylistStorage;
 import team.monroe.org.takeaway.manage.impl.KodiCloudProvider;
 import team.monroe.org.takeaway.manage.impl.LocalFileProvider;
 import team.monroe.org.takeaway.manage.Player;
@@ -45,9 +45,9 @@ public class AppModel extends AndroidModel {
         super.constructor(appName, context, serviceRegistry);
 
 
-        PlaylistManager playlistManager = new PlaylistManager();
-        TextDataBase textDataBase = new TextDataBase(context, appName, 1, playlistManager);
-        serviceRegistry.registrate(PlaylistManager.class, playlistManager);
+        PlaylistStorage playlistStorage = new PlaylistStorage();
+        TextDataBase textDataBase = new TextDataBase(context, appName, 1, playlistStorage);
+        serviceRegistry.registrate(PlaylistStorage.class, playlistStorage);
 
         downloadObservers = new ArrayList<>();
         serviceRegistry.registrate(DownloadManager.class, new DownloadManager(context, new Closure<SongFile, Void>() {
