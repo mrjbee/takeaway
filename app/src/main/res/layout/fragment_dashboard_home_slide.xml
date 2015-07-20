@@ -22,6 +22,76 @@
                 android:orientation="vertical">
 
                 <include layout="@layout/card_now_playing" />
+
+                <LinearLayout
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="10dp"
+                    android:id="@+id/panel_offline_control"
+                    android:layout_below="@+id/text_error_description"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:gravity="right|center_vertical"
+                        android:layout_weight="1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Offline Mode"
+                        style="@style/Text.Secondary.Description"/>
+
+                    <CheckBox
+                        android:layout_marginLeft="10dp"
+                        android:id="@+id/check_offline_only_error"
+                        android:layout_width="50dp"
+                        android:layout_height="25dp"
+                        android:button="@android:color/transparent"
+                        android:background="@drawable/activation_check"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="20dp"
+                    style="@style/Panel.Separator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"/>
+                <LinearLayout
+                    android:id="@+id/panel_playlists"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/panel_black_in"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:id="@+id/panel_playlists_content"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"/>
+                    <LinearLayout
+                        android:layout_marginTop="10dp"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <Space
+                            android:layout_weight="1"
+                            android:layout_width="fill_parent"
+                            android:layout_height="10dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Show all playlist"
+                            style="@style/Text.Body.Light.Smaller"/>
+                        <ImageButton
+                            android:id="@+id/action_show_all_playlist"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginRight="20dp"
+                            android:layout_marginLeft="10dp"
+                            android:padding="3dp"
+                            android:src="@drawable/android_visibility_light"
+                            style="@style/Button.Round.Action"/>
+                    </LinearLayout>
+                </LinearLayout>
                 <Space
                     android:layout_width="fill_parent"
                     android:layout_height="60dp" />

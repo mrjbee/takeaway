@@ -1,17 +1,29 @@
 package team.monroe.org.takeaway.fragment;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
+import org.monroe.team.android.box.app.ActivitySupport;
 import org.monroe.team.android.box.app.ApplicationSupport;
 import org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceController;
+import org.monroe.team.android.box.data.Data;
+import org.monroe.team.android.box.event.Event;
+import org.monroe.team.corebox.utils.Closure;
+
+import java.util.List;
 
 import team.monroe.org.takeaway.App;
 import team.monroe.org.takeaway.R;
+import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
+import team.monroe.org.takeaway.presentations.PlaylistAbout;
 import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.view.FormatUtils;
 import team.monroe.org.takeaway.view.SeekProgressView;
@@ -35,6 +47,8 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
     private SeekProgressView mSongSeekProgressView;
     private ApplicationSupport.PeriodicalAction mSongProgressUpdateAction;
     private AppearanceController ac_NowPlayingSongControl;
+    private Data.DataChangeObserver<List<PlaylistAbout>> observer_recentPlaylist;
+    private List<PlaylistAbout> mPlaylistResentList;
 
     @Override
     protected int getLayoutId() {
@@ -118,6 +132,14 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
 
         ac_NowPlayingCard.hideWithoutAnimation();
         ac_SongPlayButton.hideWithoutAnimation();
+
+        view_check(R.id.check_offline_only_error).setChecked(application().isOfflineModeEnabled());
+        view_check(R.id.check_offline_only_error).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                application().offlineMode(isChecked);
+            }
+        });
     }
 
     private void action_showPlaylistButton() {
@@ -156,6 +178,55 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
         });
         mSongProgressUpdateAction.start(500, 1000);
         update_SongProgress(false);
+
+        Event.subscribeOnEvent(activity(), this, Events.OFFLINE_MODE_CHANGED, new Closure<Boolean, Void>() {
+            @Override
+            public Void execute(Boolean arg) {
+                view_check(R.id.check_offline_only_error).setChecked(arg);
+                return null;
+            }
+        });
+        observer_recentPlaylist = new Data.DataChangeObserver<List<PlaylistAbout>>() {
+            @Override
+            public void onDataInvalid() {
+                fetch_recentPlaylist();
+            }
+            @Override
+            public void onData(List<PlaylistAbout> playlistAbouts) {}
+        };
+        application().data_recentPlaylist.addDataChangeObserver(observer_recentPlaylist);
+        fetch_recentPlaylist();
+    }
+
+    private void fetch_recentPlaylist() {
+        application().data_recentPlaylist.fetch(true, activity().observe_data(new ActivitySupport.OnValue<List<PlaylistAbout>>() {
+            @Override
+            public void action(List<PlaylistAbout> playlistAbouts) {
+                update_recentPlaylistUI(playlistAbouts);
+            }
+        }));
+    }
+
+    private void update_recentPlaylistUI(List<PlaylistAbout> playlistAbouts) {
+        if (getActivity() == null)return;
+        mPlaylistResentList = playlistAbouts;
+        if (mPlaylistResentList == null || mPlaylistResentList.isEmpty()){
+            view(R.id.panel_playlists).setVisibility(View.GONE);
+            return;
+        }else {
+            view(R.id.panel_playlists).setVisibility(View.VISIBLE);
+        }
+        ViewGroup playlistContentView = view(R.id.panel_playlists_content, ViewGroup.class);
+        playlistContentView.removeAllViews();
+        for (PlaylistAbout playlistAbout : mPlaylistResentList) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            View recentPlaylistView = inflater.inflate(R.layout.item_recent_playlist, playlistContentView, false);
+            ((TextView)recentPlaylistView.findViewById(R.id.item_caption)).setText(playlistAbout.title);
+            ((TextView)recentPlaylistView.findViewById(R.id.item_description)).setText(playlistAbout.songCount +" songs");
+            playlistContentView.addView(recentPlaylistView);
+        }
+        //playlistContentView.requestLayout();
+        //playlistContentView.invalidate();
     }
 
     private void update_SongProgress(boolean animate) {
@@ -182,11 +253,14 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
         }
     }
 
+
     @Override
     public void onStop() {
         super.onStop();
         application().player().removePlayerListener(this);
+        application().data_recentPlaylist.removeDataChangeObserver(observer_recentPlaylist);
         mSongProgressUpdateAction.stop();
+        Event.unSubscribeFromEvents(getActivity(), this);
     }
 
     private synchronized void update_currentSong(FilePointer filePointer, boolean animate) {

@@ -7,9 +7,9 @@ import org.monroe.team.corebox.utils.DateUtils;
 import team.monroe.org.takeaway.manage.PlaylistStorage;
 import team.monroe.org.takeaway.presentations.Playlist;
 
-public class SavePlaylist extends UserCaseSupport<Playlist, Void>{
+public class PlaylistSave extends UserCaseSupport<Playlist, Void>{
 
-    public SavePlaylist(ServiceRegistry serviceRegistry) {
+    public PlaylistSave(ServiceRegistry serviceRegistry) {
         super(serviceRegistry);
     }
 

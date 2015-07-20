@@ -4,7 +4,7 @@
     android:id="@+id/panel_now_playing"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="10dp"
+    android:paddingBottom="0dp"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -167,4 +167,9 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginTop="30dp"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        style="@style/Panel.Separator"/>
 </LinearLayout>
