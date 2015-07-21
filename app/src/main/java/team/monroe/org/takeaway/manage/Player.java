@@ -18,8 +18,8 @@ import team.monroe.org.takeaway.AppModel;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.SongFile;
-import team.monroe.org.takeaway.uc.GetFileContent;
-import team.monroe.org.takeaway.uc.GetSoundFiles;
+import team.monroe.org.takeaway.uc.PathGetContent;
+import team.monroe.org.takeaway.uc.SoundFileGet;
 
 public class Player implements SongManager.Observer, AppModel.DownloadObserver {
 
@@ -71,6 +71,11 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
 
     public Playlist playlist(){
        return mPlaylistController.getPlaylist();
+    }
+
+
+    public void playlist_set(Playlist playlist) {
+        mPlaylistController.setPlaylist(playlist);
     }
 
     public void playlist_clearAndAdd(FilePointer filePointer) {
@@ -154,7 +159,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         if (mCurrentSongFilePointer == null) return;
         log.i("Play song");
         List<FilePointer> nearestPlaySongList = generateNextPlayQueue(mCurrentSongFilePointer);
-        mModel.execute(GetSoundFiles.class, nearestPlaySongList, new Model.BackgroundResultCallback<List<SongFile>>() {
+        mModel.execute(SoundFileGet.class, nearestPlaySongList, new Model.BackgroundResultCallback<List<SongFile>>() {
             @Override
             public void onResult(List<SongFile> response) {
                 process_applySongCache(response);
@@ -177,7 +182,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         log.i("Play song");
         mCurrentSongFilePointer = filePointer;
         List<FilePointer> nearestPlaySongList = generateNextPlayQueue(filePointer);
-        mModel.execute(GetSoundFiles.class, nearestPlaySongList, new Model.BackgroundResultCallback<List<SongFile>>() {
+        mModel.execute(SoundFileGet.class, nearestPlaySongList, new Model.BackgroundResultCallback<List<SongFile>>() {
             @Override
             public void onResult(List<SongFile> response) {
                 process_playQueue(response);
@@ -457,6 +462,8 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
     }
 
 
+
+
     public static interface PlayerListener {
         void onPlaylistCalculation();
         void onPlaylistChanged(Playlist playlist);
@@ -525,14 +532,14 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
 
        private final  L.Logger LOG = L.create("PLAYER.PLAYLIST");
 
-       private Playlist mCurrentPlaylist = null;
+       private Playlist mPlaylistCurrent = null;
        private Playlist mPlaylistUnderBuild = null;
        private List<PlaylistUpdateJob> mPlaylistBuildJobList = new ArrayList<>();
        private BackgroundTaskManager.BackgroundTask<Void> mBackgroundUpdateTask;
 
 
         public PlaylistController() {
-           mCurrentPlaylist = createEmptyPlayList();
+           mPlaylistCurrent = createEmptyPlayList();
        }
 
        private Playlist createEmptyPlayList() {
@@ -540,18 +547,18 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
        }
 
        public Playlist getPlaylist(){
-           LOG.d("Playlist returned [songs]: " + mCurrentPlaylist);
-           return mCurrentPlaylist;
+           LOG.d("Playlist returned [songs]: " + mPlaylistCurrent);
+           return mPlaylistCurrent;
        }
 
         public synchronized void removeFromPlaylist(final Playlist playlist, FilePointer filePointer) {
             LOG.d("Playlist removing requested ...");
-            if (mCurrentPlaylist == null || mCurrentPlaylist != playlist){
+            if (mPlaylistCurrent == null || mPlaylistCurrent != playlist){
                 LOG.d("Playlist outdated ...");
                 return;
             }
-            mCurrentPlaylist.songList.remove(filePointer);
-            mCurrentPlaylist.dateModified = DateUtils.now().getTime();
+            mPlaylistCurrent.songList.remove(filePointer);
+            mPlaylistCurrent.dateModified = DateUtils.now().getTime();
             notifyListeners(new Closure<PlayerListener, Void>() {
                 @Override
                 public Void execute(PlayerListener arg) {
@@ -563,13 +570,13 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         }
        public synchronized void updatePlaylistOrder(final Playlist playlist, List<FilePointer> fileList) {
            LOG.d("Playlist reorder requested...");
-           if (mCurrentPlaylist == null || mCurrentPlaylist != playlist){
+           if (mPlaylistCurrent == null || mPlaylistCurrent != playlist){
                LOG.d("Playlist outdated ...");
                return;
            }
-           mCurrentPlaylist.songList.clear();
-           mCurrentPlaylist.songList.addAll(fileList);
-           mCurrentPlaylist.dateModified = DateUtils.now().getTime();
+           mPlaylistCurrent.songList.clear();
+           mPlaylistCurrent.songList.addAll(fileList);
+           mPlaylistCurrent.dateModified = DateUtils.now().getTime();
            notifyListeners(new Closure<PlayerListener, Void>() {
                @Override
                public Void execute(PlayerListener arg) {
@@ -588,7 +595,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            }
            mPlaylistUnderBuild = createEmptyPlayList();
            mPlaylistBuildJobList.clear();
-           mCurrentPlaylist = null;
+           mPlaylistCurrent = null;
            notifyListeners(new Closure<PlayerListener, Void>() {
                @Override
                public Void execute(PlayerListener arg) {
@@ -599,16 +606,36 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            addUpdateJob(filePointer);
        }
 
+        public synchronized void setPlaylist(final Playlist playlist) {
+            LOG.d("Set existing playlist requested...");
+            mPlaylistUnderBuild = null;
+            mPlaylistCurrent = null;
+            notifyListeners(new Closure<PlayerListener, Void>() {
+                @Override
+                public Void execute(PlayerListener arg) {
+                    arg.onPlaylistCalculation();
+                    return null;
+                }
+            });
+            mPlaylistCurrent = playlist;
+            notifyListeners(new Closure<PlayerListener, Void>() {
+                @Override
+                public Void execute(PlayerListener arg) {
+                    arg.onPlaylistChanged(playlist);
+                    return null;
+                }
+            });
+        }
 
        public synchronized void addToPlayList(FilePointer filePointer) {
            LOG.d("Add to existing playlist requested...");
-           if (mPlaylistUnderBuild == null && mCurrentPlaylist == null) {
+           if (mPlaylistUnderBuild == null && mPlaylistCurrent == null) {
                mPlaylistUnderBuild = createEmptyPlayList();
-           } else if (mPlaylistUnderBuild == null && mCurrentPlaylist != null) {
-               mPlaylistUnderBuild = mCurrentPlaylist;
+           } else if (mPlaylistUnderBuild == null && mPlaylistCurrent != null) {
+               mPlaylistUnderBuild = mPlaylistCurrent;
                mPlaylistUnderBuild.dateModified = DateUtils.now().getTime();
            }
-           mCurrentPlaylist = null;
+           mPlaylistCurrent = null;
            notifyListeners(new Closure<PlayerListener, Void>() {
                @Override
                public Void execute(PlayerListener arg) {
@@ -648,13 +675,13 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            mBackgroundUpdateTask = null;
            if (mPlaylistBuildJobList.isEmpty()){
                LOG.d("Playlist [empty] created notification");
-               mCurrentPlaylist = createEmptyPlayList();
+               mPlaylistCurrent = createEmptyPlayList();
                mPlaylistUnderBuild = null;
                mBackgroundUpdateTask = null;
                notifyListeners(new Closure<PlayerListener, Void>() {
                    @Override
                    public Void execute(PlayerListener arg) {
-                       arg.onPlaylistChanged(mCurrentPlaylist);
+                       arg.onPlaylistChanged(mPlaylistCurrent);
                        return null;
                    }
                });
@@ -670,13 +697,13 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
            mBackgroundUpdateTask = null;
            if (mPlaylistBuildJobList.isEmpty()){
                LOG.d("Playlist created notification");
-               mCurrentPlaylist = mPlaylistUnderBuild;
+               mPlaylistCurrent = mPlaylistUnderBuild;
                mPlaylistUnderBuild = null;
                mBackgroundUpdateTask = null;
                notifyListeners(new Closure<PlayerListener, Void>() {
                    @Override
                    public Void execute(PlayerListener arg) {
-                       arg.onPlaylistChanged(mCurrentPlaylist);
+                       arg.onPlaylistChanged(mPlaylistCurrent);
                        return null;
                    }
                });
@@ -688,7 +715,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
        }
 
         public synchronized FilePointer getSongBefore(FilePointer filePointer) {
-            if (mCurrentPlaylist == null) {
+            if (mPlaylistCurrent == null) {
                 return null;
             }
             int index = getPlaylistFileIndex(filePointer);
@@ -701,11 +728,11 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
                 //TODO: add play loop logic
                 return null;
             }
-            return mCurrentPlaylist.songList.get(index);
+            return mPlaylistCurrent.songList.get(index);
         }
 
         public synchronized FilePointer getSongAfter(FilePointer filePointer) {
-            if (mCurrentPlaylist == null) {
+            if (mPlaylistCurrent == null) {
                 return null;
             }
             int index = getPlaylistFileIndex(filePointer);
@@ -714,16 +741,16 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
                 return getSongFirst();
             }
             index++;
-            if (index >= mCurrentPlaylist.songList.size()){
+            if (index >= mPlaylistCurrent.songList.size()){
                 //TODO: add play loop logic
                 return null;
             }
-            return mCurrentPlaylist.songList.get(index);
+            return mPlaylistCurrent.songList.get(index);
         }
 
         private int getPlaylistFileIndex(FilePointer filePointer) {
-            for (int index = 0; index < mCurrentPlaylist.songList.size(); index++) {
-                if (mCurrentPlaylist.songList.get(index) == filePointer){
+            for (int index = 0; index < mPlaylistCurrent.songList.size(); index++) {
+                if (mPlaylistCurrent.songList.get(index) == filePointer){
                     return index;
                 }
             }
@@ -731,21 +758,21 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
         }
 
         public  synchronized FilePointer getSongFirst() {
-            if (mCurrentPlaylist == null) {
+            if (mPlaylistCurrent == null) {
                 return null;
             }
             //TODO: shuffle and so on
-            return mCurrentPlaylist.songList.get(0);
+            return mPlaylistCurrent.songList.get(0);
         }
 
         public synchronized FilePointer getFirstSong() {
-            if (mCurrentPlaylist == null || mCurrentPlaylist.songList.size() == 0) return null;
-            return mCurrentPlaylist.songList.get(0);
+            if (mPlaylistCurrent == null || mPlaylistCurrent.songList.size() == 0) return null;
+            return mPlaylistCurrent.songList.get(0);
         }
 
         public boolean hasSong(FilePointer songToCheck) {
-            if (mCurrentPlaylist == null || mCurrentPlaylist.songList.size() == 0) return false;
-            return mCurrentPlaylist.songList.indexOf(songToCheck) != -1;
+            if (mPlaylistCurrent == null || mPlaylistCurrent.songList.size() == 0) return false;
+            return mPlaylistCurrent.songList.indexOf(songToCheck) != -1;
         }
 
 
@@ -784,7 +811,7 @@ public class Player implements SongManager.Observer, AppModel.DownloadObserver {
                 songList.add(filePointer);
             }else {
                 checkAndStop();
-                List<FilePointer> files = Player.this.mModel.execute(GetFileContent.class,filePointer);
+                List<FilePointer> files = Player.this.mModel.execute(PathGetContent.class,filePointer);
                 for (FilePointer file : files) {
                     explore(file, songList);
                 }

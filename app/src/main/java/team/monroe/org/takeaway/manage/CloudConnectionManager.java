@@ -9,7 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
-import team.monroe.org.takeaway.uc.CheckCloudConnection;
+import team.monroe.org.takeaway.uc.CloudCheckConnection;
 
 public class CloudConnectionManager {
 
@@ -48,7 +48,7 @@ public class CloudConnectionManager {
         if (configuration == null){
             updateStatus(ConnectionStatus.NOT_CONFIGURED);
         }else {
-            SourceConnectionStatus mAnswer = model.execute(CheckCloudConnection.class, configuration);
+            SourceConnectionStatus mAnswer = model.execute(CloudCheckConnection.class, configuration);
             updateStatusBySourceConnection(mAnswer, true);
         }
         if (mTimer == null) return;

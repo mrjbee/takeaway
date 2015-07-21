@@ -43,7 +43,7 @@ public class ActivityConfiguration extends ActivitySupport<App>{
             }
         });
 
-        CloudConfigurationManager.Configuration configuration = application().getSourceConfiguration();
+        CloudConfigurationManager.Configuration configuration = application().function_cloudConfiguration();
         if (configuration != null){
             view_text(R.id.text_host).setText(configuration.host);
             view_text(R.id.text_port).setText(""+configuration.port);
@@ -70,16 +70,16 @@ public class ActivityConfiguration extends ActivitySupport<App>{
         }
         mTestConnectionDialog.show();
 
-        application().updateConfiguration(configuration, observe(new OnValue<SourceConnectionStatus>() {
+        application().function_cloudConfiguration(configuration, observe(new OnValue<SourceConnectionStatus>() {
             @Override
             public void action(SourceConnectionStatus connectionStatus) {
                 if (mTestConnectionDialog == null) return;
                 mTestConnectionDialog.dismiss();
-                if (connectionStatus.isSuccess()){
+                if (connectionStatus.isSuccess()) {
                     setResult(Activity.RESULT_OK);
                     finish();
                     Toast.makeText(ActivityConfiguration.this, "Configuration saved", Toast.LENGTH_SHORT).show();
-                }else {
+                } else {
                     Toast.makeText(ActivityConfiguration.this, "Please check configuration. " + connectionStatus.asString(getResources()), Toast.LENGTH_LONG).show();
                 }
             }

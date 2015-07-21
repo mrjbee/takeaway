@@ -2,7 +2,7 @@ package team.monroe.org.takeaway.presentations;
 
 import java.io.Serializable;
 
-public class Source implements Serializable {
+public class Source implements AwarePath, Serializable {
 
     public final String id;
     public final String title;
@@ -12,7 +12,13 @@ public class Source implements Serializable {
         this.title = title;
     }
 
-    public FilePointer asFilePointer() {
-        return new FilePointer(this,"",title, FilePointer.Type.FOLDER);
+    @Override
+    public String getRelativePath() {
+        return "";
+    }
+
+    @Override
+    public Source getSource() {
+        return this;
     }
 }

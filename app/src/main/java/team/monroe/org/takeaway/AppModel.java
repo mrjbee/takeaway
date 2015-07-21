@@ -24,10 +24,10 @@ import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.manage.CloudMetadataProvider;
 import team.monroe.org.takeaway.manage.DownloadManager;
-import team.monroe.org.takeaway.manage.FileProvider;
+import team.monroe.org.takeaway.manage.StorageProvider;
 import team.monroe.org.takeaway.manage.PlaylistStorage;
 import team.monroe.org.takeaway.manage.impl.KodiCloudProvider;
-import team.monroe.org.takeaway.manage.impl.LocalFileProvider;
+import team.monroe.org.takeaway.manage.impl.LocalStorageProvider;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.impl.KodiCloudManager;
 import team.monroe.org.takeaway.presentations.SongFile;
@@ -75,7 +75,7 @@ public class AppModel extends AndroidModel {
         });
 
         serviceRegistry.registrate(TransactionManager.class, transactionManager);
-        serviceRegistry.registrate(LocalFileProvider.class, new LocalFileProvider());
+        serviceRegistry.registrate(LocalStorageProvider.class, new LocalStorageProvider());
         serviceRegistry.registrate(Player.class, new Player(context, this));
         serviceRegistry.registrate(NetworkManager.class, new NetworkManager(context));
         CloudConnectionManager cloudConnectionManager = new CloudConnectionManager(this);
@@ -85,7 +85,7 @@ public class AppModel extends AndroidModel {
         CloudManager cloudManager = new KodiCloudManager(new HttpManager());
         KodiCloudProvider fileProvider = new KodiCloudProvider(cloudManager, cloudConnectionManager, configurationManager);
         serviceRegistry.registrate(CloudManager.class, cloudManager);
-        serviceRegistry.registrate(FileProvider.class, fileProvider);
+        serviceRegistry.registrate(StorageProvider.class, fileProvider);
         serviceRegistry.registrate(CloudMetadataProvider.class, fileProvider);
     }
 

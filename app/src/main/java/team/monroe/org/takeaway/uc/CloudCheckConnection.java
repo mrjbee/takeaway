@@ -7,9 +7,9 @@ import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 
-public class CheckCloudConnection extends UserCaseSupport<CloudConfigurationManager.Configuration, SourceConnectionStatus>{
+public class CloudCheckConnection extends UserCaseSupport<CloudConfigurationManager.Configuration, SourceConnectionStatus>{
 
-    public CheckCloudConnection(ServiceRegistry serviceRegistry) {
+    public CloudCheckConnection(ServiceRegistry serviceRegistry) {
         super(serviceRegistry);
     }
 

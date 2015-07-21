@@ -101,7 +101,7 @@ public class FragmentDashboardHeader extends FragmentDashboardActivity {
             }
         });
 
-        updateConnectionStatus(application().getConnectionStatus());
+        updateConnectionStatus(application().function_cloudConnectionStatus());
     }
 
     @Override

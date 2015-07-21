@@ -12,20 +12,21 @@ import java.util.Comparator;
 import java.util.List;
 
 import team.monroe.org.takeaway.manage.CloudManager;
-import team.monroe.org.takeaway.manage.FileProvider;
+import team.monroe.org.takeaway.manage.StorageProvider;
 import team.monroe.org.takeaway.manage.Settings;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
+import team.monroe.org.takeaway.presentations.AwarePath;
 import team.monroe.org.takeaway.presentations.FilePointer;
 
-public class GetFileContent extends UserCaseSupport<FilePointer, List<FilePointer>>{
+public class PathGetContent extends UserCaseSupport<AwarePath, List<FilePointer>>{
 
-    public GetFileContent(ServiceRegistry serviceRegistry) {
+    public PathGetContent(ServiceRegistry serviceRegistry) {
         super(serviceRegistry);
     }
 
     @Override
-    protected List<FilePointer> executeImpl(FilePointer request) {
+    protected List<FilePointer> executeImpl(AwarePath request) {
 
         Boolean offlineMode = using(SettingManager.class).get(Settings.MODE_OFFLINE);
         if (Boolean.TRUE.equals(offlineMode)){
@@ -33,11 +34,11 @@ public class GetFileContent extends UserCaseSupport<FilePointer, List<FilePointe
             return Collections.emptyList();
         }
 
-        final FileProvider fileProvider = using(FileProvider.class);
+        final StorageProvider storageProvider = using(StorageProvider.class);
         final CloudManager cloudManager = using(CloudManager.class);
 
         try {
-            final List<FilePointer> answer = fileProvider.getNestedFiles(request);
+            final List<FilePointer> answer = storageProvider.list(request);
             Lists.each(answer, new Closure<FilePointer, Void>() {
                 @Override
                 public Void execute(FilePointer arg) {

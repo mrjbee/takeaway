@@ -8,14 +8,16 @@ import team.monroe.org.takeaway.manage.CloudConfigurationManager;
 import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.CloudManager;
 import team.monroe.org.takeaway.manage.CloudMetadataProvider;
-import team.monroe.org.takeaway.manage.FileProvider;
+import team.monroe.org.takeaway.manage.StorageProvider;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
+import team.monroe.org.takeaway.presentations.AwarePath;
+import team.monroe.org.takeaway.presentations.AwareSource;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
 
-public class KodiCloudProvider implements FileProvider, CloudMetadataProvider {
+public class KodiCloudProvider implements StorageProvider, CloudMetadataProvider {
 
     private final CloudManager cloudManager;
     private final CloudConnectionManager cloudConnectionManager;
@@ -28,7 +30,7 @@ public class KodiCloudProvider implements FileProvider, CloudMetadataProvider {
     }
 
     @Override
-    public List<Source> getSources() throws FileOperationException {
+    public List<Source> sources() throws FileOperationException {
         CloudConfigurationManager.Configuration configuration = cloudConfigurationManager.get();
         CloudManager.Answer<List<CloudManager.RemoteFile>> sources = cloudManager.getSources(configuration);
         cloudConnectionManager.updateStatusBySourceConnection(SourceConnectionStatus.fromAnswer(sources));
@@ -43,7 +45,7 @@ public class KodiCloudProvider implements FileProvider, CloudMetadataProvider {
     }
 
     @Override
-    public String getFileId(FilePointer filePointer) throws FileOperationException {
+    public String absolutePath(FilePointer filePointer) throws FileOperationException {
         CloudConfigurationManager.Configuration configuration = cloudConfigurationManager.get();
         CloudManager.RemoteFile sourceRemoteFile = getSourceForFilePointer(filePointer, configuration);
         return sourceRemoteFile.path + filePointer.relativePath;
@@ -69,26 +71,25 @@ public class KodiCloudProvider implements FileProvider, CloudMetadataProvider {
     }
 
     @Override
-    public List<FilePointer> getNestedFiles(FilePointer filePointer) throws FileOperationException {
+    public List<FilePointer> list(AwarePath awarePath) throws FileOperationException {
         CloudConfigurationManager.Configuration configuration = cloudConfigurationManager.get();
-        CloudManager.RemoteFile sourceRemoteFile = getSourceForFilePointer(filePointer, configuration);
+        CloudManager.RemoteFile sourceRemoteFile = getSourceForFilePointer(awarePath, configuration);
 
-        CloudManager.Answer<List<CloudManager.RemoteFile>> remoteSubFiles = cloudManager.getFolderContent(configuration, sourceRemoteFile.path + filePointer.relativePath);
+        CloudManager.Answer<List<CloudManager.RemoteFile>> remoteSubFiles = cloudManager.getFolderContent(configuration, sourceRemoteFile.path + awarePath.getRelativePath());
         if (!remoteSubFiles.isSuccess()){
             throw new FileOperationException(null, FileOperationException.ErrorCode.from(remoteSubFiles.status), remoteSubFiles.errorDescription);
         }
         List<FilePointer> answer = new ArrayList<>();
         for (CloudManager.RemoteFile file : remoteSubFiles.body) {
             answer.add(new FilePointer(
-                    filePointer.source,
+                    awarePath.getSource(),
                     truncate(file.path, sourceRemoteFile.path),
-                    file.title,
                     file.isFolder? FilePointer.Type.FOLDER: FilePointer.Type.FILE));
         }
         return answer;
     }
 
-    private CloudManager.RemoteFile getSourceForFilePointer(FilePointer filePointer, CloudConfigurationManager.Configuration configuration) throws FileOperationException {
+    private CloudManager.RemoteFile getSourceForFilePointer(AwareSource sourceAware, CloudConfigurationManager.Configuration configuration) throws FileOperationException {
         CloudManager.Answer<List<CloudManager.RemoteFile>> files = cloudManager.getSources(configuration);
         cloudConnectionManager.updateStatusBySourceConnection(SourceConnectionStatus.fromAnswer(files));
         if (!files.isSuccess()){
@@ -97,14 +98,14 @@ public class KodiCloudProvider implements FileProvider, CloudMetadataProvider {
 
         CloudManager.RemoteFile sourceRemoteFile = null;
         for (CloudManager.RemoteFile file : files.body) {
-            if (filePointer.source.id.equals(file.title)){
+            if (sourceAware.getSource().id.equals(file.title)){
                 sourceRemoteFile = file;
                 break;
             }
         }
 
         if (sourceRemoteFile == null){
-            throw new FileOperationException(new NullPointerException(), FileOperationException.ErrorCode.FAILED, "No source with id = "+filePointer.source.id);
+            throw new FileOperationException(new NullPointerException(), FileOperationException.ErrorCode.FAILED, "No source with id = "+sourceAware.getSource().id);
         }
 
         return sourceRemoteFile;

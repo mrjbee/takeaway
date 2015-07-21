@@ -30,6 +30,7 @@ import team.monroe.org.takeaway.fragment.contract.ContractBackButton;
 import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
 import team.monroe.org.takeaway.manage.exceptions.FileOperationException;
+import team.monroe.org.takeaway.presentations.AwarePath;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.view.FormatUtils;
@@ -41,7 +42,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     private View mItemsPanel;
     private View mSourcePanel;
 
-    private ArrayList<FilePointer> mFileStack;
+    private ArrayList<AwarePath> mFolderStack;
     private Data<List<FilePointer>> mFolderData;
     private Data.DataChangeObserver<List<FilePointer>> mDataObserver;
 
@@ -68,11 +69,11 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         super.onActivityCreated(savedInstanceState);
 
         if (savedInstanceState != null){
-            mFileStack = (ArrayList<FilePointer>) savedInstanceState.getSerializable("browse_folder");
+            mFolderStack = (ArrayList<AwarePath>) savedInstanceState.getSerializable("browse_folder");
         }
 
-        if (mFileStack == null){
-            mFileStack = new ArrayList<>();
+        if (mFolderStack == null){
+            mFolderStack = new ArrayList<>();
         }
 
         mHeaderFilesView = activity().getLayoutInflater().inflate(R.layout.panel_header_files, null);
@@ -115,11 +116,11 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         });
 
         mHeaderFilesOfflineModeCheck = (CheckBox) mHeaderFilesView.findViewById(R.id.check_offline);
-        mHeaderFilesOfflineModeCheck.setChecked(application().isOfflineModeEnabled());
+        mHeaderFilesOfflineModeCheck.setChecked(application().function_offlineMode());
         mHeaderFilesOfflineModeCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                application().offlineMode(isChecked);
+                application().function_offlineMode(isChecked);
             }
         });
 
@@ -129,7 +130,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mWarningPresenter = new WarningViewPresenter(view(R.id.panel_error), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mFileStack.isEmpty()){
+                if (mFolderStack.isEmpty()){
                     fetch_sources(true);
                 } else {
                     fetch_folder();
@@ -137,11 +138,11 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             }
         });
 
-        view_check(R.id.check_offline_only_error).setChecked(application().isOfflineModeEnabled());
+        view_check(R.id.check_offline_only_error).setChecked(application().function_offlineMode());
         view_check(R.id.check_offline_only_error).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                application().offlineMode(isChecked);
+                application().function_offlineMode(isChecked);
             }
         });
         visibility_all(View.GONE);
@@ -312,7 +313,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 FilePointer filePointer = mFolderAdapter.getItem(position - 1);
                 if (filePointer.type != FilePointer.Type.FOLDER) return;
-                mFileStack.add(0, filePointer);
+                mFolderStack.add(0, filePointer);
                 update_folder();
             }
         });
@@ -336,8 +337,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Source source = mSourceListAdapter.getItem(position);
-                FilePointer filePointer = source.asFilePointer();
-                mFileStack.add(0,filePointer);
+                mFolderStack.add(0, source);
                 update_folder();
             }
         });
@@ -366,7 +366,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("browse_folder",mFileStack);
+        outState.putSerializable("browse_folder", mFolderStack);
     }
 
     private void visibility_all(int visibility) {
@@ -385,7 +385,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         mSourcesDataListener = new Data.DataChangeObserver<List<Source>>() {
             @Override
             public void onDataInvalid() {
-                if(mFileStack.isEmpty()){
+                if(mFolderStack.isEmpty()){
                     fetch_sources(true);
                 }else {
                     fetch_sources(false);
@@ -396,7 +396,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
         };
         application().data_sources.addDataChangeObserver(mSourcesDataListener);
         fetch_sources(false);
-        if(mFileStack.isEmpty()){
+        if(mFolderStack.isEmpty()){
             fetch_sources(true);
         }else{
             update_folder();
@@ -413,8 +413,8 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
     }
 
     private void update_folder() {
-        FilePointer filePointer = mFileStack.get(0);
-        mFolderData = application().data_range_folder.getOrCreate(filePointer);
+        AwarePath path = mFolderStack.get(0);
+        mFolderData = application().data_range_folder.getOrCreate(path);
         mDataObserver = new Data.DataChangeObserver<List<FilePointer>>() {
             @Override
             public void onDataInvalid() {
@@ -438,8 +438,14 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
                 if (!state_before(State.STOP))return;
 
-                FilePointer filePointer = mFileStack.get(0);
-                updateHeader(filePointer.name);
+                AwarePath path = mFolderStack.get(0);
+                if (path instanceof FilePointer){
+                    updateHeader(((FilePointer) path).getNormalizedTitle());
+                }else if (path instanceof Source) {
+                    updateHeader(((Source) path).title);
+                }else {
+                    throw new IllegalStateException("Unsupported path "+path);
+                }
 
                 visibility_all(View.GONE);
                 if (filePointers.isEmpty()){
@@ -536,8 +542,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                         warning_asNoItems("Try to switch offline mode");
                     }else {
                         if (sources.size()==1){
-                            FilePointer filePointer = sources.get(0).asFilePointer();
-                            mFileStack.add(0,filePointer);
+                            mFolderStack.add(0, sources.get(0));
                             update_folder();
                         }else {
                             mSourceListAdapter.clear();
@@ -578,7 +583,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
 
     @Override
     public boolean onBackPressed() {
-        switch (mFileStack.size()){
+        switch (mFolderStack.size()){
             case 0: return false;
             case 1: {
                 if (mSources.size() == 1){
@@ -589,7 +594,7 @@ public class FragmentDashboardSlideMusic extends FragmentDashboardSlide  impleme
                 }
             }
             default:
-                mFileStack.remove(0);
+                mFolderStack.remove(0);
                 update_folder();
                 return true;
         }

@@ -246,10 +246,10 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     private void action_onPlaylistSaveExisting() {
         mSavePlalistActionButton.setVisibility(View.GONE);
         if (mPlaylist.isSaveRequired()){
-            application().savePlaylist(mPlaylist, activity().observe(new ActivitySupport.OnValue<Void>() {
+            application().function_playlistSave(mPlaylist, activity().observe(new ActivitySupport.OnValue<Void>() {
                 @Override
                 public void action(Void aVoid) {
-                    if (getActivity() != null){
+                    if (getActivity() != null) {
                         Toast.makeText(getActivity(), "Playlist saved", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -265,7 +265,7 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
         }
         mPlaylist.title=  title;
         mPlaylist.autosave = view_check(R.id.check_playlist_autosave).isChecked();
-        application().savePlaylist(mPlaylist, activity().observe(new ActivitySupport.OnValue<Void>() {
+        application().function_playlistSave(mPlaylist, activity().observe(new ActivitySupport.OnValue<Void>() {
             @Override
             public void action(Void o) {
                 if (activity() == null) return;

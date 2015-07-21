@@ -20,6 +20,7 @@ import team.monroe.org.takeaway.manage.CloudConnectionManager;
 import team.monroe.org.takeaway.manage.Events;
 import team.monroe.org.takeaway.manage.Player;
 import team.monroe.org.takeaway.manage.Settings;
+import team.monroe.org.takeaway.presentations.AwarePath;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.Playlist;
 import team.monroe.org.takeaway.presentations.PlaylistAbout;
@@ -27,12 +28,13 @@ import team.monroe.org.takeaway.presentations.SongDetails;
 import team.monroe.org.takeaway.presentations.SongFile;
 import team.monroe.org.takeaway.presentations.Source;
 import team.monroe.org.takeaway.presentations.SourceConnectionStatus;
-import team.monroe.org.takeaway.uc.CheckCloudConnection;
+import team.monroe.org.takeaway.uc.CloudCheckConnection;
+import team.monroe.org.takeaway.uc.PathGetContent;
+import team.monroe.org.takeaway.uc.PlaylistLoad;
+import team.monroe.org.takeaway.uc.SourceGetAll;
 import team.monroe.org.takeaway.uc.PlaylistAboutGetAll;
 import team.monroe.org.takeaway.uc.PlaylistSave;
 import team.monroe.org.takeaway.uc.SongDetailsExtractIfNeeded;
-import team.monroe.org.takeaway.uc.GetCloudSources;
-import team.monroe.org.takeaway.uc.GetFileContent;
 
 public class App extends ApplicationSupport<AppModel> implements AppModel.DownloadObserver{
 
@@ -40,7 +42,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
         L.setup(new AndroidLogImplementation());
     }
 
-    public PersistRangeDataProvider<FilePointer, List<FilePointer>> data_range_folder;
+    public PersistRangeDataProvider<AwarePath, List<FilePointer>> data_range_folder;
     public Data<List<Source>> data_sources;
     public Data<List<PlaylistAbout>> data_recentPlaylist;
     public final ObserverSupport<OnSongDetailsObserver> observers_songDetails = new ObserverSupport<>();
@@ -52,24 +54,24 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
         data_sources = new Data<List<Source>>(model()) {
             @Override
             protected List<Source> provideData() {
-                return model().execute(GetCloudSources.class, null);
+                return model().execute(SourceGetAll.class, null);
             }
         };
 
-        data_range_folder = new PersistRangeDataProvider<FilePointer, List<FilePointer>>() {
+        data_range_folder = new PersistRangeDataProvider<AwarePath, List<FilePointer>>() {
             @Override
-            protected Data<List<FilePointer>> buildData(final FilePointer filePointer) {
+            protected Data<List<FilePointer>> buildData(final AwarePath filePointer) {
                 return new Data<List<FilePointer>>(model()) {
                     @Override
                     protected List<FilePointer> provideData() {
-                        return model().execute(GetFileContent.class, filePointer);
+                        return model().execute(PathGetContent.class, filePointer);
                     }
                 };
             }
 
             @Override
-            protected String convertToStringKey(FilePointer filePointer) {
-                return filePointer.source.id+":"+filePointer.relativePath;
+            protected String convertToStringKey(AwarePath filePointer) {
+                return filePointer.getSource().id+":"+filePointer.getRelativePath();
             }
         };
 
@@ -98,7 +100,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
             @Override
             public void onPlaylistChanged(final Playlist playlist) {
                 if (playlist.autosave && playlist.isSaveRequired()){
-                    savePlaylist(playlist, new ValueObserver<Void>() {
+                    function_playlistSave(playlist, new ValueObserver<Void>() {
                         @Override
                         public void onSuccess(Void value) {
                             observers_playlistSave.notify(new Closure<OnPlaylistSaveObserver, Void>() {
@@ -109,6 +111,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
                                 }
                             });
                         }
+
                         @Override
                         public void onFail(Throwable exception) {
                             observers_playlistSave.notify(new Closure<OnPlaylistSaveObserver, Void>() {
@@ -147,31 +150,31 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
         return new AppModel("takeaway", getApplicationContext());
     }
 
-    public boolean isSourceConfigured() {
+    public boolean function_cloudConfigured() {
         return model().usingService(CloudConfigurationManager.class).get() != null;
     }
 
-    public CloudConfigurationManager.Configuration getSourceConfiguration() {
+    public CloudConfigurationManager.Configuration function_cloudConfiguration() {
         return model().usingService(CloudConfigurationManager.class).get();
     }
 
-    public void updateConfiguration(CloudConfigurationManager.Configuration configuration, ValueObserver<SourceConnectionStatus> observer) {
-        fetchValue(CheckCloudConnection.class, configuration, new NoOpValueAdapter<SourceConnectionStatus>(), observer);
+    public void function_cloudConfiguration(CloudConfigurationManager.Configuration configuration, ValueObserver<SourceConnectionStatus> observer) {
+        fetchValue(CloudCheckConnection.class, configuration, new NoOpValueAdapter<SourceConnectionStatus>(), observer);
     }
 
-    public CloudConnectionManager.ConnectionStatus getConnectionStatus() {
+    public CloudConnectionManager.ConnectionStatus function_cloudConnectionStatus() {
         return model().usingService(CloudConnectionManager.class).getStatus();
     }
 
 
-    public String getCloudName() {
+    public String function_cloudName() {
         String version = model().usingService(CloudConfigurationManager.class).getProperty("version");
         return "Kodi "+ (version == null?"":version);
     }
 
-    public void offlineMode(boolean enabled) {
+    public void function_offlineMode(boolean enabled) {
 
-        boolean wasValue = isOfflineModeEnabled();
+        boolean wasValue = function_offlineMode();
 
         if (wasValue == enabled){
             return;
@@ -183,7 +186,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
         data_range_folder.invalidateAll();
     }
 
-    public boolean isOfflineModeEnabled() {
+    public boolean function_offlineMode() {
         return model().usingService(SettingManager.class).get(Settings.MODE_OFFLINE);
     }
 
@@ -223,8 +226,12 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
         });
     }
 
-    public void savePlaylist(Playlist playlist, ValueObserver<Void> observer) {
+    public void function_playlistSave(Playlist playlist, ValueObserver<Void> observer) {
         fetchValue(PlaylistSave.class, playlist, new NoOpValueAdapter<Void>(), observer);
+    }
+
+    public void function_playlistRestore(PlaylistAbout playlistAbout, ValueObserver<Playlist> observer) {
+        fetchValue(PlaylistLoad.class, playlistAbout.id, new NoOpValueAdapter<Playlist>() ,observer);
     }
 
     public interface OnSongDetailsObserver {

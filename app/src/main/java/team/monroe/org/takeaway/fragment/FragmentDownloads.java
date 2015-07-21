@@ -34,8 +34,8 @@ public class FragmentDownloads extends FragmentDashboardActivity{
             }
         });
 
-        view_text(R.id.text_cloud_title).setText(application().getCloudName());
-        updateCloudStatus(application().getConnectionStatus());
+        view_text(R.id.text_cloud_title).setText(application().function_cloudName());
+        updateCloudStatus(application().function_cloudConnectionStatus());
     }
 
     private void updateCloudStatus(CloudConnectionManager.ConnectionStatus connectionStatus) {

@@ -9,19 +9,19 @@ import java.util.List;
 
 import team.monroe.org.takeaway.manage.DownloadManager;
 import team.monroe.org.takeaway.manage.exceptions.ApplicationException;
-import team.monroe.org.takeaway.manage.impl.LocalFileProvider;
+import team.monroe.org.takeaway.manage.impl.LocalStorageProvider;
 import team.monroe.org.takeaway.presentations.FilePointer;
 import team.monroe.org.takeaway.presentations.SongFile;
 
-public class GetSoundFiles extends UserCaseSupport<List<FilePointer>, List<SongFile>>{
+public class SoundFileGet extends UserCaseSupport<List<FilePointer>, List<SongFile>>{
 
-    public GetSoundFiles(ServiceRegistry serviceRegistry) {
+    public SoundFileGet(ServiceRegistry serviceRegistry) {
         super(serviceRegistry);
     }
 
     @Override
     protected List<SongFile> executeImpl(List<FilePointer> request) {
-        LocalFileProvider localFileProvider = using(LocalFileProvider.class);
+        LocalStorageProvider localFileProvider = using(LocalStorageProvider.class);
         List<SongFile> answer = new ArrayList<>();
         SongFile itSongFile = null;
         DownloadManager downloadManager = using(DownloadManager.class);
@@ -35,7 +35,7 @@ public class GetSoundFiles extends UserCaseSupport<List<FilePointer>, List<SongF
                 if (itSongFile == null){
                     //no streaming file already
                     try {
-                        DownloadManager.Transfer transfer = using(Model.class).execute(GetTransferForFile.class, filePointer);
+                        DownloadManager.Transfer transfer = using(Model.class).execute(TransferGetForFile.class, filePointer);
                         itSongFile = downloadManager.streamFileCreate(filePointer, transfer, getPriorityByIndex(i));
                     }catch (ApplicationException e){
                         itSongFile = new SongFile.NotAvailableSongFile(filePointer);

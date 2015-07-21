@@ -1,30 +1,30 @@
 package team.monroe.org.takeaway.presentations;
 
+import java.io.File;
 import java.io.Serializable;
-import java.util.regex.Pattern;
 
-public class FilePointer implements Serializable {
+public class FilePointer implements AwarePath, Serializable{
 
     public final Source source;
     public final String relativePath;
-    public final String normolizedName;
+    private final String normalisedName;
     public final String name;
     public final Type type;
     public SongDetails details;
 
-    public FilePointer(Source source, String relativePath, String name, Type type) {
+    public FilePointer(Source source, String relativePath, Type type) {
         this.source = source;
         this.relativePath = relativePath;
-        this.name = name;
+        this.name = fileSimpleName(relativePath);
         this.type = type;
         if (type == Type.FOLDER){
-            normolizedName = name
+            normalisedName = name
                     .replace("_", " ")
                     .replace("-", " ")
                     .replaceAll(" +"," ")
                     .replaceAll("^ +","");
-        }else {
-            normolizedName = name
+        } else {
+            normalisedName = name
                     .replaceAll("\\.[^ .]+$", "")
                     .replaceFirst("^[0-9. ]+", "")
                     .replace("_", " ")
@@ -35,7 +35,7 @@ public class FilePointer implements Serializable {
     }
 
     public String getNormalizedTitle(){
-        return normolizedName;
+        return normalisedName;
     }
 
     @Override
@@ -62,8 +62,22 @@ public class FilePointer implements Serializable {
        return source.id + ":"+relativePath;
     }
 
+    @Override
+    public Source getSource() {
+        return source;
+    }
+
+    @Override
+    public String getRelativePath() {
+        return relativePath;
+    }
+
     public static enum Type {
         FOLDER, FILE
+    }
+
+    private static String fileSimpleName(String path) {
+        return new File(path).getName();
     }
 
 }

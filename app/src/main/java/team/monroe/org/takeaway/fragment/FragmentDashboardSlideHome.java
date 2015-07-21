@@ -133,11 +133,11 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
         ac_NowPlayingCard.hideWithoutAnimation();
         ac_SongPlayButton.hideWithoutAnimation();
 
-        view_check(R.id.check_offline_only_error).setChecked(application().isOfflineModeEnabled());
+        view_check(R.id.check_offline_only_error).setChecked(application().function_offlineMode());
         view_check(R.id.check_offline_only_error).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                application().offlineMode(isChecked);
+                application().function_offlineMode(isChecked);
             }
         });
     }
@@ -218,15 +218,31 @@ public class FragmentDashboardSlideHome extends FragmentDashboardSlide implement
         }
         ViewGroup playlistContentView = view(R.id.panel_playlists_content, ViewGroup.class);
         playlistContentView.removeAllViews();
-        for (PlaylistAbout playlistAbout : mPlaylistResentList) {
+        for (final PlaylistAbout playlistAbout : mPlaylistResentList) {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View recentPlaylistView = inflater.inflate(R.layout.item_recent_playlist, playlistContentView, false);
             ((TextView)recentPlaylistView.findViewById(R.id.item_caption)).setText(playlistAbout.title);
             ((TextView)recentPlaylistView.findViewById(R.id.item_description)).setText(playlistAbout.songCount +" songs");
+            recentPlaylistView.findViewById(R.id.action_item).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    action_onPlaylistSelected(playlistAbout);
+                }
+            });
             playlistContentView.addView(recentPlaylistView);
+
         }
-        //playlistContentView.requestLayout();
-        //playlistContentView.invalidate();
+    }
+
+    private void action_onPlaylistSelected(PlaylistAbout playlistAbout) {
+        application().function_playlistRestore(playlistAbout, activity().observe(new ActivitySupport.OnValue<Playlist>() {
+            @Override
+            public void action(Playlist playlist) {
+                if (activity() != null){
+                    application().player().playlist_set(playlist);
+                }
+            }
+        }));
     }
 
     private void update_SongProgress(boolean animate) {

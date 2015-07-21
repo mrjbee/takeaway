@@ -9,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.PopupWindow;
 
 import org.monroe.team.android.box.app.ActivitySupport;
 import static org.monroe.team.android.box.app.ui.animation.apperrance.AppearanceControllerBuilder.*;
@@ -44,7 +43,7 @@ public class ActivityDashboard extends ActivitySupport<App>{
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (isFirstRun(savedInstanceState)){
-            if (application().isSourceConfigured()){
+            if (application().function_cloudConfigured()){
                 //usual look
                 setup_onCreateSlider();
             }else{
