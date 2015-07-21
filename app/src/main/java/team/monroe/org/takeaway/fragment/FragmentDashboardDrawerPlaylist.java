@@ -346,7 +346,8 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
     public void onPlaylistCalculation() {
         hide_all();
         mLoadingPanel.setVisibility(View.VISIBLE);
-        mSongsText.setText("Loading. Please wait");
+        mPlaylistText.setText("Playlist calculation");
+        mSongsText.setText("Please wait");
     }
 
     @Override
