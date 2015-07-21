@@ -21,8 +21,10 @@ public class PlaylistStorage extends TextDataBase.TextDataProvider<PlaylistStora
     public static final class PlaylistTextDataTable extends TextDataBase.TextDataTable{
         @Override
         public String getDataName() {
-            return "playlist";
+            return "playlists";
         }
+        @Override
+        public int getDataVersion() { return 5; }
     }
 
     private static final class PlaylistTextDataAdapter implements TextDataBase.TextDataAdapter<PlaylistData> {
@@ -81,7 +83,7 @@ public class PlaylistStorage extends TextDataBase.TextDataProvider<PlaylistStora
         }
 
         public static PlaylistData fromPlaylist(Playlist playlist){
-            PlaylistData answer = new PlaylistData(playlist.title,playlist.title, true);
+            PlaylistData answer = new PlaylistData(playlist.title, playlist.id, true);
             for (FilePointer filePointer : playlist.songList) {
                 answer.songDataList.add(new SongData(filePointer.relativePath, filePointer.source.id));
             }

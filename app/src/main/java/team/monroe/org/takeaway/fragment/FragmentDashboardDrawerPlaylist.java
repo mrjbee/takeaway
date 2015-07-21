@@ -280,6 +280,13 @@ public class FragmentDashboardDrawerPlaylist extends FragmentDashboardActivity i
             Toast.makeText(activity(), "Playlist should be not empty",Toast.LENGTH_LONG).show();
             return;
         }
+        if (mPlaylist.title != null) {
+            view_text(R.id.edit_playlist_title).setText(mPlaylist.title);
+            view_check(R.id.check_playlist_autosave).setChecked(mPlaylist.autosave);
+        }else {
+            view_text(R.id.edit_playlist_title).setText("");
+            view_check(R.id.check_playlist_autosave).setChecked(true);
+        }
         if (mPlaylistDetailsShown){
             hide_playlistDetails();
         }else {

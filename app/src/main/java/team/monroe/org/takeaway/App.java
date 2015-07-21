@@ -227,7 +227,13 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
     }
 
     public void function_playlistSave(Playlist playlist, ValueObserver<Void> observer) {
-        fetchValue(PlaylistSave.class, playlist, new NoOpValueAdapter<Void>(), observer);
+        fetchValue(PlaylistSave.class, playlist, new NoOpValueAdapter<Void>(){
+            @Override
+            public Void adapt(Void value) {
+                data_recentPlaylist.invalidate();
+                return super.adapt(value);
+            }
+        }, observer);
     }
 
     public void function_playlistRestore(PlaylistAbout playlistAbout, ValueObserver<Playlist> observer) {

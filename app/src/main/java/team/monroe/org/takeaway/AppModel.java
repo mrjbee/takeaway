@@ -46,7 +46,7 @@ public class AppModel extends AndroidModel {
 
 
         PlaylistStorage playlistStorage = new PlaylistStorage();
-        TextDataBase textDataBase = new TextDataBase(context, appName, 1, playlistStorage);
+        TextDataBase textDataBase = new TextDataBase(context, appName, playlistStorage);
         serviceRegistry.registrate(PlaylistStorage.class, playlistStorage);
 
         downloadObservers = new ArrayList<>();
