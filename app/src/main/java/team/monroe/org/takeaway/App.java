@@ -87,7 +87,7 @@ public class App extends ApplicationSupport<AppModel> implements AppModel.Downlo
                     }
                 });
                 List<PlaylistAbout> answer = new ArrayList<>();
-                for (int i=0; i < 3 && i<allSaved.size(); i++){
+                for (int i=0; i<allSaved.size(); i++){
                     answer.add(allSaved.get(i));
                 }
                 return answer;

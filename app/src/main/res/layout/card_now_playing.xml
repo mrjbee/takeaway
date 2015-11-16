@@ -44,16 +44,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
-            <ImageButton
-                android:id="@+id/action_song_label"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginLeft="10dp"
-                android:padding="3dp"
-                android:src="@drawable/android_label_light"
-                style="@style/Button.Round.Action"/>
-
         </LinearLayout>
     </RelativeLayout>
 

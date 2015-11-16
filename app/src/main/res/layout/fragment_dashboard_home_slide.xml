@@ -71,21 +71,12 @@
                             android:layout_marginLeft="20dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Top Playlists"
+                            android:text="Your Playlist"
                             style="@style/Text.Body.Light.Smaller"/>
                         <Space
                             android:layout_weight="1"
                             android:layout_width="fill_parent"
                             android:layout_height="10dp" />
-                        <ImageButton
-                            android:id="@+id/action_show_all_playlist"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_marginRight="20dp"
-                            android:layout_marginLeft="10dp"
-                            android:padding="3dp"
-                            android:src="@drawable/android_visibility_light"
-                            style="@style/Button.Round.Action"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="fill_parent"
@@ -103,7 +94,7 @@
                 </LinearLayout>
                 <Space
                     android:layout_width="fill_parent"
-                    android:layout_height="60dp" />
+                    android:layout_height="100dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
